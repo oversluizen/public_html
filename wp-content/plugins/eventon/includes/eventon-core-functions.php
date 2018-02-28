@@ -81,16 +81,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 // if event is in date range
 	function eventon_is_event_in_daterange($Estart_unix, $Eend_unix, $Mstart_unix, $Mend_unix, $shortcode=''){	
 
+		
 		// past event only cal
-		if(!empty($shortcode['el_type']) && $shortcode['el_type']=='pe'){
-			if(		
-				( $Eend_unix <= $Mend_unix) &&
-				( $Eend_unix >= $Mstart_unix)
-			){
-				return true;
-			}else{
-				return false;
-			}
+		if(isset($shortcode['el_type']) && $shortcode['el_type']=='pe'){
+
+			if( $Eend_unix <= $Mend_unix &&	 $Eend_unix >= $Mstart_unix ) return true;				
+			return false;
 		}else{
 			if(	
 				($Mend_unix == 0 && $Mstart_unix == 0) ||
@@ -471,18 +467,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // ---
 // SUPPORTIVE time and date functions
-	// GET time for ICS adjusted for unix
+	// GET time for ICS adjusted for unix		
 		function evo_get_adjusted_utc($unix, $sep= true){
 			
-			global $eventon;
-			$offset = (get_option('gmt_offset', 0) * 3600);
-
-			$opt = $eventon->frontend->evo_options;
-			$customoffset = !empty($opt['evo_time_offset'])? 
-				(intval($opt['evo_time_offset'])) * 60:
-				0;
-
-			$unix = $unix - $offset + $customoffset;
+			$datetime = new evo_datetime();
+			
+			$unix = $unix - $datetime->get_UTC_offset();
 
 			if(!$sep) return $unix;
 			
@@ -1424,6 +1414,28 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			return EVO()->evo_get_options('evcal_options_evcal_2');
 		}
 
+		// @since v2.5.6
+		function evo_get_option_val($field_name='', $options_key=''){
+			if(empty($field_name)) return false;
+
+			$options_key = !empty($options_key)? $options_key: 'evcal_options_evcal_1';
+			$OPT = EVO()->evo_get_options($options_key);
+
+			if(empty($OPT[$field_name])) return false;
+
+			return stripslashes($OPT[$field_name]);
+		}
+		function evo_has_option_val($field_name='', $options_key=''){
+			if(empty($field_name)) return false;
+
+			$options_key = !empty($options_key)? $options_key: 'evcal_options_evcal_1';
+			$OPT = EVO()->evo_get_options($options_key);
+
+			if(empty($OPT[$field_name])) return false;
+
+			return true;
+		}
+
 /* version 2.2.25 */	
 	/* when events are moved to trash record time */
 		function eventon_record_trashedtime($opt){
@@ -1469,8 +1481,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 				// only do this for event post types 5/19/15
 				if($event['post_type']!='ajde_events') continue;
 				
+				do_action('evo_before_trashing_event', $event_id);
+
 				$event['post_status']='trash';
 				wp_update_post($event);
+
+				do_action('evo_after_trashing_event', $event_id);
 								
 
 			endwhile;
@@ -1758,6 +1774,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	}
 	function evo_save_term_metas($tax, $termid, $data, $options=''){
 		if(empty($termid)) return false;
+		if(!is_array($data) ) return false;
+		
 		$termmetas = !empty($options)? $options: get_option( "evo_tax_meta");
 		
 		if(!empty($termmetas) && is_array($termmetas) && !empty($termmetas[$tax][$termid])){
@@ -1774,7 +1792,12 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 // SUPPORT FUNCTIONS
 	// Link Related
 		// convert link to acceptable link
-			function evo_format_link($url){
+  			function evo_format_link($url){
+
+  				$is_url_filters_on = evo_get_option_val('evo_card_http_filter');
+
+  				if(!empty($is_url_filters_on) && $is_url_filters_on=='yes') return $url;
+
 				$scheme = is_ssl() ? 'https' : 'http';
 				
 	            $url = str_replace(array('http:','https:'), '', $url);

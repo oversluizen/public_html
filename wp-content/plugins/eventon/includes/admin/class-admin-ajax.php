@@ -6,20 +6,22 @@
 class EVO_admin_ajax{
 	public function __construct(){
 		$ajax_events = array(
-			'deactivate_lic'=>'eventon_deactivate_evo',
-			'validate_license'=>'validate_license',
-			'verify_key'=>'verify_key',
-			'remote_validity'=>'remote_validity',
-			'get_license_api_url'=>'get_license_api_url',
-			'deactivate_addon'=>'deactivate_addon',			
-			'export_events'=>'export_events',			
-			'get_addons_list'=>'get_addons_list',
-			'export_settings'=>'export_settings',
-			'import_settings'=>'import_settings',
+			'deactivate_product'	=>'deactivate_product',	
+			'validate_license'		=>'validate_license',					
+			'revalidate_license'	=>'revalidate_license',					
+			'export_events'			=>'export_events',			
+			'get_addons_list'		=>'get_addons_list',
+			'export_settings'		=>'export_settings',
+			'import_settings'		=>'import_settings',
 			'get_event_tax_term_section'=>'get_event_tax_term_section',
-			'event_tax_list'=>'event_tax_list',
+			'event_tax_list'		=>'event_tax_list',
 			'event_tax_save_changes'=>'event_tax_save_changes',
-			'event_tax_remove'=>'event_tax_remove',
+			'event_tax_remove'		=>'event_tax_remove',
+			'eventpost_update_meta'	=>'evo_eventpost_update_meta',
+			'admin_test_email'		=>'admin_test_email',
+			'admin_get_views'		=>'admin_get_views',
+			'activate_subscription'		=>'activate_subscription',
+			'deactivate_subscription'	=>'deactivate_subscription',
 		);
 		foreach ( $ajax_events as $ajax_event => $class ) {
 
@@ -30,6 +32,105 @@ class EVO_admin_ajax{
 
 		add_action('wp_ajax_eventon-feature-event', array($this, 'eventon_feature_event'));
 	}
+
+	// get HTML views
+		function admin_get_views(){
+			if(!isset($_POST['type'])){
+				echo 'failed'; exit;
+			} 
+
+			$type = $_POST['type'];
+			$data = isset($_POST['data'])? $_POST['data']: array();
+
+			$views = new EVO_Views();
+
+			echo json_encode(array(
+				'status'=>'good','html'=>$views->get_html($type, $data)
+			)); exit;
+		}
+
+	// subscription
+		function activate_subscription(){
+			if(!isset($_POST['subscription_key']) && !isset($_POST['myeventon_username'])){
+				echo json_encode(array(
+					'status'=>	'bad',
+					'msg'=>	__('Required Information Missing!','eventon')
+				)); exit;
+			}
+
+			$SUB = new EVO_Product_Lic('evo_subscription');
+			$SUB->save_subscription($_POST['subscription_key'], $_POST['myeventon_username']);
+
+			$verify = $SUB->verify_active_subscription();
+
+			if( $verify['status'] == 'bad'){
+				$msg = EVO_Error()->error_code( 150 );
+				$result_error_code = isset($verify['error_code'])? $verify['error_code']: false;
+				if($result_error_code && !in_array($result_error_code, array(21,23,30))){
+
+					$msg = EVO_Error()->error_code( $verify['error_code'] );
+				}				
+
+				echo json_encode(array(
+					'status'=>	'bad',
+					'msg'=>	$msg,
+					'error_remote_var'=> ( isset($verify['error_remote_var']) ? $verify['error_remote_var']: ''),
+					'error_code'=>$verify['error_code']
+				)); exit;
+			}else{
+				$views = new EVO_Views();
+				$html =  $views->get_html('evo_subsription_view');
+				echo json_encode(array(					
+					'status'=>	'good',
+					'msg'=>	EVO_Error()->error_code( 155 ),
+					'html'=> $html,
+				)); exit;
+			}
+		}
+		function deactivate_subscription(){
+			$SUB = new EVO_Product_Lic('evo_subscription');
+			$views = new EVO_Views();
+			$status = 'bad'; $msg = '';
+			$SUB->deactivate(); // deactivate locally
+			
+			if( !$SUB->get_prop('key')){
+				$msg = EVO_Error()->error_code( 160 );				
+			}else{
+				$JSON = $SUB->remote_deactivate_subscription();
+				$returned_error_code = isset($JSON['error_code'])? (int)$JSON['error_code']:false;
+
+				$msg = ($returned_error_code && $returned_error_code == 162 ) ? 
+					EVO_Error()->error_code( 162 ): EVO_Error()->error_code( 161 );
+			}
+
+			$return_content = array(
+				'status'=> $status,
+				'msg'=> $msg,
+				'html'=> $views->get_html('evo_subsription_view'),	
+				'url'=>	(isset($JSON['url'])? $JSON['url']: '')		
+			);
+			echo json_encode($return_content);		
+			exit;
+		}
+
+	// update event post meta
+		function evo_eventpost_update_meta(){
+			if(isset($_POST['eid']) && isset($_POST['values']) ){
+			
+				$post = array();
+				foreach($_POST['values'] as $key=>$val){
+					update_post_meta($_POST['eid'], $key, $val);
+
+					do_action('eventon_saved_event_metadata', $_POST['eid'], $key, $val);
+				}
+				echo json_encode(array(
+					'status'=>	'good',
+					'msg'=>	__('Successfully saved event meta data!','eventon')
+				)); exit;
+			}else{
+				echo 'Event ID not available!'; exit;
+			}
+		}
 
 	// get event singular tax term form or list
 		function get_event_tax_term_section(){
@@ -67,7 +168,7 @@ class EVO_admin_ajax{
 					?><option <?php echo $selected;?> value="<?php echo $term->term_id;?>"><?php echo $term->name;?></option><?php
 				}
 				?></select>
-				<p><soan class='evo_btn evo_term_submit'><?php _e('Save Changes','eventon');?></span></p>
+				<p style='text-align:center; padding-top:10px;'><span class='evo_btn evo_term_submit'><?php _e('Save Changes','eventon');?></span></p>
 				<?php
 			}else{
 				?><p><?php _e('You do not have any items saved! Please add new!','eventon');?></p><?php
@@ -118,36 +219,55 @@ class EVO_admin_ajax{
 					}	
 				}
 
+				$fields = EVO()->taxonomies->get_event_tax_fields_array($_POST['tax'],'');
+
+				
+				// if a term ID is present
 				if($taxtermID){
 					$term_meta = array();
-					foreach( $_POST as $field=>$value){
 
-						// fields to skip
-						if(in_array($field,	array('term_name','tax','eventid','type','action','termid'))) continue;
+					// save description
+					$term_description = isset($_POST['description'])? sanitize_text_field($_POST['description']):'';
+					$tt = wp_update_term($taxtermID, $tax, array( 'description'=>$term_description ));
+					
+					// lat and lon values saved in the form
+						if(isset($_POST['location_lon'])) $term_meta['location_lon'] = str_replace('"', "'", $_POST['location_lon']); 
+						if(isset($_POST['location_lat'])) $term_meta['location_lat'] = str_replace('"', "'", $_POST['location_lat']); 
 
-						do_action('evo_tax_save_each_field', $field, $value);
+					foreach($fields as $key=>$value){
+						if(in_array($key, array('description', 'submit','term_name','evcal_lat','evcal_lon'))) continue;
 
-						if($field=='location_address'){
-							if(isset($_POST['location_address']))
-								$latlon = eventon_get_latlon_from_address($_POST['location_address']);
+						if(isset($_POST[$value['var']])){
 
-							// longitude
-							$term_meta['location_lon'] = (!empty($_POST['location_lon']))?$_POST['location_lon']:
-								(!empty($latlon['lng'])? floatval($latlon['lng']): null);
+							do_action('evo_tax_save_each_field',$value['var'], $_POST[$value['var']]);
 
-							// latitude
-							$term_meta['location_lat'] = (!empty($_POST['location_lat']))?$_POST['location_lat']:
-								(!empty($latlon['lat'])? floatval($latlon['lat']): null);
+							
+							if($value['var']=='location_address'){
+								if(isset($_POST['location_address']))
+									$latlon = eventon_get_latlon_from_address($_POST['location_address']);
 
-							$term_meta['location_address' ] = (isset($_POST[ 'location_address' ]))? $_POST[ 'location_address' ]:null;
+								// longitude
+								$term_meta['location_lon'] = isset($term_meta['location_lon']) ? $term_meta['location_lon']:
+									(!empty($latlon['lng'])? floatval($latlon['lng']): null);
 
-							continue;
+								// latitude
+								$term_meta['location_lat'] = isset($term_meta['location_lat']) ? $term_meta['location_lat']:
+									(!empty($latlon['lat'])? floatval($latlon['lat']): null);
+
+								$term_meta['location_address' ] = (isset($_POST[ 'location_address' ]))? $_POST[ 'location_address' ]:null;
+
+								continue;
+							}
+
+
+							$term_meta[ $value['var'] ] = str_replace('"', "'", $_POST[$value['var']]); 
+
+						}else{
+							$term_meta[ $value['var'] ] = ''; 
 						}
-
-						if( empty($value)) continue;
-
-						$term_meta[ $field ] = str_replace('"', "'", $value); 
 					}
+
+					print_r($term_meta);
 
 					// save meta values
 						evo_save_term_metas($tax, $taxtermID, $term_meta);
@@ -186,7 +306,6 @@ class EVO_admin_ajax{
 				'htmldata'=> EVO()->evo_admin->metaboxes->event_edit_tax_section($_POST['tax'] , $_POST['eventid'] )
 			)); exit;
 		}
-
 
 	// export eventon settings
 		function export_settings(){
@@ -259,7 +378,8 @@ class EVO_admin_ajax{
 			$cmd_count = evo_calculate_cmd_count($evo_opt);
 
 			$fields = apply_filters('evo_csv_export_fields',array(
-				'publish_status',				
+				'publish_status',	
+				'event_id',			
 				'evcal_event_color'=>'color',
 				'event_name',				
 				'event_description','event_start_date','event_start_time','event_end_date','event_end_time',
@@ -287,25 +407,28 @@ class EVO_admin_ajax{
 				'evp_repeat_rb'=>'repeatby',
 			));
 			
-			$csvHeader = '';
-			foreach($fields as $var=>$val){	$csvHeader.= $val.',';	}
+			// Print out the CSV file header
+				$csvHeader = '';
+				foreach($fields as $var=>$val){	$csvHeader.= $val.',';	}
 
-			// event types
-				for($y=1; $y<=$event_type_count;  $y++){
-					$_ett_name = ($y==1)? 'event_type': 'event_type_'.$y;
-					$csvHeader.= $_ett_name.',';
-					$csvHeader.= $_ett_name.'_slug,';
-				}
-			// for event custom meta data
-				for($z=1; $z<=$cmd_count;  $z++){
-					$_cmd_name = 'cmd_'.$z;
-					$csvHeader.= $_cmd_name.",";
-				}
+				// event types
+					for($y=1; $y<=$event_type_count;  $y++){
+						$_ett_name = ($y==1)? 'event_type': 'event_type_'.$y;
+						$csvHeader.= $_ett_name.',';
+						$csvHeader.= $_ett_name.'_slug,';
+					}
+				// for event custom meta data
+					for($z=1; $z<=$cmd_count;  $z++){
+						$_cmd_name = 'cmd_'.$z;
+						$csvHeader.= $_cmd_name.",";
+					}
 
-			$csvHeader = apply_filters('evo_export_events_csv_header',$csvHeader);
-			$csvHeader.= "\n";
-			echo iconv("UTF-8", "ISO-8859-2", $csvHeader);
- 
+				$csvHeader = apply_filters('evo_export_events_csv_header',$csvHeader);
+				$csvHeader.= "\n";
+				
+				echo (function_exists('iconv'))? iconv("UTF-8", "ISO-8859-2", $csvHeader): $csvHeader;
+ 	
+ 			// events
 			$events = new WP_Query(array(
 				'posts_per_page'=>-1,
 				'post_type' => 'ajde_events',
@@ -315,13 +438,8 @@ class EVO_admin_ajax{
 			if($events->have_posts()):
 				date_default_timezone_set('UTC');
 
-				// date and time format
-				/*$date_format = get_option('date_format');
-				$time_format = get_option('time_format');
-				$date_time_format = evo_settings_val('evo_usewpdateformat', $evo_opt)? 
-					$date_format.','.$time_format:
-					'n/j/Y,g:i:A';
-					*/
+				// allow processing content for html readability
+				$process_html_content = true;
 
 				// for each event
 				while($events->have_posts()): $events->the_post();
@@ -330,12 +448,13 @@ class EVO_admin_ajax{
 
 					$csvRow = '';
 					$csvRow.= get_post_status($__id).",";
+					$csvRow.= $__id.",";
 					//echo (!empty($pmv['_featured'])?$pmv['_featured'][0]:'no').",";
 					$csvRow.= (!empty($pmv['evcal_event_color'])? $pmv['evcal_event_color'][0]:'').",";
 
 					// event name
 						$eventName = get_the_title();
-						$eventName = htmlentities($eventName);
+						$eventName = $this->html_process_content($eventName, $process_html_content);
 						//$output = iconv("utf-8", "ascii//TRANSLIT//IGNORE", $eventName);
 						//$output =  preg_replace("/^'|[^A-Za-z0-9\s-]|'$/", '', $output); 
 						$csvRow.= '"'.$eventName.'",';
@@ -343,7 +462,7 @@ class EVO_admin_ajax{
 					$event_content = get_the_content();
 						$event_content = str_replace('"', "'", $event_content);
 						$event_content = str_replace(',', "\,", $event_content);
-						$event_content = htmlentities( $event_content);
+						$event_content = $this->html_process_content( $event_content, $process_html_content);
 					$csvRow.= '"'.$event_content.'",';
 
 					// start time
@@ -372,7 +491,7 @@ class EVO_admin_ajax{
 					$loctaxid = $orgtaxid = '';
 					$loctaxname = $orgtaxname = '';
 					foreach($fields as $var=>$val){
-						
+
 						// yes no values
 						if(in_array($val, array('featured','all_day','hide_end_time','event_gmap','evo_year_long','_evo_month_long','repeatevent'))){
 							$csvRow.= ( (!empty($pmv[$var]) && $pmv[$var][0]=='yes') ? 'yes': 'no').',';
@@ -389,9 +508,9 @@ class EVO_admin_ajax{
 							}
 							if($val == 'evcal_organizer'){
 								if($orgtaxname){
-									$csvRow.= '"'. htmlentities($orgtaxname) . '",';									
+									$csvRow.= '"'. $this->html_process_content($orgtaxname, $process_html_content) . '",';									
 								}elseif(!empty($pmv[$var]) ){
-									$value = htmlentities($pmv[$var][0]);
+									$value = $this->html_process_content($pmv[$var][0], $process_html_content);
 									$csvRow.= '"'.$value.'"';
 								}else{	$csvRow.= ",";	}
 								continue;
@@ -407,9 +526,9 @@ class EVO_admin_ajax{
 							}
 							if($val == 'location_name'){
 								if($loctaxname){
-									$csvRow.= '"'. htmlentities($loctaxname) . '",';									
+									$csvRow.= '"'. $this->html_process_content($loctaxname, $process_html_content) . '",';									
 								}elseif(!empty($pmv[$var]) ){
-									$value = htmlentities($pmv[$var][0]);
+									$value = $this->html_process_content($pmv[$var][0], $process_html_content);
 									$csvRow.= '"'.$value.'"';
 								}else{	$csvRow.= ",";	}
 								update_post_meta(3089,'aa',$loctaxname.'yy');
@@ -419,10 +538,10 @@ class EVO_admin_ajax{
 								if($loctaxid){
 									$termMeta = evo_get_term_meta('event_location',$loctaxid, $taxopt, true);
 									$csvRow.= !empty($termMeta['location_address'])? 
-										'"'. htmlentities($termMeta['location_address']) . '",':
+										'"'. $this->html_process_content($termMeta['location_address'], $process_html_content) . '",':
 										",";									
 								}elseif(!empty($pmv[$var]) ){
-									$value = htmlentities($pmv[$var][0]);
+									$value = $this->html_process_content($pmv[$var][0], $process_html_content);
 									$csvRow.= '"'.$value.'"';
 								}else{	$csvRow.= ",";	}
 								continue;
@@ -442,7 +561,7 @@ class EVO_admin_ajax{
 							}else{ $csvRow.= ",";}
 						}else{
 							if(!empty($pmv[$var])){
-								$value = htmlentities($pmv[$var][0]);
+								$value = $this->html_process_content($pmv[$var][0], $process_html_content);
 								$csvRow.= '"'.$value.'"';
 							}else{ $csvRow.= '';}
 							$csvRow.= ',';
@@ -474,7 +593,7 @@ class EVO_admin_ajax{
 						for($z=1; $z<=$cmd_count;  $z++){
 							$cmd_name = '_evcal_ec_f'.$z.'a1_cus';
 							$csvRow.= (!empty($pmv[$cmd_name])? 
-								'"'.str_replace('"', "'", htmlentities($pmv[$cmd_name][0])) .'"'
+								'"'.str_replace('"', "'", $this->html_process_content($pmv[$cmd_name][0], $process_html_content) ) .'"'
 								:'');
 							$csvRow.= ",";
 						}
@@ -482,151 +601,317 @@ class EVO_admin_ajax{
 					$csvRow = apply_filters('evo_export_events_csv_row',$csvRow, $__id, $pmv);
 					$csvRow.= "\n";
 
-				echo iconv("UTF-8", "ISO-8859-2", $csvRow);
+				echo (function_exists('iconv'))? iconv("UTF-8", "ISO-8859-2", $csvRow): $csvRow;
 
 				endwhile;
-
 			endif;
 
 			wp_reset_postdata();
+		}
+
+		function html_process_content($content, $process = true){
+			return ($process)? htmlentities($content): $content;
 		}
 
 	// Validation of eventon products
 		function validate_license(){
 			global $eventon;
 
-			$status = 'bad'; $error_code = '00';
+			$status = 'bad'; 
+			$error_code = 11; 
+			$error_msg_add = $html = '';
 			
-			if(empty($_POST['type'])){ _e("Missing Data",'eventon'); exit;}
+			// check for required information
+			if(empty($_POST['type']) && isset($_POST['key']) && isset($_POST['slug']) ){ 
+				echo json_encode(array('status'=>'bad','error_msg'=> EVO_Error()->error_code(14) ));		
+				exit;
+			}
 
 			// Initial values
 			$type = $_POST['type'];
-			$license_key = $_POST['purchase_key'];
+			$license_key = $_POST['key'];
 			$slug = $_POST['slug'];
+
+			$PROD = new EVO_Product_Lic($slug);
 			
-			$verifyformat = evo_license()->purchase_key_format($license_key, $type );
-
-			// save envato data for eventon
-			if($type=='main') evo_license()->save_envato_data();
-
-			// not valid license format
-			if(!$verifyformat) $error_code = '10';	
+			// check for key format validation
+			$verifyformat = $PROD->purchase_key_format($license_key );
+			if(!$verifyformat) $error_code = '02';	
+			
 			
 			// if license key format is validated
 			if($verifyformat){
+
+				// save eventon data
+				if($type=='main') $PROD->save_license_data();
+
 				$status = 'good';
 				$msg = ($slug=='eventon')?
 					'Excellent! Purchase key verified and saved. Thank you for activating EventON!':
 					'Excellent! License key verified and saved. Thank you for activating EventON addon!';
 
 				$data_args = array(
-					'type'=>(!empty($_POST['type'])?$_POST['type']:'main'),
-					'slug'=> addslashes ($slug),
-					'key'=> addslashes( str_replace(' ','',$license_key) ),
-					'email'=>(!empty($_POST['email'])? $_POST['email']: null),
-					'product_id'=>(!empty($_POST['product_id'])?$_POST['product_id']:''),						
-					'instance'=> (!empty($_POST['instance'])?(int)$_POST['instance']:'1'),
+					'type'		=>(!empty($_POST['type'])?$_POST['type']:'main'),
+					'key'		=> addslashes( str_replace(' ','',$license_key) ),
+					'email'		=>(!empty($_POST['email'])? $_POST['email']: null),
+					'product_id'=>(!empty($_POST['product_id'])?$_POST['product_id']:''),
 				);
+				$validation = $PROD->remote_validation($data_args);
 
-				$api_url = evo_license()->get_api_url($data_args);
-
-				$validation = evo_license()->eventon_remote_validation($api_url, $license_key,$slug);
-
-				// perform remote validation
-				if($type=='main'){
-
-					evo_license()->eventon_kriyathmaka_karanna();
-
-					if($validation['status'] =='bad'){
-						$msg = 'Your EventON license key is validated locally';
-						$error_code = !empty($validation['error_code'])? $validation['error_code']: 13;
-					}
-
-				}else{ // for addons
-
+				// Other update tasks
+				if($type=='addon'){	
 					// update other addon fields
 					foreach(array(
-						'email','product_id','instance'
+						'email','product_id','instance','key'
 					) as $field){
-						if(!empty($_POST[$field]))
-							evo_license()->update_field($slug, $field, $_POST[$field]);
+						if(!empty($_POST[$field])){
+							$PROD->set_prop( $field, $_POST[$field], false);
+						}
 					}
-
-					if($validation['status']=='bad'){
-						evo_license()->evo_kriyathmaka_karanna_locally($slug);
-						$error_code = 13;
-					}
-
-					$msg = '';
-					
+					$PROD->save();
 				}
+
+				$results = $this->get_remote_validation_results($validation, $PROD, $type);
+			
+				if(isset($results['error_code'])) $error_code = $results['error_code'];
+
+				$status = $results['status'];
+					
+				if($error_code != 11){
+					$msg = EVO_Error()->error_code( $error_code);
+				}
+
+				if($results['status'] == 'bad' && in_array( $error_code, array(11,21,23) )){
+					$msg = EVO_Error()->error_code( 120 );
+				}
+
+			}else{
+				// Invalid license key format
+				$status = 'bad';
+				$msg = 'License Key format is not a valid format!';
 			}
 
 			$return_content = array(
-				'status'=>$status,
-				'msg'=> $msg,
-				'error_msg'=> evo_license()->error_code( $error_code),
+				'status'=>	$status,
+				'msg'=> 	$msg,				
+				'code'=> 	$error_code,
+				'html'=>	$this->get_html_view( $type,$slug),
 			);
 			echo json_encode($return_content);		
 			exit;
 		}
 
-		
-		// deactivate addon 
-			function deactivate_addon(){
-				global $eventon;
+		// RE-VALIDATE
+			function revalidate_license(){
+				$slug = $_POST['slug'];
 
-				// initial values
-					$debug = $content ='';
-					$status = 'success';
-					$error_code = '00';
-					$error_msg='';
+				$PROD = new EVO_Product_Lic($slug);
 
-				// deactivate the license locally
-				$dea_local = evo_license()->deactivate($_POST['slug']);
+				//echo $PROD->get_prop('key');
+
+				if( !$PROD->get_prop('key') || !$PROD->get_prop('email')){
+					echo json_encode(array(
+						'status'=>'bad',
+						'msg'=>'Required fields for remote validation are missing! try deactivating and reactivating again.'
+					));		
+					exit;
+				}else{
+
+					$ERR = new EVO_Error();
+					$ERR->record_gen_log('Re-activating', $slug,'','',false);
+
+					$data_args = array(
+						'type'		=>(!empty($_POST['type'])?$_POST['type']:'main'),
+						'key'		=> $PROD->get_prop('key'),
+						'email'		=> $PROD->get_prop('email'),
+						'product_id'=>(!empty($_POST['product_id'])?$_POST['product_id']:''),						
+						'instance'	=> md5(get_site_url()),
+					);
+					$validation = $PROD->remote_validation($data_args);
+
+					
+					$results = $this->get_remote_validation_results( $validation, $PROD , $_POST['type']);
+					$output_error_code = isset($results['error_code'])? (int) $results['error_code']: false;
+
+					if($results['status'] == 'bad'){
+						$ERR->record_gen_log('Re-activating failed', $slug, $results['error_code'],'',false);
+					}
+					
+					$ERR->save();
+
+					// Message intepretation
+					$msg = ($results['status']=='bad'? EVO_Error()->error_code(15): EVO_Error()->error_code(16));
+					if($results['status'] == 'bad' && $output_error_code && in_array( $output_error_code, array(11,21,23) )){
+						$msg = EVO_Error()->error_code( 121 );
+					}
+
+					if($output_error_code && in_array( $output_error_code, array(100,101,102,103)) ){
+						$msg = EVO_Error()->error_code( $output_error_code );
+
+						if( $output_error_code == 103){
+							$msg = EVO_Error()->error_code( '103r' );
+							EVO_Error()->record_deactivation_loc($slug);
+							$PROD->deactivate();
+						}
+					}
+
+					echo json_encode(array(
+						'status'=> $results['status'],
+						'msg'=> $msg,
+						//'error_msg'=> EVO_Error()->error_code( $results['error_code']),
+						'html'=> $this->get_html_view( 'addon',$slug),					
+					));		
+					exit;
+				}
+			}
+
+	// REMOTE RESULTS
+		function get_remote_validation_results($validation, $PROD, $type){
+			// validation contain // status, error_remote_msg, error_code, api_url
+			// invalid remote validation
+			$output = array();
+			$error_code = false;
+			if($validation['status'] =='good'){
+				$output['status'] = 'good';
+				EVO_Prods()->get_remote_prods_data();
+				$PROD->evo_kriyathmaka_karanna();
+				EVO_Error()->record_activation_rem();
+
+			}else{
+				$output['status'] = 'bad';	
+				if(!empty($validation['error_code'])) $error_code =  (int)$validation['error_code'];
 				
+				$output['error_code'] = $error_code;
+				$output['error_msg'] = isset($validation['error_remote_msg'])? $validation['error_remote_msg']: '';
+
+				// local kriyathmaka karala nehe
+				if(!$PROD->kriyathmaka_localda() && $error_code && in_array( $error_code, array(11,21,23) ) ){
+					$PROD->evo_kriyathmaka_karanna_athulen();
+					EVO_Error()->record_activation_loc($error_code);
+				}
+			}
+
+			return $output;
+		}
+
+	// Deactivate EventON Products
+		function deactivate_product(){
+			$error_msg = $status = $html = '';
+			$error_code = '00';
+			
+			if($_POST['type'] == 'main'){
+				$PROD = new EVO_Product_Lic('eventon');
+				$status = $PROD->deactivate();
+
+				$slug = 'eventon';
+
+				// not able to deactivate
+				if(!$status){
+				 	$error_code = '07';	
+				}else{ // deactivated
+					EVO_Error()->record_deactivation_loc($slug);
+					$html = $this->get_html_view('main',$slug);
+					$error_code = 32;
+				}
+				
+			}else{// for addons
+
+				if(!isset($_POST['slug'])){
+					echo json_encode(array(
+						'status'=>'bad',
+						'error_msg'=> EVO_Error()->error_code(14)
+					)); exit;
+				}
+
+				$PROD = new EVO_Product_Lic($_POST['slug']);
+			
 				// passing data
-					$__data = array(
-						'slug'=> addslashes ($_POST['slug']),
-						'key'=> addslashes( str_replace(' ','',$_POST['key']) ),
-						'email'=>(!empty($_POST['email'])? $_POST['email']: null),
+					$remote_data = array(
+						'key'		=> addslashes( str_replace(' ','',$_POST['key']) ),
+						'email'		=>(!empty($_POST['email'])? $_POST['email']: null),
 						'product_id'=>(!empty($_POST['product_id'])? $_POST['product_id']: null),
 					);
 
 				// deactivate addon from remote server
-					$url='http://www.myeventon.com/woocommerce/?wc-api=software-api&request=deactivation&email='.$__data['email'].'&licence_key='.$__data['key'].'&instance=0&product_id='.$__data['product_id'];
+					$deactive_remotely = $PROD->remote_deactivate($remote_data);
 
-					$request = wp_remote_get($url);
+					$returned_error_code = isset($deactive_remotely['error_code'])? (int)$deactive_remotely['error_code']:false;
 
-					if (!is_wp_error($request) && $request['response']['code']===200) {
-
-						$status_ = (!empty($request['body']))? json_decode($request['body']): $request; 
+					if($returned_error_code && in_array( $returned_error_code, array(30,31) ) ){
+						
+						EVO_Error()->record_deactivation_fail($returned_error_code);
+						EVO_Error()->record_deactivation_loc($_POST['slug']);
+						$PROD->deactivate();
+						$error_code = 32;
+					}else{
+						$error_code = 33;
+						EVO_Error()->record_deactivation_rem();
+						$PROD->deactivate();
 					}
-				
-				$return_content = array(
-					'status'=>$status,					
-					'extra'=>$status_,
-					'error_msg'=> evo_license()->error_code($error_code),
-					'content'=>"License Status: <strong>Deactivated</strong>"
-				);
-				echo json_encode($return_content);		
-				exit;
+
+
+					$html = $this->get_html_view('addon',$_POST['slug']);
+					$status = 'success';
 			}
 
-	// deactivate eventon license
-		function eventon_deactivate_evo(){
-			$error_msg =''; 
-
-			$status = evo_license()->deactivate('eventon');
-
-			if(!$status)	$error_msg = evo_license()->error_code();
-
 			$return_content = array(
-				'status'=> ($status?'success':'bad'),		
-				'error_msg'=>$error_msg
+				'status'=> ($status?'success':'bad'),
+				'msg'=>EVO_Error()->error_code($error_code),
+				'html'=> $html,					
 			);
 			echo json_encode($return_content);		
 			exit;
+		}
+
+		function get_html_view($type,$slug){
+			$views = new EVO_Views();
+			$var = ($type=='main')? 'evo_box': 'evo_addon_box';
+			return $views->get_html(	$var,array('slug'	=>$slug) );
+		}
+		
+	// get all addon details
+		public function get_addons_list(){
+
+			// verifications
+			if(!is_admin()) return false;
+
+			$active_plugins = get_option( 'active_plugins' );
+
+			ob_start();
+			// installed addons		
+
+				$addons_list = new EVO_Addons_List();
+
+				$count=1;
+				// EACH ADDON
+				foreach($addons_list->get_list() as $slug=>$product){
+
+					if($slug=='eventon') continue; // skip for eventon
+					$_has_addon = false;
+
+					$views = new EVO_Views();
+
+					echo $views->get_html(
+						'evo_addon_box',
+						array(
+							'slug'				=>$slug,
+							'product'			=>$product,
+							'active_plugins'	=>$active_plugins
+						)
+					);
+					
+					$count++;
+				} //endforeach
+
+			$content = ob_get_clean();
+
+			$return_content = array(
+				'content'=> $content,
+				'status'=>true
+			);
+			
+			echo json_encode($return_content);		
+			exit;	
 		}
 
 	/** Feature an event from admin */
@@ -655,257 +940,31 @@ class EVO_admin_ajax{
 
 			wp_safe_redirect( remove_query_arg( array('trashed', 'untrashed', 'deleted', 'ids'), wp_get_referer() ) );
 		}
+	
+	// Diagnose
+		// send test email
+		function admin_test_email(){
+			$email_address = $_POST['email'];
 
-	// get all addon details
-		public function get_addons_list(){
-
-			// verifications
-			if(!is_admin()) return false;
-
-			require_once('settings/addon_details.php');
-
-			$activePlugins = get_option( 'active_plugins' );
-			$products = get_option('_evo_products');
-
-			ob_start();
-			// installed addons		
-
-				$count=1;
-				// EACH ADDON
-				foreach($addons as $slug=>$product){
-					if($slug=='eventon') continue; // skip for eventon
-					$_has_addon = false;
-					$_this_addon = (!empty($products[$slug]))? $products[$slug]:$product;
-
-					// check if the product is activated within wordpress
-					if(!empty($activePlugins)){
-						foreach($activePlugins as $plugin){
-							// check if foodpress is in activated plugins list
-							if(strpos( $plugin, $slug.'.php') !== false){
-								$_has_addon = true;
-							}
-						}
-					}else{	$_has_addon = false;	}
-								
-					// initial variables
-						$guide = ($_has_addon && !empty($_this_addon['guide_file']) )? "<span class='eventon_guide_btn ajde_popup_trig' ajax_url='{$_this_addon['guide_file']}' poptitle='How to use {$product['name']}'>Guide</span> | ":null;
-						
-						$__action_btn = (!$_has_addon)? "<a class='evo_admin_btn btn_secondary' target='_blank' href='". $product['download']."'>Get it now</a>": "<a class='ajde_popup_trig evo_admin_btn btn_prime' data-dynamic_c='1' data-content_id='eventon_pop_content_{$slug}' poptitle='Activate {$product['name']} License'>Activate Now</a>";
-
-						//$__remote_version = (!empty($_this_addon['remote_version']))? '<span title="Remote server version"> /'.$_this_addon['remote_version'].'</span>': false;
-
-						$pluginData = array();
-						if(file_exists(AJDE_EVCAL_DIR.'/'.$slug.'/'.$slug.'.php'))
-							$pluginData = get_plugin_data(AJDE_EVCAL_DIR.'/'.$slug.'/'.$slug.'.php');
-					
-						// /print_r($pluginData);
-					// ACTIVATED
-					if(!empty($_this_addon['status']) && $_this_addon['status']=='active' && $_has_addon):
-
-
-					
-					?>
-						<div id='evoaddon_<?php echo $slug;?>' class="addon activated" data-slug='<?php echo $slug;?>' data-key='<?php echo $_this_addon['key'];?>' data-email='<?php echo $_this_addon['email'];?>' data-product_id='<?php echo $product['id'];?>'>
-							<h2><?php echo $product['name']?></h2>
-							<?php if(!empty($pluginData['Version'])):?>
-								<p class='version'><span><?php echo $pluginData['Version']?></span></p>
-							<?php endif;?>
-
-							<p class='status'>License Status: <strong>Activated</strong></p>
-							<p><a class='evo_deact_adodn ajde_popup_trig evo_admin_btn btn_triad' data-dynamic_c='1' data-content_id='eventon_pop_content_dea_<?php echo $slug;?>' poptitle='Deactivate <?php echo $product['name'];?> License'>Deactivate</a></p>
-							<p class="links"><?php echo $guide;?><a href='<?php echo $product['link'];?>' target='_blank'>Learn More</a></p>
-								<div id='eventon_pop_content_dea_<?php echo $slug;?>' class='evo_hide_this'>
-									<p class="evo_loader"></p>
-								</div>
-						</div>
-					
-					<?php	
-						// NOT ACTIVATED
-						else:
-							global $ajde;
-					?>
-						<div id='evoaddon_<?php echo $slug;?>' class="addon <?php echo (!$_has_addon)?'donthaveit':null;?>" data-slug='<?php echo $slug;?>' data-key='<?php echo !empty($_this_addon['key'])?$_this_addon['key']:'';?>' data-email='<?php echo !empty($_this_addon['email'])?$_this_addon['email']:'';?>' data-product_id='<?php echo !empty($product['id'])? $product['id']:'';?>'>
-							<h2><?php echo $product['name']?></h2>
-							<?php if(!empty($pluginData['Version'])):?>
-								<p class='version'><span><?php echo $pluginData['Version']?></span></p>
-							<?php endif;?>
-							<p class='status'>License Status: <strong>Not Activated</strong></p>
-							<p class='action'><?php echo $__action_btn;?></p>
-							<p class="links"><?php echo $guide;?><a href='<?php echo $product['link'];?>' target='_blank'>Learn More</a></p>
-							<p class='activation_text'></p>
-								<div id='eventon_pop_content_<?php echo $slug;?>' class='evo_hide_this'>
-									<p>
-										<label><?php _e('Addon License Key','eventon');?>*</label>
-										<input class='eventon_license_key_val fields' name='purchase_key' type='text' style='width:100%' placeholder='Enter the addon license key'/>
-										<input class='eventon_slug fields' name='slug' type='hidden' value='<?php echo $slug;?>' />
-										<input class='eventon_id fields' name='product_id' type='hidden' value='<?php echo $product['id'];?>' />
-										<input class='eventon_license_div' type='hidden' value='evoaddon_<?php echo $slug;?>' />
-										<i style='opacity:0.6;padding-top:5px; display:block'><?php _e('Find addon license key from','eventon');?> <a href='http://www.myeventon.com/my-account/licenses/' target='_blank'><?php _e('My eventon > My licenses','eventon');?></a></i>
-									</p>
-
-									<p>
-										<label><?php _e('Email Address','eventon');?>* <?php $ajde->wp_admin->echo_tooltips('The email address you have used to purchase eventon addon from myeventon.com.');?></label>
-										<input class='eventon_email_val fields' name='email' type='text' style='width:100%' placeholder='Email address used for purchasing addon'/>
-									</p>
-									
-									<p>
-										<label><?php _e('Site Instance','eventon');?> <?php $ajde->wp_admin->echo_tooltips('If your license allow more than one site activations, please select which site you are activating now eg. 1 - for 1st website, 2 - for 2nd website, 3 - for 3rd website etc.');?></label>
-										<input class='eventon_index_val fields' name='instance' type='text' style='width:100%'/>
-									</p>
-
-									<p><a class='eventonADD_submit_license evo_admin_btn btn_prime' data-type='addon' data-slug='<?php echo $slug;?>'>Activate Now</a></p>
-								</div>
-						</div>
-					<?php		
-						endif;
-						$count++;
-				} //endforeach
-
-			$content = ob_get_clean();
-
-			$return_content = array(
-				'content'=> $content,
-				'status'=>true
-			);
+			$result = wp_mail($email_address, 'This is a Test Email', 'Test Email Body', array('Content-Type: text/html; charset=UTF-8') );
 			
-			echo json_encode($return_content);		
-			exit;	
+			$ts_mail_errors = array();
+			if(!$result){
+				global $ts_mail_errors;
+				global $phpmailer;
+
+				if (!isset($ts_mail_errors)) $ts_mail_errors = array();
+
+				if (isset($phpmailer)) {
+					$ts_mail_errors[] = $phpmailer->ErrorInfo;
+				}
+			}
+
+			echo json_encode(array(
+				'msg'=> ($result?'Email Sent': 'Email was not sent'),
+				'error'=>$ts_mail_errors
+			));		
+			exit;
 		}
-
-	// Deprecating
-		// get API data
-		// deprecated since 2.5
-			function get_license_api_url(){
-				global $eventon;
-				
-				$__passing_instance = (!empty($_POST['instance'])?(int)$_POST['instance']:'1');
-				$data = array(
-					'type'=>(!empty($_POST['type'])?$_POST['type']:'main'),
-					'slug'=> addslashes ($_POST['slug']),
-					'key'=> addslashes( str_replace(' ','',$_POST['key']) ),
-					'email'=>(!empty($_POST['email'])? $_POST['email']: null),
-					'product_id'=>(!empty($_POST['product_id'])?$_POST['product_id']:''),						
-					'instance'=>$__passing_instance,
-				);					
-
-				echo json_encode( array('json_url'=> $eventon->evo_updater->get_api_url($data) ));
-				exit;
-			}
-		// update remote validity status of a license
-		// deprecating
-			function remote_validity(){
-				global $eventon;
-
-				$new_content = '';
-
-				// EventON update remote validity
-				if($_POST['slug'] == 'eventon'){
-					$eventon->evo_updater->eventon_kriyathmaka_karanna();
-					if(!empty($_POST['buyer'])) 
-						$eventon->evo_updater->product->update_field($_POST['slug'], 'buyer', $_POST['buyer']);
-
-					$new_content = '';
-				}
-
-				$remote_validity = !empty($_POST['remote_validity'])? 'valid':'';
-				$status = $eventon->evo_updater->product->update_field($_POST['slug'], 'remote_validity',$remote_validity );
-
-				if(!empty($_POST['key'])) $eventon->evo_updater->product->update_field($_POST['slug'], 'key',$_POST['key'] );
-
-				$return_content = array(
-					'status'=>($status?'good':'bad'),	
-					'new_content'=>	$new_content		
-				);
-				echo json_encode($return_content);		
-				exit;
-			}
-		// verify license key
-			function verify_key(){
-				global $eventon;
-
-				// initial values
-					$debug = $content = $addition_msg ='';
-					$status = 'success';
-					$error_code = '00';
-					$error_msg='';
-
-				// passing data
-					$__passing_instance = (!empty($_POST['instance'])?(int)$_POST['instance']:'1');
-					$__data = array(
-						'slug'=> addslashes($_POST['slug']),
-						'key'=> addslashes( str_replace(' ','',$_POST['key']) ),
-						'email'=>(!empty($_POST['email'])? $_POST['email']: null),
-						'product_id'=>(!empty($_POST['product_id'])?$_POST['product_id']:''),
-						'instance'=>$__passing_instance,
-					);
-
-				// for eventon
-				if($_POST['slug']=='eventon'){
-					$api_url = $eventon->evo_updater->get_api_url($__data);		
-					$__save_new_lic = $eventon->evo_updater->product->save_license(
-						$__data['slug'],
-						$__data['key']
-					);
-					$return_content = array(
-						'status'=>$status,
-						'error_msg'=>$eventon->evo_updater->error_code_($error_code),
-						'addition_msg'=>$addition_msg,
-						'json_url'=>$api_url,
-					);
-				// Addons
-				}else{
-					$status_ = $eventon->evo_updater->verify_product_license($__data);
-					//content for success activation
-						$content ="License Status: <strong>Activated</strong>";
-
-					// save verified eventon addon product info
-						$__save_new_lic = $eventon->evo_updater->product->save_license(
-							$__data['slug'],
-							$__data['key'],
-							$__data['email'],
-							$__data['product_id'],
-							'valid','', (!empty($status_->instance)? $status_->instance:'1')
-						);
-
-					// CHECK remote validation results
-					if($status_){
-						// if activated value is true
-						if($status_->activated){							
-							$status = 'success';
-
-							// append additional mesages passed from remote server
-							$addition_msg = !empty($status_->message)? $status_->message:null;
-
-						}else{ // return activated to be not true
-							// if there were errors returned from eventon server
-							if(!empty($status_->code) && $status_->code=='103' && $__passing_instance=='1'){
-								$status = 'success';
-								$error_code = '12';
-							}elseif(!empty($status_->code) && $status_->code=='103'){
-								$status = 'bad';
-								$error_code = '103'; //exceeded max activations
-							}else{
-								$status = 'success';
-								$error_code = '13'; //general validation failed
-							}				
-						}
-					}else{ // couldnt connect to myeventon.com to check
-						$status = 'good';
-						$error_code = '13';							
-					}
-					$return_content = array(
-						'status'=>$status,
-						'error_msg'=>$eventon->evo_updater->error_code_($error_code),
-						'addition_msg'=>$addition_msg,
-						'this_content'=>$content,
-						'extra'=>$status_,
-					);
-				}
-				
-				echo json_encode($return_content);		
-				exit;				
-			}
-
-
 }
 new EVO_admin_ajax();

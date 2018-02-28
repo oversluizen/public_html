@@ -3,8 +3,8 @@
  * Helper functions to be used by eventon or its addons
  * front-end only
  *
- * @version 0.6
- * @since  2.5.2
+ * @version 0.7
+ * @updated  2.5.6
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -77,7 +77,9 @@ class evo_helper{
 				'header'=>'',
 				'subject'=>'',
 				'message'=>'',
-				'type'=>'',
+				'type'=>'',// bcc
+				'attachments'=> array(),
+				'return_details'=>false
 			);
 			$args = array_merge($defaults, $args);
 
@@ -97,7 +99,7 @@ class evo_helper{
 				}
 			}	
 
-			$return = '';		
+			$return = '';	
 
 			if($args['preview']=='yes'){
 				$return = array(
@@ -110,16 +112,33 @@ class evo_helper{
 			}else if(!empty($args['type']) && $args['type']=='bcc' ){
 				$bcc = (is_array($args['to']))? implode(',', $args['to']): $args['to'];
 				$headers[] = "Bcc: ".$bcc;
-				$return = wp_mail($args['from'], $args['subject'], $args['message'], $headers);	
+				$return = wp_mail($args['from'], $args['subject'], $args['message'], $headers, $args['attachments']);	
 			}else{
-				$return = wp_mail($args['to'], $args['subject'], $args['message'], $headers);
+				$return = wp_mail($args['to'], $args['subject'], $args['message'], $headers, $args['attachments']);
 			}
 
 			if($args['html']=='yes'){
 				remove_filter( 'wp_mail_content_type', array($this,'set_html_content_type') );
 			} 
 
-			return $return;
+			if($args['return_details']){
+				// get the errors
+				$ts_mail_errors = array();
+				if(!$return){
+					global $ts_mail_errors;
+					global $phpmailer;
+
+					if (!isset($ts_mail_errors)) $ts_mail_errors = array();
+
+					if (isset($phpmailer)) {
+						$ts_mail_errors[] = $phpmailer->ErrorInfo;
+					}
+				}
+				return array('result'=>$return, 'error'=>$ts_mail_errors);
+			}else{
+				return $return;
+			}
+			
 		}
 		function set_html_content_type() {
 			return 'text/html';
@@ -231,6 +250,22 @@ class evo_helper{
 		}
 		function echo_tooltips($content, $position=''){
 			$this->tooltips($content, $position='',true);
+		}
+
+	// template locator
+	// pass: paths array, file name, default template with full path and file
+		function template_locator($paths, $file, $template){
+			foreach($paths as $path){
+				if(file_exists($path.$file) ){	
+					$template = $path.$file;
+					break;
+				}
+			}				
+			if ( ! $template ) { 
+				$template = AJDE_EVCAL_PATH . '/templates/' . $file;
+			}
+
+			return $template;
 		}	
 
 }

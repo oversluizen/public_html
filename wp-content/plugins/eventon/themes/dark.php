@@ -15,6 +15,7 @@ $theme = apply_filters('evo_color_theme_dark', array(
 	//eventtop background
 	'evcal__bgc4'=>'474747',
 	'evcal__bgc4h'=>'616161',
+	'evcal_loader_001'=>'545454',// loader bar bg
 	//border
 	'evcal__evcbrb0'=>'000000',
 

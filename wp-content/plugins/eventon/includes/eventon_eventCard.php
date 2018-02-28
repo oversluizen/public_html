@@ -11,6 +11,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 	$OT ='';
 	$count = 1;
 	$items = count($array);	
+
 	
 	// close button
 	$close = "<div class='evcal_evdata_row evcal_close' title='".eventon_get_custom_language($evoOPT2, 'evcal_lang_close','Close')."'></div>";
@@ -23,6 +24,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 	$t = $dt->get_int_correct_event_time($pmv,7);
 	print_r($t);
 	*/
+
 
 	// FOR each
 	foreach($array as $box_f=>$box){
@@ -39,7 +41,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 		$boxname = (in_array($box_f, $_additions))? $box_f: null;
 
 		//echo($box_f.' ');
-		//print_r($boxname);
+		//print_r($object);
 		//$OT.="".$items.'-'.$count." ".$box_f;
 		
 		// each eventcard type
@@ -110,14 +112,15 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 								<div class='evcal_evdata_row evo_time'>
 									{$iconTime}
 									<div class='evcal_evdata_cell'>							
-										<h3 class='evo_h3'>".$iconTime.eventon_get_custom_language($evoOPT2, 'evcal_lang_time','Time')."</h3><p>".$object->timetext. $timezone. "</p>
+										<h3 class='evo_h3'>".$iconTime.eventon_get_custom_language($evoOPT2, 'evcal_lang_time','Time')."</h3>
+										<p>".$object->timetext. $timezone. "</p>
 									</div>
 								</div>
 							</div><div class='evcal_col50'>
 								<div class='evcal_evdata_row evo_location'>
 									{$iconLoc}
 									<div class='evcal_evdata_cell' data-loc_tax_id='{$object->locTaxID}'>							
-										<h3 class='evo_h3'>".$iconLoc.($locationLink? $locationLink:'').eventon_get_custom_language($evoOPT2, 'evcal_lang_location','Location').($locationLink?'</a>':'')."</h3>". ( (!empty($object->location_name))? "<p class='evo_location_name'>".stripslashes($object->location_name)."</p>":null ) ."<p>". ( !empty($object->address)? stripslashes($object->address): null)."</p>
+										<h3 class='evo_h3'>".$iconLoc.($locationLink? $locationLink:'').eventon_get_custom_language($evoOPT2, 'evcal_lang_location','Location').($locationLink?'</a>':'')."</h3>". ( (!empty($object->location_name))? "<p class='evo_location_name'>".stripslashes($object->location_name)."</p>":null ) ."<p class='evo_location_address'>". ( !empty($object->address)? stripslashes($object->address): null)."</p>
 									</div>
 								</div>
 							</div><div class='clear'></div>
@@ -168,6 +171,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 					$fullheight = (int)$object->fullheight;
 
 					if(!empty($img_src)){
+						//print_r($object);
 						// text over location image
 						$inside = $inner = '';
 						if(!empty($object->locName)){
@@ -197,7 +201,10 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 
 					// if set to direct image
 					if(!empty($evOPT['evo_ftimg_height_sty']) && $evOPT['evo_ftimg_height_sty']=='direct'){
-						$OT .= "<div class='evo_metarow_directimg'><img src='{$object->img[0]}'/></div>";
+						// ALT Text for the image
+							$alt = !empty($object->img_id)? get_post_meta($object->img_id,'_wp_attachment_image_alt', true):false;
+							$alt = !empty($alt)? 'alt="'.$alt.'"': '';
+						$OT .= "<div class='evo_metarow_directimg'><img src='{$object->img[0]}' {$alt}/></div>";
 					}else{
 						$height = !empty($object->img[2])? $object->img[2]:'';
 						$width = !empty($object->img[1])? $object->img[1]:'';
@@ -218,7 +225,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 					$newdinwow = (!empty($ORGMeta['_evocal_org_exlink_target']) && $ORGMeta['_evocal_org_exlink_target']=='yes')? 'target="_blank"':'';
 
 					// organizer name text openinnewwindow
-						if(!empty($ORGMeta['evcal_org_exlink'])){
+						if(!empty($ORGMeta['evcal_org_exlink'])){							
 							$orgNAME = "<span class='evo_card_organizer_name_t'><a ".( $newdinwow )." href='" . 
 								evo_format_link($ORGMeta['evcal_org_exlink']) . "'>".$object->organizer_name."</a></span>";
 						}else{
@@ -256,7 +263,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 					
 					$OT.="<div class='evo_metarow_getDr evorow evcal_evdata_row bordb evcal_evrow_sm getdirections'>
 						<form action='https://maps.google.com/maps' method='get' target='_blank'>
-						<input type='hidden' name='daddr' value='{$object->fromaddress}'/> 
+						<input type='hidden' name='daddr' value=\"{$object->fromaddress}\"/> 
 						<p><input class='evoInput' type='text' name='saddr' placeholder='{$_lang_1}' value=''/>
 						<button type='submit' class='evcal_evdata_icons evcalicon_9' title='{$_lang_2}'><i class='fa ".get_eventON_icon('evcal__fai_008a', 'fa-road',$evOPT )."'></i></button>
 						</p></form>
@@ -312,7 +319,11 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 						<div class='evo_metarow_learnMICS evorow bordb <?php echo $end_row_class;?>'>
 						<div class='tb'>
 							<div class='tbrow'>
-							<a class='evcal_col50 dark1 bordr evo_clik_row' href='<?php echo $learnmore_link;?>' <?php echo $object->learnmore_target;?>>
+							<?php 
+								echo apply_filters('evo_eventcard_learnmore_link_html_pre', 
+								"<a class='evcal_col50 dark1 bordr evo_clik_row' href='". $learnmore_link ."' ". $object->learnmore_target.">", 
+								$learnmore_link, $object );
+							?>
 								<span class='evcal_evdata_row ' >
 									<span class='evcal_evdata_icons'><i class='fa <?php echo get_eventON_icon('evcal__fai_006', 'fa-link',$evOPT );?>'></i></span>
 									<h3 class='evo_h3'><?php echo eventon_get_custom_language($evoOPT2, 'evcal_evcard_learnmore2','Learn More');?></h3>
@@ -378,7 +389,7 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 						<div class='evo_metarow_paypal evorow evcal_evdata_row bordb evo_paypal'>
 								<span class='evcal_evdata_icons'><i class='fa <?php echo get_eventON_icon('evcal__fai_007', 'fa-ticket',$evOPT );?>'></i></span>
 								<div class='evcal_evdata_cell'>
-									<p><?php echo $text;?></p>
+									<p style='padding-bottom:5px;'><?php echo $text;?></p>
 									<form target="_blank" name="_xclick" action="https://www.paypal.com/us/cgi-bin/webscr" method="post">
 										<input type="hidden" name="cmd" value="_xclick">
 										<input type="hidden" name="business" value="<?php echo $email;?>">

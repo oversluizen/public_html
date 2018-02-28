@@ -44,7 +44,7 @@ jQuery(document).ready(function($){
 	// go back button on the shortcode popup
 		function ajdePOSH_go_back(){
 			$('#'+CODE+'POSH_back').click(function(){		
-				$(this).animate({'left':'-20px'},'fast');	
+				$(this).animate({'left':'-30px'},'fast');	
 				
 				$('h3.notifications').removeClass('back');
 			

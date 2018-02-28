@@ -1,7 +1,7 @@
 <?php
 /**
  * Handle general Cron functions for eventon and its addons
- * @since  2.5.5
+ * @since  2.6.1
  */
 
 class evo_cron{
@@ -47,7 +47,6 @@ class evo_cron{
 					}
 				}
 			}
-
 		}
 
 	// perform a cron manually
@@ -64,8 +63,30 @@ class evo_cron{
 				}
 			}
 			return false;
-
 	 	}
+
+	// delete cron
+		function delete_cron($hookname, $sig=''){
+			$next_run = $this->next_run( $hookname );
+
+			$crons = _get_cron_array();
+
+			if(empty($sig)){
+				$cron_data = $this->get_cron_data($hookname);
+				$sig = isset($cron_data['sig'])? $cron_data['sig']: null;
+			}
+
+			if(empty($sig)) return false;
+
+			if ( isset( $crons[ $next_run ][ $hookname ][ $sig ] ) ) {
+				$args = $crons[ $next_run ][ $hookname ][ $sig ]['args'];
+				wp_unschedule_event( $next_run, $hookname, $args );
+				return true;
+			}
+						
+			return false;
+		}
+
 	// cron log creation
 		function record_log($data, $key){
 			$logs = get_option('evo_cron_logs');

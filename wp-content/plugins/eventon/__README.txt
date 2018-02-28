@@ -4,8 +4,9 @@ Plugin Name: EventON
 Author URI: http://ashanjay.com/
 Tags: calendar, event calendar, event posts
 Requires at least: 4.0
-Tested up to: 4.8
-Stable tag: 2.5.5
+Tested up to: 4.9
+Stable tag: 2.6.2
+Initial Release: 2011-12-21
 
 Event calendar plugin for wordpress that utilizes WP's custom post type.  
 
@@ -19,6 +20,76 @@ Event calendar plugin for wordpress that utilizes WP's custom post type. This pl
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+= 2.6.2 (2017-11-17) = 
+ADDED: Deprecated class handing and recording for alternatives
+FIXED: license activation not working
+
+= 2.6.1 (2017-11-17) =
+ADDED: Support for past and future event filtering on frontend
+ADDED: Export events as CSV to include event id
+ADDED: Remove invalid quotation marks from shortcode arguments
+ADDED: function check for iconv() for users without support for that
+ADDED: new remote auto updates system to eventon and addons
+ADDED: remote updates subscription service for eventon products
+ADDED: new filter evo_template_loader_file for template loading files
+FIXED: featuring an event in wp-admin causing error
+FIXED: Organizer open in new window not saving
+FIXED: wp-admin styles not passing version
+FIXED: ICS download file date format issue
+FIXED: All day events passing all day text for end time as well
+FIXED: Email share event name in email body not escaping correct
+FIXED: event class maybe_unserialize return prop values
+FIXED: email child theme support not working
+FIXED: location coordinates not saving just by itself
+FIXED: Location apostrophe
+UPDATED: POT file updates
+UPDATED: month jumper to show all months with no scroll
+UPDATED: csv htmlentities separated to be able to turn off
+UPDATED: Event id to be passed to eventtop
+UPDATED: Event object class improvements
+DEV: action filter when events auto trash
+
+= 2.6 (2017-9-12) =
+ADDED: ability to pass arguments to get_all_event_data() function
+ADDED: globally accessible event post meta update ajax from wp-admin
+ADDED: New calendar loader bar with cool knightrider like animation
+ADDED: Support for access to new loadbar for eventon addons
+ADDED: Support for event featured image ALT text
+ADDED: Option to disable location and organizer link filtering for https
+ADDED: new tile style with details under the tile
+ADDED: location and organizer filter support into shortcode generator
+FIXED: event end time not passing correct for dailyview addon
+FIXED: Separate months event list showing 1 less event
+FIXED: Single events template sidebar not position correct
+FIXED: Universal time format for eventcard not applying to all day events
+FIXED: hide end time events still showing end time
+FIXED: external links with https not working for events
+FIXED: twitter not including the URL
+FIXED: Single event page styles on responsive
+FIXED: event type archive page template layout issues
+FIXED: location and organizer archive page layout issues and styles
+FIXED: fixed month value with 0 yeild incorrect month
+FIXED: wp_admin AJDE library table styles
+FIXED: ajax based show more events causing filter events issues
+FIXED: ICS add to calendar file time processing issue
+FIXED: learn more link ux_val=2 not working
+FIXED: location meta data not able to delete
+FIXED: location description not saving and showing up in lightbox
+FIXED: open in new window not working for ux_val & learn more link
+FIXED: Google maps disable in settings to still work using other google maps APIs
+FIXED: single event box repeat interval not passing correct to box data
+FIXED: auto created events page to have page content as basic eventon shortcode
+FIXED: load styles and scripts only on eventon pages
+UPDATED: Possibility for extra filter text translation
+UPDATED: evo helpers to support file attachment to emails
+UPDATED: Helper styles for frontend
+UPDATED: event tax archive page layout design update
+UPDATED: eventon language saving for duplicate text strings
+UPDATED: new event date time function using event id
+UPDATED: location info over image styles and layout updated
+UPDATED: eventon back end button styles
+DEV: get_terms instead of get_categories to get event taxonomies for filter
+
 = 2.5.5 (2017-7-4) =
 ADDED: End year to show in eventtop with option to hide
 ADDED: Option to set custom login URL

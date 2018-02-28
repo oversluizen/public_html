@@ -6,6 +6,8 @@
 class evo_settings_settings{
 	function __construct($evcal_opt)	{
 		$this->evcal_opt = $evcal_opt;
+
+		$this->ajde_settings = new  ajde_settings('evcal_1');
 	}
 
 	function content(){
@@ -87,9 +89,24 @@ class evo_settings_settings{
 					),
 					array('id'=>'evo_dis_icshtmldecode',
 						'type'=>'yesno',
-						'name'=>__('Disable ICS file special character dencoding','eventon'), 
+						'name'=>__('Disable ICS file special character encoding','eventon'), 
 						'legend'=>__('This will disable html special character dencoding for all ics downloaded files for events')
 					),
+
+					array('id'=>'evo_load_scripts_only_onevo',
+						'type'=>'yesno',
+						'name'=>__('Load eventON scripts and styles only on eventON pages','eventon'), 
+						'legend'=>__('This will load eventon scripts and styles only when eventon shortcode is called in the page.'),
+						'afterstatement'=>'evo_load_scripts_only_onevo'
+					),
+						array('id'=>'evo_load_scripts_only_onevo','type'=>'begin_afterstatement'),
+						array('id'=>'evo_load_all_styles_onpages',
+							'type'=>'yesno',
+							'name'=>__('Load all eventON styles to all page headers','eventon'), 
+							'legend'=>__('This will load eventon styles into every page header. This will make sure that styles are already loaded in the page when eventon calendar HTML is loaded on to the page and avoid delay in calendar layout rendering.')
+						),
+						array('id'=>'evo_load_scripts_only_onevo','type'=>'end_afterstatement'),
+
 
 
 					array('id'=>'evcal_additional',
@@ -144,11 +161,11 @@ class evo_settings_settings{
 					array('id'=>'evcal_gmap_disable_section','type'=>'radio','name'=>__('Select which part of Google gmaps API to disable','eventon'),'width'=>'full',
 						'options'=>array(
 							'complete'=>__('Completely disable google maps','eventon'),
-							'gmaps_js'=>__('Google maps javascript file only (If the js file is already loaded with another gmaps program)','eventon'))
+							'gmaps_js'=>__('Google maps javascript file only (If the API js file is already loaded with another gmaps program)','eventon'))
 					),
 					array('id'=>'evcal_cal_gmap_api','type'=>'end_afterstatement'),
 					
-					array('id'=>'evo_gmap_api_key','type'=>'text','name'=>__('Google maps API Key (Not required)','eventon').' <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">How to get API Key</a>','legend'=>'Not required with Gmap API V3, but typing a google maps API key will append the key and will enable monitoring map loading activity from google.','afterstatement'=>'evcal_cal_gmap_api'),
+					array('id'=>'evo_gmap_api_key','type'=>'text','name'=>__('Google maps API Key (Required)','eventon').' <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">How to get API Key</a>','legend'=>'Not required with Gmap API V3, but typing a google maps API key will append the key and will enable monitoring map loading activity from google.','afterstatement'=>'evcal_cal_gmap_api'),
 					array('id'=>'evcal_gmap_scroll','type'=>'yesno','name'=>__('Disable scrollwheel zooming on Google Maps','eventon'),'legend'=>'This will stop google maps zooming when mousewheel scrolled.'),
 					
 					array('id'=>'evcal_gmap_format', 'type'=>'dropdown','name'=>__('Google maps display type:','eventon'),
@@ -340,7 +357,16 @@ class evo_settings_settings{
 																
 					array('id'=>'evo_morelass','type'=>'yesno','name'=>__('Show full event description','eventon'),'legend'=>'If you select this option, you will not see More/less button on EventCard event description.'),
 					
-					array('id'=>'evo_opencard','type'=>'yesno','name'=>__('Open all eventCards by default','eventon'),'legend'=>'This option will load the calendar with all the eventCards open by default and will not need to be clicked to slide down and see details.')
+					array('id'=>'evo_opencard',
+						'type'=>'yesno',
+						'name'=>__('Open all eventCards by default','eventon'),
+						'legend'=>'This option will load the calendar with all the eventCards open by default and will not need to be clicked to slide down and see details.'
+					),
+					array('id'=>'evo_card_http_filter',
+						'type'=>'yesno',
+						'name'=>__('Disable location & organizer link filtering','eventon'),
+						'legend'=>'Location and organizer link filter removes http & https from the link, disabling this will stop that filter from running'
+					)
 				)
 			),
 
@@ -559,12 +585,13 @@ class evo_settings_settings{
 			ob_start();
 			?>
 			<div class="diagnosis_row">
-				<p><a class='evo_admin_btn btn_prime'><?php _e('Test EventON Email','eventon');?></a></p>
-				<p><label for=""><?php _e('Email address to send test email','eventon');?></label> <input type="text"></p>
-				<p><a class="evo_admin_btn btn_triad"><?php _e('Send Test Email','eventon');?></a></p>
-			</div>
-			<div class="diagnosis_row">
-				<p><a class='evo_admin_btn btn_prime'><?php _e('Test Search','eventon');?></a></p>
+				<p style='padding-bottom:10px;'>
+					<label for=""><?php _e('Email address to send test email','eventon');?></label> 
+					<span class='nfe_f_width'><input id='evo_admin_test_email_address' type="text"></span>
+				</p>
+				<p><a id='evo_send_test_email' class="evo_admin_btn btn_triad"><?php _e('Send Test Email','eventon');?></a></p>
+
+				<p id="evodiagnose_message"></p>
 			</div>
 			<?php
 			return ob_get_clean();
@@ -637,7 +664,11 @@ class evo_settings_settings{
 			$event_type_names = evo_get_ettNames($this->evcal_opt[1]);
 			// event types category names		
 			$ett_verify = evo_get_ett_count($this->evcal_opt[1] );
+
+			$event_type_options = array();
 			
+			$event_type_options['event_past_future'] = 'Past & Future Event Filtering';
+
 			for($x=1; $x< ($ett_verify+1); $x++){
 				$ab = ($x==1)? '':'_'.$x;
 				$event_type_options['event_type'.$ab] = $event_type_names[$x];
@@ -651,39 +682,9 @@ class evo_settings_settings{
 
 	// rearrange fields
 		function rearrange_code(){	
-			$rearrange_items = apply_filters('eventon_eventcard_boxes',array(
-				'ftimage'=>array('ftimage',__('Featured Image','eventon')),
-				'eventdetails'=>array('eventdetails',__('Event Details','eventon')),
-				'timelocation'=>array('timelocation',__('Time and Location','eventon')),
-				'repeats'=>array('repeats',__('Event Repeats Info','eventon')),
-				'organizer'=>array('organizer',__('Event Organizer','eventon')),
-				'locImg'=>array('locImg',__('Location Image','eventon')),
-				'gmap'=>array('gmap',__('Google Maps','eventon')),
-				'learnmoreICS'=>array('learnmoreICS',__('Learn More & Add to your calendar','eventon')),
-				'evosocial'=>array('evosocial',__('Social Share Icons','eventon')),
-			));
-
-			// otehr values
-				//get directions
-				$rearrange_items['getdirection']=array('getdirection',__('Get Directions','eventon'));
-				
-				//eventbrite
-				if(!empty($this->evcal_opt[1]['evcal_evb_events']) && $this->evcal_opt[1]['evcal_evb_events']=='yes')
-					$rearrange_items['eventbrite']= array('eventbrite',__('eventbrite','eventon'));
-					
-				//paypal
-				if(!empty($this->evcal_opt[1]['evcal_paypal_pay']) && $this->evcal_opt[1]['evcal_paypal_pay']=='yes')
-					$rearrange_items['paypal']= array('paypal',__('Paypal','eventon'));
-				
-				// custom fields
-				$_cmd_num = evo_calculate_cmd_count($this->evcal_opt[1]);
-				for($x=1; $x<=$_cmd_num; $x++){
-					if( !empty($this->evcal_opt[1]['evcal_ec_f'.$x.'a1']) && !empty($this->evcal_opt[1]['evcal_af_'.$x]) && $this->evcal_opt[1]['evcal_af_'.$x]=='yes')
-						$rearrange_items['customfield'.$x] = array('customfield'.$x,$this->evcal_opt[1]['evcal_ec_f'.$x.'a1'] );
-				}
-			
-			return $rearrange_items;
+			return $this->ajde_settings->get_eventcard_fields();
 		}
+		
 	// custom meta fields
 		function custom_meta_fields(){
 			// reused array parts
@@ -750,7 +751,7 @@ class evo_settings_settings{
 			}
 
 			// Note
-				$etc[] = array('id'=>'evo_note','type'=>'note','name'=>sprintf(__('Want more than 5 event categories? <br/><a href="%s" target="_blank"class="evo_admin_btn btn_triad">Extend categories using pluggable functions</a>.' ,'eventon'), 'http://www.myeventon.com/documentation/increase-event-type-count/') );
+				$etc[] = array('id'=>'evo_note','type'=>'note','name'=>sprintf(__('Want more than 5 event categories? <br/><br/><a href="%s" target="_blank"class="evo_admin_btn btn_triad">Extend categories using pluggable functions</a>' ,'eventon'), 'http://www.myeventon.com/documentation/increase-event-type-count/') );
 			
 
 			// for each Multi Data Types
