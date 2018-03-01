@@ -215,13 +215,13 @@ class evo_ajde_events{
 					
 					get_inline_data( $post );
 				
-					$event = $eventon->evo_event_item->get_event($post->ID);
+					$event = $eventon->evo_event->get_event($post->ID);
 					
 					//print_r($event);
 					
 					/* Custom inline data for eventon */
 					echo '<div class="hidden" id="eventon_inline_' . $post->ID . '">';
-					foreach($eventon->evo_event_item->get_event_fields_edit()  as $field){
+					foreach($eventon->evo_event->get_event_fields_edit()  as $field){
 						$value = (!empty($event->$field))? $event->$field: null;
 						echo "<div class='{$field}'>{$value}</div>";
 					}

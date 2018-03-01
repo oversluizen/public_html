@@ -1,25 +1,23 @@
 <?php
 /**
  * Eventon License class
- * @version 2.6.1
+ * @version 2.5.1
  */
-class EVO_Product_lic extends EVO_Product{
+class evo_license{
 
 	public $code;
 	public $error_msg;
 
-	public function __construct($slug){
-		$this->slug = $slug;
-		$this->init = false;
-		$this->load();
+	public function __construct(){
+		$this->products = get_option('_evo_products');
 	}
-	
+
 	// check purchase code correct format
 		// @version 2.4
-			public function purchase_key_format($key){				
+			public function purchase_key_format($key, $type='eventon'){				
 				if(!strpos($key, '-'))	return false;
 
-				if( $this->slug == 'eventon'){
+				if($type== 'eventon' || $type=='main'){
 					$str = explode('-', $key);
 
 					$status = true;
@@ -47,231 +45,88 @@ class EVO_Product_lic extends EVO_Product{
 				}
 
 	// Actions
+		// activate
+			function activate($slug){
+				if(!empty($this->products[$slug])){					
+					return $this->update_field($slug, 'status', 'active');
+				}else{return false;}
+			}
 		// deactivate
-			function deactivate(){
-				$this->set_prop('status','inactive');
-				$this->force_package_update('dettach');	
-				return true;			
-			}
-			function remote_deactivate($__data){
-				$output = array();
+			function deactivate($slug){
+				$product_data = $this->products;
+				if(!empty($product_data[$slug])){
 
-				if($this->slug == 'eventon') return false;
+					$new_data = $product_data;
+					$new_data[$slug]['status']='inactive';
 
-				$url= $this->api_url_base(). 'request=deactivation&email='.$__data['email'].'&licence_key='.$__data['key'].'&instance=0&product_id='.$__data['product_id'];
+					update_option('_evo_products',$new_data);
 
-				$request = wp_remote_get($url);
-
-				if( is_wp_error($request)){
-					$output['error_code'] = 30; return $output;
+					// update the instance values
+					$this->products = get_option('_evo_products');
+					return true;
+				}else{
+					$this->code = '07';
+					return false;
 				}
-				if($request['response']['code'] !==200){
-					$output['error_code'] = 31; return $output;
-				}
-				
-				$output['result'] = (!empty($request['body']))? json_decode($request['body']): $request; 				
-				return $output;
 			}
+		// Update
+			public function update_field($slug, $field, $value){
+				$product_data = $this->products;
 
-		// save license data only 
-			function save_license_data(){
+				if(!empty($product_data[$slug])){
+					$new_data = $product_data;
+					$new_data[$slug][$field]=$value;
+					update_option('_evo_products',$new_data);
+					
+					// refresh the evo products values
+					$this->products = get_option('_evo_products');
+					return true;
+				}else{return false;}
+			}
+		// save envato data
+			function save_envato_data(){
 
 				if(empty($_POST['type'])) return false;
 
-				if( $_POST['type'] == 'main'){
-					$data_array = array(
-						'envato_username'=>'envato_username',
-						'envato_api_key'=>'envato_api_key',
-						'key'=>'key',
-					);
-				}else
-				if($_POST['type'] == 'addon'){
-					$data_array = array(
-						'instance'=>'instance',
-						'email'=>'email',
-						'key'=>'key',
-						'ID'=>'product_id'
-					);
-				}
+				if($_POST['type']!= 'main') return false;
 
-				foreach($data_array as $var=>$field){
-
-					if(!isset($_POST[ $field ])) continue;
-
-					$this->set_prop($var , $_POST[ $field ]);
-				}
-
-			}
-
-	// Subscription
-		function save_subscription($key, $username){
-			$this->set_prop('key', $key, false);
-			$this->set_prop('username', $username, false);
-			$this->save();
-		}
-
-		function has_valid_subscription(){
-			if( $this->kriyathmakada() ){
-				$next_payment = $this->get_prop('next_payment');
-				if($next_payment ){
-					date_default_timezone_set("UTC");
-					if( time() < $next_payment  ){
-						return true;
+				foreach(array(
+					'envato_username','envato_api_key'
+				) as $field){
+					if(!empty($_POST[$field])){						
+						$this->update_field('eventon',$field , $_POST[$field]);
 					}
 				}
 
-				// if next payment is past deactivate and check for validation
-				$this->deactivate();
-				$result = $this->verify_active_subscription();
-
-				if(isset($result['status']) && $result['status'] == 'good') return true;
-			}
-			
-			return false;
-		}
-
-		function verify_active_subscription(){
-			$key = $this->get_prop('key');
-
-			if( !$key) return false;
-			
-			$data = array();
-			$data['key'] = $key;
-			$data['request'] = 'verify_subscription';
-
-			$output = array();
-			$output['error_code'] = 150;
-			$output['status'] = 'bad';
-
-			$url = $this->subscription_api_url($data);
-		
-			$response = wp_remote_get( $url);
-
-			//print_r($response);
-				
-			if ( is_wp_error( $response ) ){
-				$output['error_code'] = 23; 
-				$this->record(23,$data['request'], $result->get_error_message());
-				return $output;
+				if(!empty($_POST['purchase_key']))
+					$this->update_field('eventon','key' , $_POST['purchase_key']);
 			}
 
-			if ( $response['response']['code'] !== 200 ) {
-				$output['error_code'] = 21;
-				$this->record(21,$data['request']);
-				return $output;
-			}
-
-			//$json = json_decode( wp_remote_retrieve_body( $response['body'] ) );
-			$json = json_decode( $response['body'] ,true );
-
-			if ( empty($json) || !$json || !isset($json['status'])){
-				$output['error_code'] = 30; 
-				$this->record(30,$data['request']);
-				return $output;
-			}
-
-			if (  $json['status'] == 'bad' ){
-				$output['error_remote_var'] = $json['error_var'];				
-				$output['error_code'] = $json['code']; 
-				$this->record($json['code'],$data['request']);
-				return $output;
-			}
-
-			if(  $json['status'] == 'inactive' ){
-				$output['error_code'] = 151; 
-				$this->record(151,$data['request'], (isset($json['error_var'])? $json['error_var']:''));
-				if(isset($json['error_var'])) $output['error_remote_var'] = $json['error_var'];	
-				return $output;
-			}
-
-			if(  $json['status'] == 'active' ){
-				$output['status'] = 'good';
-				$this->record(155,$data['request'], EVO_Error()->error_code( 155 ));
-
-				if( isset($json['next_payment'])){
-					$this->set_prop('next_payment',$json['next_payment'] );
-				}
-				$this->set_prop('remote_validity','valid' );
-				$this->evo_kriyathmaka_karanna();
-			}	
-
-			// output include
-			// status, error_code, error_remote_var
-			return $output;
-		}
-
-		function remote_deactivate_subscription(){
-			$output = array();
-
-			$data = array();
-			$data['key'] = $this->get_prop('key');
-			$data['request'] = 'deactivate_subscription';
-
-			$output = array();
-			$output['error_code'] = 150;
-			$output['status'] = 'bad';
-
-			$url = $this->subscription_api_url($data);
-			$output['url'] = $url;
-
-			$request = wp_remote_get($url);
-
-			if( is_wp_error($request)){
-				$output['error_code'] = 161; return $output;
-			}
-			if($request['response']['code'] !==200){
-				$output['error_code'] = 161; return $output;
-			}
-			
-			$json = json_decode( $request['body'] ,true );
-
-			if ( empty($json) || !$json || !isset($json['status'])){
-				$output['error_code'] = 161; 
-				$this->record(161,$data['request']);
-				return $output;
-			}
-
-			if (  $json['status'] == 'bad' ){
-				$output['error_code'] = 161; 
-				$this->record($json['code'],$data['request']);
-				return $output;
-			}
-
-			if(  $json['status'] == 'inactive' || $json['status'] == 'good' ){
-				$output['status'] = 'good';
-				$output['error_code'] = 162; 
-				$this->record(162,$data['request'], EVO_Error()->error_code( 162 ));
-			}	
-
-			return $output;
-		}
-
-		function subscription_api_url($data){
-			$instance = md5(get_site_url());				
-			return $this->subscription_api_url_base() . 'request=' . $data['request'] .'&key='. $data['key'] .'&instance=' . $instance ;
-		}
-		function subscription_api_url_base(){
-			//return 'http://localhost/EVO/wp-json/ajde/evo-subscription?';
-			return 'http://www.myeventon.com/wp-json/ajde/evo-subscription?';
-		}
-		private function record($code, $task,$data=''){
-			EVO_Error()->record_gen_log($task, $this->slug, $code, $data );
-		}
 
 	// Returns		
+		public function get_product($slug){
+			if(empty($this->products[$slug])) return false;
+			return $this->products[$slug];
+		}
+
 		// check if the license key was validated remotely
-		public function remotely_validated(){			
-			return ($this->get_prop('remote_validity') && $this->get_prop('remote_validity') == 'valid' && $this->get_prop('status') && $this->get_prop('status') =='active')?
-				true: false;
+		public function remotely_validated($slug){
+			$product = $this->get_product($slug);
+
+			return (!empty($product['remote_validity']) && $product['status']=='active')? true: false;
 		}
-		public function get_license(){
-			return $this->get_prop('key')? $this->get_prop('key'): false;
+		public function get_license($slug){
+			if(!empty($this->products[$slug]) && !empty($this->products[$slug]['key'])){
+				return $this->products[$slug]['key'];
+			}else{return false;}
 		}
-		public function get_partial_license(){				
-			$key = $this->get_license();
+		public function get_partial_license($slug){	
+			global $eventon;
+
+			$key=$this->get_license($slug);
 			if(!empty($key )){
-				if($this->slug=='eventon'){
-					$valid_key = $this->purchase_key_format($key);
+				if($slug=='eventon'){
+					$valid_key = $eventon->license->purchase_key_format($key);
 					if($valid_key){
 						$parts = explode('-', $key);
 						return 'xxxxxxxx-xxxx-xxxx-xxxx-'.$parts[4];
@@ -286,151 +141,149 @@ class EVO_Product_lic extends EVO_Product{
 			}else{return '--';}
 		}
 
-	
+		// Eventon products kriyaathmaka kiya danum deema
+		public function kriyathmakada($slug){
+			//print_r($this->products);
+			if(!empty($this->products[$slug])){
+				return (!empty($this->products[$slug]['status']) && $this->products[$slug]['status']=='active' &&
+					!empty($this->products[$slug]['key'])
+				)? true:false;
+			}else{return false;}
+		}
+
 		// for AJAX
 		// return api url 
-			protected function get_api_url($args){
+			public function get_api_url($args){
 				$url = '';
-				if($this->slug=='eventon'){					
-					$api_key = $this->get_prop('envato_api_key')? $this->get_prop('envato_api_key'): 
-						'vzfrb2suklzlq3r339k5t0r3ktemw7zi';
-					$api_username = $this->get_prop('envato_username')? $this->get_prop('envato_username'):  'ashanjay';
+				if($args['slug']=='eventon'){
+
+					// get the eventon product saved info
+					$product = $this->get_product('eventon');					
+
+					$api_key = !empty($product['envato_api_key'])? $product['envato_api_key']: 'vzfrb2suklzlq3r339k5t0r3ktemw7zi';
+					$api_username = !empty($product['envato_username'])? $product['envato_username']:  'ashanjay';
 					$api_key = 'vzfrb2suklzlq3r339k5t0r3ktemw7zi';
 					$api_username = 'ashanjay';
 					$url = 'http://marketplace.envato.com/api/edge/'.$api_username.'/'.$api_key.'/verify-purchase:'.$args['key'].'.json';				
 				}else{
-					$instance = md5(get_site_url());					
-					$url= $this->api_url_base(). 'request=activation&email='.$args['email'].'&licence_key='.$args['key'].'&product_id='.$args['product_id'].'&instance='.$instance;
+					$instance = !empty($args['instance'])?$args['instance']:1;
+					
+					$url='http//www.myeventon.com/woocommerce/?wc-api=software-api&request=activation&email='.$args['email'].'&licence_key='.$args['key'].'&product_id='.$args['product_id'].'&instance='.$instance;
 				}
 				return $url;
 			}
 
-			function api_url_base(){
-				return 'http://www.myeventon.com/woocommerce/?wc-api=software-api&';
-				//return 'http://localhost/EVO/woocommerce/?wc-api=software-api&';
-			}
-
-		// remote validation 
-			function remote_validation($args){				
-
-				if(!isset($args['key'])) return false;
-
-				$url = $this->get_api_url($args);
-
-				$key = $args['key'];
+		// remote validation for eventon
+			function eventon_remote_validation($url, $key, $slug){
 
 				$output = array();
-				$output['error_code'] = 11;
+				$output['error_code'] = 00;
 				$output['status'] = 'bad';
-				$output['api_url'] = $url;
+
+				if(empty($slug)) return false;
 
 				$response = wp_remote_post( $url);
 				
 				if ( is_wp_error( $response ) ){
-					$output['error_code'] = 23; 
-					$this->record(23,'remote_validation_failed', 'URL:'.$url);
-					return $output;
+					$output['error_code'] = 20; return $output;
 				}
 
 				if ( $response['response']['code'] !== 200 ) {
-					$output['error_code'] = 21;
-					$this->record(21,'remote_validation_failed', 'URL:'.$url);
-					return $output;
+					$output['error_code'] = 21; return $output;
 				}
 
 				$json = json_decode( $response['body'], true );
 				
-				// for eventon main plugin
-				if($this->slug == 'eventon'){
+				if($slug == 'eventon'){
 					
 					if ( ! $json || ! isset( $json['verify-purchase'] ) ) {
-						$output['error_code'] = 03; 
-						return $output;
+						$output['error_code'] = 03; return $output;
 					}
 
 					if( empty($json['verify-purchase'])){
-						$output['error_code'] = 02; 
-						return $output;
+						$output['error_code'] = 02; return $output;
 					}
 
 					if( !empty($json['verify-purchase']['item_id']) && $json['verify-purchase']['item_id'] !='1211017'){
-						$output['error_code'] = 22; 
-						return $output;
+						$output['error_code'] = 22; return $output;
 					}
 
 					// update other values
-					if(!empty($json['verify-purchase']['buyer'])){ 
-						$this->set_prop( 'buyer', $json['verify-purchase']['buyer']);
-						$output['status'] = 'good';
-					}
+					if(!empty($json['verify-purchase']['buyer'])) 
+						$this->update_field('eventon', 'buyer', $json['verify-purchase']['buyer']);
 
-					$this->set_prop('remote_validity','valid' );
+					$this->update_field('eventon', 'remote_validity','valid' );					
+					$this->eventon_kriyathmaka_karanna();
 
 				}else{ 
 				// for addons
-					if ( ! $json ){
+					if ( ! $json || ! isset( $json['activated'] ) || empty($json['activated']) ) {
 						$output['error_code'] = 30; return $output;
 					}
 
 					if ( !empty( $json['error'] ) ){
-						$output['error_remote_msg'] = $json['error'];
-						if( isset( $json['additional info'])) $output['error_additional_info'] = $json['additional info'];
-						$output['error_code'] = isset( $json['code'])?  $json['code']: 11; 
-						$this->record($output['error_code'],'remote_validation_error', 'URL:'.$url);
-						return $output;
+						$output['error_code'] = 02; return $output;
 					}
 
-					// remote validated
-					if( isset($json['activated']) && $json['activated'] == true){
-						$this->set_prop('remote_validity','valid' );
-						$this->set_prop('key',$key );
-						$output['status'] = 'good';
-						$this->dl_updater();
-					}	
+					$this->update_field($slug, 'remote_validity','valid' );
+					$this->update_field($slug, 'key',$key );
+
 				}
 
-				// output include
-				// status, error_remote_msg, error_code, api_url
+				$output['status'] = 'good';
+
 				return $output;
 			}
 
-		// auto validation checker
-			function check_validity(){
-				$rv = $this->get_prop('remote_validity');
 
-				if($rv == 'valid') return true;
-				if($rv == 'local'){
-
-					if(!$this->get_prop('key')) return false;
-
-					$args = array(
-						'key'=> $this->get_prop('key'),
-						'email'	=> $this->get_prop('email'),
-						'product_id'	=> $this->get_prop('ID'),
-						'instance'	=> $this->get_prop('instance'),
-					);
-
-					$remote_validate = $this->remote_validation($args);
-				}
+		// eventon witharak - kriyathmaka karanna
+			public function eventon_kriyathmaka_karanna(){
+				$this->update_field('eventon', 'status', 'active');
+			}
+			public function evo_kriyathmaka_karanna($slug){
+				$this->update_field($slug, 'status', 'active');
+			}
+			public function evo_kriyathmaka_karanna_locally($slug){
+				$this->update_field($slug, 'status', 'active');
+				$this->update_field($slug, 'remote_validity', 'local');
 			}
 
-		// download link updater
-			function dl_updater(){
-				if($this->has_update()){
-					$PRODS = new evo_prods();
-					$PRODS->get_remote_prods_data();
-				}
-			}
 
-		// kriyathmaka karanna
-			public function evo_kriyathmaka_karanna(){
-				$this->set_prop('status', 'active');
-				if($this->slug!= 'evo_subscription') $this->force_package_update('append');	
-			}
-			// site eka ethulen withrak kriyathmana karanna
-			public function evo_kriyathmaka_karanna_athulen(){
-				$this->set_prop('status', 'active');
-				$this->set_prop('remote_validity', 'local');
-			}
-	
+	// error code decipher
+		public function error_code($code=''){
+
+			$code = empty($code)? (!empty($this->code)? $this->code:'20'): $code;
+			
+			$array = array(
+				"00"=>'',
+				'01'=>"No data returned from envato API",
+				"02"=>'Your license is not a valid one!, please check and try again.',
+				"03"=>'envato verification API is busy at moment, please try later.',
+				"04"=>'This license is already registered with a different site.',
+				"05"=>'Your EventON version is older than 2.2.17.',
+				"06"=>'Eventon license key not passed correct!',
+				"07"=>'Could not deactivate eventON license from remote server',
+				'08'=>'http request failed, connection time out. Please contact your web provider!',
+				'09'=>'wp_remote_post() method did not work to verify licenses, trying a backup method now..',
+
+				'10'=>'License key is not valid, please try again.',
+				'11'=>'Could not verify. Server might be busy, please try again LATER!',
+				'12'=>'Activated successfully and synced w/ eventon server!',
+				'13'=>'Remote validation did not work, but we have activated the software within your site!',
+
+				'20'=>'Please try again later!',
+				'21'=>'Server did not respond with OK',
+				'22'=>'Purchase key is for a wrong software.',
+
+				'30'=>'EventON API did not provide output, try again later.',
+
+				'101'=>'Invalid license key!',
+				'102'=>'Addon has been deactivated!',
+				'103'=>'You have exceeded maxium number of activations!',
+				'104'=>'Invalid instance ID!',
+				'105'=>'Invalid security key!',
+				'100'=>'Invalid request!',
+			);
+			return $array[$code];
+		}
 }

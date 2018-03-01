@@ -32,7 +32,6 @@ class eventon_admin_shortcode_box{
 						'guide'=>'Event Type '.$x.' category IDs - seperate by commas (eg. 3,12)',
 						'placeholder'=>'eg. 3, 12',
 						'var'=>'event_type_'.$x,
-						'possible_values'=>'yes',
 						'default'=>'0'
 					);
 				}else{ $event_types_sc['event_type_'.$x] = array(); }
@@ -105,7 +104,6 @@ class eventon_admin_shortcode_box{
 				'guide'=>__('Event Type category IDs - seperate by commas (eg. 3,12)','eventon'),
 				'placeholder'=>'eg. 3, 12',
 				'var'=>'event_type',
-				'possible_values'=>'yes',
 				'default'=>'0'
 			),'event_type_2'=>array(
 				'name'=>__('Event Type 2','eventon'),
@@ -113,30 +111,11 @@ class eventon_admin_shortcode_box{
 				'guide'=>__('Event Type 2 category IDs - seperate by commas (eg. 3,12)','eventon'),
 				'placeholder'=>'eg. 3, 12',
 				'var'=>'event_type_2',
-				'possible_values'=>'yes',
 				'default'=>'0'
 			),
 			'event_type_3'=>$event_types_sc['event_type_3'],
 			'event_type_4'=>$event_types_sc['event_type_4'],
 			'event_type_5'=>$event_types_sc['event_type_5'],
-			'event_location'=>array(
-				'name'=>__('Event Location','eventon'),
-				'type'=>'taxonomy',
-				'guide'=>__('Event Loction term ID(s) - seperate by commas (eg. 3,12)','eventon'),
-				'placeholder'=>'eg. 3, 12',
-				'var'=>'event_location',
-				'possible_values'=>'yes',
-				'default'=>'0'
-			),
-			'event_organizer'=>array(
-				'name'=>__('Event Organizer','eventon'),
-				'type'=>'taxonomy',
-				'guide'=>__('Event Organizer term ID(s) - seperate by commas (eg. 3,12)','eventon'),
-				'placeholder'=>'eg. 3, 12',
-				'var'=>'event_organizer',
-				'possible_values'=>'no',
-				'default'=>'0'
-			),
 			'fixed_month'=>array(
 				'name'=>__('Fixed Month','eventon'),
 				'type'=>'text',
@@ -399,8 +378,6 @@ class eventon_admin_shortcode_box{
 						,$this->shortcode_default_field('event_type_3')
 						,$this->shortcode_default_field('event_type_4')
 						,$this->shortcode_default_field('event_type_5')
-						,$this->shortcode_default_field('event_location')
-						,$this->shortcode_default_field('event_organizer')
 						,$this->shortcode_default_field('etc_override')
 						,$this->shortcode_default_field('fixed_mo_yr')						
 						,$this->shortcode_default_field('lang')
@@ -449,17 +426,6 @@ class eventon_admin_shortcode_box{
 								'afterstatement'=>'tiles'
 							),
 							array(
-								'name'=>'Number of Tiles in a Row',
-								'type'=>'select',
-								'options'=>array(
-									'2'=>'2',
-									'3'=>'3',
-									'4'=>'4',
-									),
-								'guide'=>'Select the number of tiles to show on one row',
-								'var'=>'tile_count','default'=>'0'
-							),
-							array(
 								'name'=>'Tile Box Height (px)',
 								'placeholder'=>'eg. 200',
 								'type'=>'text',
@@ -474,17 +440,27 @@ class eventon_admin_shortcode_box{
 									),
 								'guide'=>'Select the type of background for the event tile design',
 								'var'=>'tile_bg','default'=>'0'
+							),array(
+								'name'=>'Number of Tiles in a Row',
+								'type'=>'select',
+								'options'=>array(
+									'2'=>'2',
+									'3'=>'3',
+									'4'=>'4',
+									),
+								'guide'=>'Select the number of tiles to show on one row',
+								'var'=>'tile_count','default'=>'0'
 							),
-							array(
+							/*array(
 								'name'=>'Tile Style',
 								'type'=>'select',
 								'options'=>array(
 									'0'=>'Default',
-									'1'=>'Details under tile box',
+									'1'=>'Top bar',
 									),
 								'guide'=>'With this you can select different layout styles for tiles',
 								'var'=>'tile_style','default'=>'0'
-							),
+							),*/
 							array(
 								'name'=>'Custom Code','type'=>'customcode', 'value'=>'',
 								'closestatement'=>'tiles'
@@ -520,9 +496,7 @@ class eventon_admin_shortcode_box{
 						,$this->shortcode_default_field('event_type_2')
 						,$this->shortcode_default_field('event_type_3')
 						,$this->shortcode_default_field('event_type_4')
-						,$this->shortcode_default_field('event_type_5')							
-						,$this->shortcode_default_field('event_location')
-						,$this->shortcode_default_field('event_organizer')
+						,$this->shortcode_default_field('event_type_5')	
 						,$this->shortcode_default_field('hide_month_headers')
 						,$this->shortcode_default_field('hide_mult_occur'),
 						array(
@@ -650,10 +624,8 @@ class eventon_admin_shortcode_box{
 		public function get_content(){
 			global $ajde, $eventon;
 
-			$EVO = new EVO_Product('eventon');
-
-			if(!$EVO->kriyathmakada()) 
-				return '<p style="padding:10px;text-align:center">'.$EVO->akriyamath_niwedanaya() .'</p>';
+			if(!$eventon->evo_updater->kriyathmakada()) 
+				return '<p style="padding:10px;text-align:center">'.$eventon->evo_updater->akriyamath_niwedanaya() .'</p>';
 			
 			return $ajde->wp_admin->get_content(
 				$this->get_shortcode_field_array(),

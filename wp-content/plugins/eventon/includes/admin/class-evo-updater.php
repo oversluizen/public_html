@@ -43,17 +43,17 @@ class evo_updater{
 	       		$this->pluginFile = (isset($args['file']))? $args['file']: $pluginFile;
 	       		$this->pluginName = (isset($args['name']))? $args['name']: false;
 
-	       	// setup product
-		        $this->product = new evo_product($this->slug, false,array(
+	       	// connect to eventon products class
+		        $this->product = new evo_product(array(
 		    		'name'=>$args['name'],
 		    		'slug'=>$this->slug,
 		    		'version'=>$args['version'],
 		    		'guide_file'=>(!empty($args['guide_file'])? $args['guide_file']: null),
-		    		'plugin_slug'=>	$this->plugin_slug,
 		    	));
 
 	        // get api url
-		        
+		        $rand = rand(1,5);
+		        $this->api_url= 'http://get.myeventon.com/index_'.$rand.'.php';		
 		        //$this->api_url= 'http://get.myeventon.com/index_x.php';		
 
 		    $this->init();
@@ -71,6 +71,7 @@ class evo_updater{
 			$this->new_update_notices();
 
 	    	// update current of the product to product data
+	    	//$this->product->update_field($this->slug,'version', $this->current_version);
 	    }
 
 	// get information regarding eventon from wordpress
@@ -90,7 +91,7 @@ class evo_updater{
 			if(!empty($this->myeventonAPIResults)) return;
     		
     		// check if local stored info exists and if there is update
-    		$product = $this->product->get_product_array();
+    		$product = $this->product->get_product_array($this->slug, true);
 
     		// if local info shows there is an update show that info, OR if its not time to check remote
     		if( (
@@ -307,7 +308,7 @@ class evo_updater{
 	// Custom update notice message -- if updates are avialable
 		// CHECK for new update and if there are any show custom update notice message
 		    public function new_update_notices(){
-		    	$product = $this->product->get_product_array();
+		    	$product = $this->product->get_product_array($this->slug, true);
 		    	
 		    	if(empty($product['remote_version'])) return;
 

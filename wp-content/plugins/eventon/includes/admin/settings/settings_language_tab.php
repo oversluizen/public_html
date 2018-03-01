@@ -28,20 +28,17 @@ class evo_settings_lang{
 		ob_start(); ?>
 		<form method="post" action=""><?php settings_fields('evcal_field_group'); 
 			wp_nonce_field( AJDE_EVCAL_BASENAME, 'evcal_noncename' ); ?>
-			<div id="evcal_2" class="postbox evcal_admin_meta">	
-				<div class="inside">
-					<h2><?php _e('Type in custom language text for front-end calendar','eventon');?></h2>
-					<?php echo $this->_section_lang_selection();?>
-
-					<p style='padding-bottom:15px;'><i><?php _e('Please use the below fields to type in custom language text that will be used to replace the default language text on the front-end of the calendar.','eventon')?><br/><?php _e('NOTE: Text strings with label "Duplicate" will be replaced with first text string value you entered, after saving changes.');?></i></p>
-					<?php
-						echo $this->interpret_array( apply_filters('eventon_settings_lang_tab_content',$this->language_variables_array()) );
-					?>
-				</div>
+		<div id="evcal_2" class="postbox evcal_admin_meta">	
+			<div class="inside">
+				<h2><?php _e('Type in custom language text for front-end calendar','eventon');?></h2>
+				<?php echo $this->_section_lang_selection();?>
+				<p><i><?php _e('Please use the below fields to type in custom language text that will be used to replace the default language text on the front-end of the calendar.','eventon')?></i></p>
+				<?php
+					echo $this->interpret_array( apply_filters('eventon_settings_lang_tab_content',$this->language_variables_array()) );
+				?>
 			</div>
-			
-			<p style='padding:0'><input type="submit" class="evo_admin_btn btn_prime" value="<?php _e('Save Changes','eventon') ?>" style='margin-top:15px'/></p>
-
+		</div>
+		<p style='padding:0'><input type="submit" class="evo_admin_btn btn_prime" value="<?php _e('Save Changes','eventon') ?>" style='margin-top:15px'/></p>
 		</form>
 		
 		<?php
@@ -51,7 +48,7 @@ class evo_settings_lang{
 			 * @added 	2.3.2
 			 */
 		?>
-		<div class="evo_lang_export" style='padding-top:10px; margin-top:30px; border-top:1px solid #d0d0d0'>
+		<div class="evo_lang_export">
 			<h3><?php _e('Import/Export translations','eventon');?></h3>
 			<p><i><?php _e('NOTE: Make sure to save changes after importing. This will import/export the current selected language ONLY.','eventon');?></i></p>
 
@@ -80,7 +77,7 @@ class evo_settings_lang{
 						echo "<option value='{$lang}' ".(($this->lang_version==$lang)? 'selected="select"':null).">{$lang}</option>";
 					}
 				?></select>
-				<?php $ajde->wp_admin->echo_tooltips(__("You can use this to save different languages for customized text for calendar. Once saved use the shortcode to show calendar text in that customized language. eg. [add_eventon lang='L2']",'eventon'));?></h4>
+				<?php $ajde->wp_admin->echo_tooltips(__("You can use this to save upto 2 different languages for customized text. Once saved use the shortcode to show calendar text in that customized language. eg. [add_eventon lang='L2']",'eventon'));?></h4>
 
 			<?php 
 			return ob_get_clean();
@@ -94,8 +91,6 @@ class evo_settings_lang{
 			$output = '';
 
 			if(!is_array($array)) return;
-
-			$LNG_names = array();
 
 			foreach($array as $item){
 				$item_type = !empty($item['type'])? $item['type']: '';				
@@ -131,39 +126,24 @@ class evo_settings_lang{
 						$output .= "</div><!--close-->";
 					break;
 					default:
-
-						//if(empty($item['name'])) continue;
-
 				
 						//@v 2.2.28 
 						// self sufficient names for language
 							if(!empty($item['var']) && $item['var']=='1'){
 								$name = evo_lang_texttovar_filter($label);
 							}else{
-								$name = $item['name'];
+								$name = (!empty($item['name']))?  $item['name']: '';
 							}
+						
+						$val = (!empty($name) && !empty($this->lang_options[$name]))?  $this->lang_options[$name]: '';						
 
-						$duplicate_string = in_array($name, $LNG_names)? true:false;
+						if(empty($label)) break;
 
-						// field name processing
-							if(in_array($name, $LNG_names) && !empty($this->lang_options[$name]) ){
-								$val = $this->lang_options[$name];
-							}else{
-								$name = in_array($name, $LNG_names)? $name.'_v_': $name;
-								$LNG_names[] = $name;	
-								$val = (!empty($this->lang_options[$name]))?  $this->lang_options[$name]: '';
-							}
-								
-
-						$output .= "<div class='eventon_custom_lang_line ".($duplicate_string?'dup':'')."'>
+						$output .= "<div class='eventon_custom_lang_line'>
 							<div class='eventon_cl_label_out'>
 								<p class='eventon_cl_label'>{$label}</p>
 							</div>";
-
-						$value = is_array($val)? $val[0]: stripslashes($val);
-
-						$output .= '<input class="eventon_cl_input " type="text" name="'.$name.'" placeholder="'.$placeholder.'" value="'.
-							$value.'"/>';
+						$output .= '<input class="eventon_cl_input" type="text" name="'.$name.'" placeholder="'.$placeholder.'" value="'.stripslashes($val).'"/>';
 
 						if($placeholder) $output .= $ajde->wp_admin->tooltips($placeholder,'L');
 						$output .= "<div class='clear'></div></div>";

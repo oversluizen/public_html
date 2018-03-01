@@ -8,7 +8,7 @@
  *
  *	@Author: AJDE
  *	@EventON
- *	@version: 2.5.6
+ *	@version: 2.5.5
  */
 ?>
 	
@@ -38,11 +38,10 @@
 			<?php endwhile; ?>	
 
 		<?php	do_action('eventon_single_sidebar');	?>
-
 		<?php	do_action('eventon_single_after_loop');	?>
 
-	</div><!-- #primary -->	
-
+	</div><!-- #primary -->
+	<div class="clear"></div>
 </div>	
 
 <?php 	do_action('eventon_after_main_content'); ?>

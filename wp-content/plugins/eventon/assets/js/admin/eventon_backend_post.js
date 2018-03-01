@@ -376,24 +376,5 @@ jQuery(document).ready(function($){
 	      	}
 		});
 
-	// update event post meta data on real time
-		$('body').on('evo_update_event_metadata',function(event, eid, values, evomb_body){
-			var ajaxdataa_ = {};
-			ajaxdataa_['action']='eventon_eventpost_update_meta';
-			ajaxdataa_['eid'] = eid;
-			ajaxdataa_['values'] = values;
-
-			$.ajax({
-				beforeSend: function(){ 
-					evomb_body.addClass( 'loading');
-				},
-				url:	the_ajax_script.ajaxurl,
-				data: 	ajaxdataa_,	dataType:'json', type: 	'POST',
-				success:function(data){},
-				complete:function(){ 				
-					evomb_body.removeClass( 'loading');
-				}
-			});
-		});
 	
 });

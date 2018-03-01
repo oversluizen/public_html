@@ -36,57 +36,52 @@ class evoadmin_set_appearance{
 
 				// Calendar Header
 				array('id'=>'evcal_fcx','type'=>'hiddensection_open','name'=>__('Calendar Header','eventon'), 'display'=>'none'),
-					array('id'=>'fs_sort_options','type'=>'fontation','name'=>__('Sort Options Text','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__sot', 'name'=>'Default State', 'type'=>'color', 'default'=>'B8B8B8'),
-							array('id'=>'evcal__sotH', 'name'=>'Hover State', 'type'=>'color', 'default'=>'d8d8d8'),
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jump Months Trigger Button','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__jm001', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__jm002', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ADADAD'),
-							array('id'=>'evcal__jm001H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__jm002H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'d3d3d3'),						
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__jm003', 'name'=>'Text Color', 'type'=>'color', 'default'=>'a0a09f'),
-							array('id'=>'evcal__jm004', 'name'=>'Background Color', 'type'=>'color', 'default'=>'f5f5f5'),
-							array('id'=>'evcal__jm003H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'a0a09f'),
-							array('id'=>'evcal__jm004H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'e6e6e6'),							
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons: Current','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__jm006', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__jm007', 'name'=>'Background Color', 'type'=>'color', 'default'=>'CFCFCF'),
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons: Active','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__jm008', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__jm009', 'name'=>'Background Color', 'type'=>'color', 'default'=>'f79191'),
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Current month Button','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__thm001', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__thm002', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ADADAD'),
-							array('id'=>'evcal__thm001H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__thm002H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'d3d3d3'),						
-						)
-					),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Arrow Circle','eventon'),
-						'variations'=>array(
-							array('id'=>'evcal__jm010', 'name'=>'Line Color', 'type'=>'color', 'default'=>'e2e2e2'),
-							array('id'=>'evcal__jm011', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ffffff'),
-							array('id'=>'evcal__jm010H', 'name'=>'Line Color (Hover)', 'type'=>'color', 'default'=>'e2e2e2'),
-							array('id'=>'evcal__jm011H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'ededed'),
-							array('id'=>'evcal__jm01A', 'name'=>'The arrow color', 'type'=>'color', 'default'=>'e2e2e2'),
-							array('id'=>'evcal__jm01AH', 'name'=>'The arrow color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
-						)
-					),array('id'=>'fs_loader','type'=>'fontation','name'=>__('Calendar Loader','eventon'),
+				array('id'=>'fs_sort_options','type'=>'fontation','name'=>__('Sort Options Text','eventon'),
 					'variations'=>array(
-							array('id'=>'evcal_loader_001', 'name'=>'Bar Color', 'type'=>'color', 'default'=>'efefef'),
-							array('id'=>'evcal_loader_002', 'name'=>'Moving Bar Color', 'type'=>'color', 'default'=>'f5b87a'),
-						)
-					),		
+						array('id'=>'evcal__sot', 'name'=>'Default State', 'type'=>'color', 'default'=>'B8B8B8'),
+						array('id'=>'evcal__sotH', 'name'=>'Hover State', 'type'=>'color', 'default'=>'d8d8d8'),
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jump Months Trigger Button','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__jm001', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__jm002', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ADADAD'),
+						array('id'=>'evcal__jm001H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__jm002H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'d3d3d3'),						
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__jm003', 'name'=>'Text Color', 'type'=>'color', 'default'=>'a0a09f'),
+						array('id'=>'evcal__jm004', 'name'=>'Background Color', 'type'=>'color', 'default'=>'f5f5f5'),
+						array('id'=>'evcal__jm003H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'a0a09f'),
+						array('id'=>'evcal__jm004H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'e6e6e6'),							
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons: Current','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__jm006', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__jm007', 'name'=>'Background Color', 'type'=>'color', 'default'=>'CFCFCF'),
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Jumper - Month/Year Buttons: Active','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__jm008', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__jm009', 'name'=>'Background Color', 'type'=>'color', 'default'=>'f79191'),
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Current month Button','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__thm001', 'name'=>'Text Color', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__thm002', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ADADAD'),
+						array('id'=>'evcal__thm001H', 'name'=>'Text Color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__thm002H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'d3d3d3'),						
+					)
+				),array('id'=>'fs_calhead','type'=>'fontation','name'=>__('Arrow Circle','eventon'),
+					'variations'=>array(
+						array('id'=>'evcal__jm010', 'name'=>'Line Color', 'type'=>'color', 'default'=>'e2e2e2'),
+						array('id'=>'evcal__jm011', 'name'=>'Background Color', 'type'=>'color', 'default'=>'ffffff'),
+						array('id'=>'evcal__jm010H', 'name'=>'Line Color (Hover)', 'type'=>'color', 'default'=>'e2e2e2'),
+						array('id'=>'evcal__jm011H', 'name'=>'Background Color (Hover)', 'type'=>'color', 'default'=>'ededed'),
+						array('id'=>'evcal__jm01A', 'name'=>'The arrow color', 'type'=>'color', 'default'=>'e2e2e2'),
+						array('id'=>'evcal__jm01AH', 'name'=>'The arrow color (Hover)', 'type'=>'color', 'default'=>'ffffff'),
+					)
+				),				
 				array('id'=>'evcal_ftovrr','type'=>'hiddensection_close'),
 
 

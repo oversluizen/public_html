@@ -37,9 +37,8 @@ class evo_cal_body{
 
 					// months list
 					$lang = (!empty($args['lang']))? $args['lang']: 'L1';
-					$evo_lang_options = $this->cal->evopt2;
-					$__months = eventon_get_oneL_months( !empty($evo_lang_options[$lang])? $evo_lang_options[$lang]:'');	
-					$fullMonther = evo_get_long_month_names( !empty($evo_lang_options[$lang])? $evo_lang_options[$lang]:'' );	
+					$__months = eventon_get_oneL_months($this->cal->evopt2[$lang]);	
+					$fullMonther = evo_get_long_month_names($this->cal->evopt2[$lang]);	
 								
 					$count = 1;
 					foreach($fullMonther as $m){
@@ -235,11 +234,8 @@ class evo_cal_body{
 				if( $this->rtl)
 					$__cal_classes[] = 'evortl';
 
-				if(!empty($args['tile_style']) && $args['tile_style'] !='0'){
-					$__cal_classes[] = 'boxstyle'.$args['tile_style'];
-				}else{
-					if($boxCal == 'boxy') $__cal_classes[] = 'boxstyle0';
-				}
+				if(!empty($args['tile_style']) && $args['tile_style'] !='0')
+					$__cal_classes[] = 'tile'.$args['tile_style'];
 
 				if($this->cal->is_upcoming_list)
 					$__cal_classes[] = 'ul';

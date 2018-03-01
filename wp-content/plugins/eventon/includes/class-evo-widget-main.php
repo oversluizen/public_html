@@ -203,7 +203,7 @@ class EvcalWidget extends WP_Widget{
 		global $eventon;
 
 		// make sure styles and scripts get loaded
-		$eventon->frontend->load_evo_scripts_styles();
+		$eventon->load_evo_scripts_styles();
 		
 		// DEFAULTS
 		$fixed_month = $fixed_year = 0;
@@ -220,7 +220,7 @@ class EvcalWidget extends WP_Widget{
 			add_filter('eventon_shortcode_defaults', array($this,'event_list_shortcode_defaults'), 10, 1);
 		
 		// CALENDAR ARGUMENTS
-		$args = apply_filters('evo_main_widget_args',array(
+		$args = array(
 			'cal_id'=>$ev_cal_id,
 			'event_count'=>$ev_count,
 			'show_upcoming'=>$show_upcoming,
@@ -233,7 +233,7 @@ class EvcalWidget extends WP_Widget{
 			'hide_past'=>$ev_hidepastev,
 			'hide_mult_occur'=>$hide_mult_occur,
 			'hide_empty_months'=>$hide_empty_months,
-		));
+		);
 		//print_r($args);
 		
 		// Check for event type filterings called for from widget settings

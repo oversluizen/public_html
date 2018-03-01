@@ -514,9 +514,20 @@
 		padding:0px;
 		margin:0px -25px;
 	}
-	.evo_select_tax .evo_btn, .evomb_section .evo_btn{background-color:#b3b3b3}
+	.evo_select_tax .evo_btn, .evomb_section .evo_btn{
+		background-color: #B9B8B8;
+	    border-radius: 5px;
+	    padding: 4px 8px 4px;
+	    margin: 3px 5px 0 0px;
+	    cursor: pointer;
+	    display: inline-block;
+	    text-transform: uppercase;
+	    color:#fff;
+	    text-decoration: none;
+	}
 	.evomb_section .evcal_location_data_section .evo_btn{margin-left: 5px; margin-top: 0;}
 	.evomb_section .evcal_location_data_section label{margin-top: 5px;}
+	.evo_select_tax .evo_btn:hover, .evomb_section .evo_btn:hover{opacity: 0.6}
 	.evo_tax_list_terms span{
 		margin-right: 8px; display: inline-block;
 	}

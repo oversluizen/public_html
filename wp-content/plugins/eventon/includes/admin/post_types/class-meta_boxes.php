@@ -229,7 +229,7 @@ class evo_event_metaboxes{
 			}else{
 				?>
 				<p class='evo_selected_tax_actions'>
-					<a class='evo_tax_term_list evo_btn ajde_popup_trig' data-type='list' data-popc='evo_term_lightbox' data-eventid='<?php echo $eventid;?>'><?php printf(__('Select a %s from list','eventon'), $tax_name);?></a>
+					<a class='evo_tax_term_list evo_btn ajde_popup_trig' data-type='list' data-popc='evo_term_lightbox' data-eventid='<?php echo $eventid;?>'><?php printf(__('Select a %s from list'), $tax_name);?></a>
 					<a class='evo_tax_term_form evo_btn ajde_popup_trig' data-popc='evo_term_lightbox' data-eventid='<?php echo $eventid;?>' data-type='new' data-tax='event_location'><?php printf(__('Create a new %s','eventon'),$tax_name);?></a>
 				</p>
 				<?php
@@ -1059,9 +1059,9 @@ class evo_event_metaboxes{
 					<div class='evomb_section' id='<?php echo $mBOX['id'];?>'>			
 						<div class='evomb_header'>
 							<span class="evomb_icon evII"><i class="fa fa-plug"></i></span>
-							<p><?php _e('Additional Functionality','eventon');?></p>
+							<p>Additional Functionality</p>
 						</div>
-						<p style='padding:15px 25px; margin:0' class="evomb_body_additional"><?php echo sprintf(__('Looking for additional functionality including event tickets, frontend event submissions, RSVP to events, photo gallery and more? Check out <a href="%s" target="_blank">eventON addons</a>','eventon'), 'http://www.myeventon.com/addons/');?>.</p>
+						<p style='padding:15px 25px; margin:0' class="evomb_body_additional">Looking for additional functionality including event tickets, frontend event submissions, RSVP to events, photo gallery and more? Check out <a href='http://www.myeventon.com/addons/' target='_blank'>eventON addons</a>.</p>
 					</div>	
 				<div class='evMB_end'></div>
 			</div>
@@ -1178,9 +1178,10 @@ class evo_event_metaboxes{
 					'_featured',
 					'_completed',
 					'_cancel','_cancel_reason',
-					'_onlyloggedin',					
+					'_onlyloggedin',
+					
 					//'evcal_lat','evcal_lon',
-				), $post_id);
+				));
 
 			// append custom fields based on activated number
 				$evcal_opt1= get_option('evcal_options_evcal_1');
@@ -1225,7 +1226,7 @@ class evo_event_metaboxes{
 						delete_post_meta($post_id, $f_val);
 					}
 					
-					if(!empty($_POST[$f_val])){
+					if(!empty ($_POST[$f_val])){
 
 						$post_value = ( $_POST[$f_val]);
 						update_post_meta( $post_id, $f_val,$post_value);
@@ -1236,8 +1237,10 @@ class evo_event_metaboxes{
 						}
 
 					}else{
-						//if(defined('DOING_AUTOSAVE') && !DOING_AUTOSAVE){
-						
+						if(defined('DOING_AUTOSAVE') && !DOING_AUTOSAVE){
+							// if the meta value is set to empty, then delete that meta value
+							delete_post_meta($post_id, $f_val);
+						}
 						delete_post_meta($post_id, $f_val);
 					}
 					
@@ -1334,7 +1337,6 @@ class evo_event_metaboxes{
 							$field_value = stripslashes(str_replace('"', "'", (esc_attr( $termMeta[$value['var']] )) ));
 						}						
 					}
-
 				}else{
 					$field_value = $value['value'];
 				}
@@ -1342,9 +1344,9 @@ class evo_event_metaboxes{
 				switch ($value['type']) {
 					case 'text':
 						?>
-						<p>	
-							<label for='<?php echo $key;?>'><?php echo $value['name']?></label>
+						<p>								
 							<input id='<?php echo $key;?>' class='field' type='text' name='<?php echo $value['var'];?>' value="<?php echo $field_value?>" style='width:100%' placeholder='<?php echo !empty($value['placeholder'])? $value['placeholder']:'';?>'/>
+							<label for='<?php echo $key;?>'><?php echo $value['name']?></label>
 							<?php if(!empty($value['legend'])):?>
 								<em class='evo_legend'><?php echo $value['legend']?></em>
 							<?php endif;?>
@@ -1353,10 +1355,9 @@ class evo_event_metaboxes{
 					break;
 					case 'textarea':
 						?>
-						<p>	
-							<label for='<?php echo $key;?>'><?php echo $value['name']?></label>	
+						<p>		
 							<textarea id='<?php echo $key;?>' class='field' type='text' name='<?php echo $value['var'];?>' style='width:100%'><?php echo $field_value?></textarea>						
-							
+							<label for='<?php echo $key;?>'><?php echo $value['name']?></label>
 							<?php if(!empty($value['legend'])):?>
 								<em class='evo_legend'><?php echo $value['legend']?></em>
 							<?php endif;?>
@@ -1375,13 +1376,12 @@ class evo_event_metaboxes{
 						$__button_class = ($image_id)? 'removeimg':'chooseimg';
 						?>
 						<p class='evo_metafield_image'>
-							<label><?php echo $value['name']?></label>
 							<input class='field <?php echo $key;?> custom_upload_image evo_meta_img' name="<?php echo $key;?>" type="hidden" value="<?php echo ($image_id)? $image_id: null;?>" /> 
                     		<input class="custom_upload_image_button button <?php echo $__button_class;?>" data-txt='<?php echo $__button_text_not;?>' type="button" value="<?php echo $__button_text;?>" /><br/>
                     		<span class='evo_loc_image_src image_src'>
                     			<img src='<?php echo $img_src;?>' style='<?php echo !empty($image_id)?'':'display:none';?>'/>
                     		</span>
-                    		
+                    		<label><?php echo $value['name']?></label>
                     	</p>
 						<?php
 					break;
@@ -1394,7 +1394,6 @@ class evo_event_metaboxes{
 									'id'=>$key, 
 									'var'=>$field_value,
 									'input'=>true,
-									'inputAttr'=>array('class'=>'field'),
 									'label'=>$value['name']
 								));?>											
 							</span>
@@ -1403,7 +1402,7 @@ class evo_event_metaboxes{
 					break;
 					case 'button':
 						?>
-						<p style='text-align:center; padding-top:10px'><span class='evo_btn evo_term_submit'><?php echo $is_new? 'Add New':'Save Changes';?></span></p>
+						<p><span class='evo_btn evo_term_submit'><?php echo $is_new? 'Add New':'Save Changes';?></span></p>
 						<?php
 					break;
 				}

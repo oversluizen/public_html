@@ -20,7 +20,6 @@ class evo_ajax{
 			'the_ajax_hook'=>'evcal_ajax_callback',			
 			'export_events_ics'=>'export_events_ics',
 			'search_evo_events'=>'search_evo_events',
-			'get_local_event_time'=>'get_local_event_time',
 			//'evo_dynamic_css'=>'eventon_dymanic_css',
 		);
 		foreach ( $ajax_events as $ajax_event => $class ) {
@@ -31,7 +30,7 @@ class evo_ajax{
 			add_action( 'wp_ajax_nopriv_'. $prepend . $ajax_event, array( $this, $class ) );
 		}
 
-		//add_action('wp_ajax_eventon-feature-event', array($this, 'eventon_feature_event'));
+		add_action('wp_ajax_eventon-feature-event', array($this, 'eventon_feature_event'));
 	}
 
 	// OUTPUT: json headers
@@ -123,9 +122,7 @@ class evo_ajax{
 
 			// Calendar content		
 				$EVENTlist = $eventon->evo_generator->evo_get_wp_events_array('', $eve_args, $eve_args['filters']);
-
 				$EVENTlist  = $eventon->evo_generator->move_ft_to_top($EVENTlist, $eve_args);
-				$EVENTlist  = $eventon->evo_generator->order_past_future_events($EVENTlist, $eve_args['filters']);
 
 				$total_events = count($EVENTlist);
 
@@ -152,19 +149,18 @@ class evo_ajax{
 					$NEWevents[$event_id]= $event;
 				}
 
-
 			// RETURN VALUES
 			// Array of content for the calendar's AJAX call returned in JSON format
 				$return_content = array(
 					'status'=>(!$evodata? 'Need updated':$status),
-					'eventList'=>$NEWevents,					
+					'eventList'=>$NEWevents,
+					'content'=>$content_li,
 					'cal_month_title'=>$calendar_month_title,
 					'month'=>$focused_month_num,
 					'year'=>$focused_year,
 					'focus_start_date_range'=>$focus_start_date_range,
 					'focus_end_date_range'=>$focus_end_date_range,	
-					'total_events'=>$total_events,
-					'content'=>$content_li,
+					'total_events'=>$total_events	
 				);			
 			
 			
@@ -217,17 +213,15 @@ class evo_ajax{
 						
 			header("Content-Type: text/Calendar; charset=utf-8");
 			header("Content-Disposition: inline; filename={$slug}.ics");
-			echo "BEGIN:VCALENDAR\r\n";
-			echo "VERSION:2.0\r\n";
+			echo "BEGIN:VCALENDAR\n";
+			echo "VERSION:2.0\n";
 			echo "PRODID:-//eventon.com NONSGML v1.0//EN\n";
 			//echo "METHOD:REQUEST\n"; // requied by Outlook
 			echo "BEGIN:VEVENT\n";
 			echo "UID:{$uid}\n"; // required by Outlok
 			echo "DTSTAMP:".date_i18n('Ymd').'T'.date_i18n('His')."\n"; // required by Outlook
-			//echo "DTSTART:{$start}\n"; 
-			//echo "DTEND:{$end}\n";
-			echo "DTSTART:". 	( strpos($start, 'T')===false? date_i18n('Ymd\THis',$start): $start)."\n";
-			echo "DTEND:".		( strpos($start, 'T')===false? date_i18n('Ymd\THis',$end): $end)."\n";
+			echo "DTSTART:{$start}\n"; 
+			echo "DTEND:{$end}\n";
 			echo "LOCATION:{$location}\n";
 			echo "SUMMARY:".html_entity_decode( $this->esc_ical_text($name))."\n";
 			echo "DESCRIPTION: ".$this->esc_ical_text($summary)."\n";
@@ -321,16 +315,6 @@ class evo_ajax{
 			endif;
 		}
 
-	// get event time based on local time on browswr
-		function get_local_event_time(){
-			$datetime = new evo_datetime();
-			$offset = $datetime->get_UTC_offset();
-			$brosweroffset = (int)$_POST['browser_offset'] *60;
-			echo $brosweroffset.' '.$offset.' '.$object->evvals['evcal_srow'][0];
-
-			$newunix = $object->evvals['evcal_srow'][0] + ($offset + $brosweroffset);
-			echo date('Y-m-d h:ia', $newunix);
-		}
 
 
 	// Search results for ajax search of events from search box

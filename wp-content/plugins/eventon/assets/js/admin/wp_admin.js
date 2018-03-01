@@ -502,28 +502,6 @@ jQuery(document).ready(function($){
 			});
 		});
 
-// Diagnose
-	$('#evo_send_test_email').on('click', function(){
-		if($('#evo_admin_test_email_address').val() == undefined|| $('#evo_admin_test_email_address').val() ==''){
-			$('#evodiagnose_message').html('Email Address Missing!');
-		}else{
-			$.ajax({
-				beforeSend: function(){	$('#evodiagnose_message').html('Sending Test Email...')},
-				type: 'POST',
-				url:evo_admin_ajax_handle.ajaxurl,
-				data: {	
-					action:'eventon_admin_test_email',
-					nonce: evo_admin_ajax_handle.postnonce,
-					email: $('#evo_admin_test_email_address').val()
-				},
-				dataType:'json',
-				success:function(data){
-					$('#evodiagnose_message').html(data.msg);
-				},complete:function(){	}
-			});
-		}		
-	});
-
 // LANGUAGE SETTINGS
 	// language tab
 		$('.eventon_cl_input').focus(function(){

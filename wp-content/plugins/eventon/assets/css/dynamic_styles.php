@@ -113,6 +113,9 @@
 				array('css'=>'font-size:$', 'var'=>'evcal__ecIz',	'default'=>'18px')
 			)	
 		),array(
+			'item'=>'#eventon_loadbar',
+			'css'=>'background-color:#$', 'var'=>'evcal_header1_fc',	'default'=>'6B6B6B'
+		),array(
 			'item'=>'.evcal_evdata_row .evcal_evdata_cell h3, .evo_clik_row .evo_h3',
 			'css'=>'font-size:$', 'var'=>'evcal_fs_001',	'default'=>'18px'
 		),array(
@@ -294,14 +297,6 @@
 				array('replace'=>'background:repeating-linear-gradient(45deg,#$0,#$0 10px,#$1 10px,#$1 20px)', 'var'=>array('evcal__cancel_event_3', 'evcal__cancel_event_4'),'default'=>array('FDF2F2','FAFAFA')),			
 			)			
 		),
-		/* loader */
-		array(
-			'item'=>'#eventon_loadbar',
-			'css'=>'background-color:#$', 'var'=>'evcal_loader_001','default'=>'efefef',
-		),array(
-			'item'=>'#eventon_loadbar:before',
-			'css'=>'background-color:#$', 'var'=>'evcal_loader_002','default'=>'f5b87a',
-		),
 		/* event top */
 		array(
 			'item'=>'.evcal_desc .evcal_desc3 em.evocmd_button, #evcal_list .evcal_desc .evcal_desc3 em.evocmd_button',
@@ -368,37 +363,35 @@
 			),
 	));
 
-	
-	if(sizeof($style_array)>0){
-		foreach($style_array as $sa){
-			if(!empty($sa['multicss']) && is_array($sa['multicss'])){
 
-				echo $sa['item'].'{';
+	foreach($style_array as $sa){
+		if(!empty($sa['multicss']) && is_array($sa['multicss'])){
 
-				foreach($sa['multicss'] as $sin_CSS){
-					if(!empty($sin_CSS['replace'])){
-						$css = $sin_CSS['replace'];
-						foreach($sin_CSS['var'] as $index=>$var){
-							$css_val = (!empty($opt[ $var] ))? 
-								$opt[ $var ] : $sin_CSS['default'][$index];
+			echo $sa['item'].'{';
 
-							$css = str_replace('$'.$index ,$css_val, $css );
-						}
-						
-						echo $css.';';
-					}else{
-						$css_val  = (!empty($opt[ $sin_CSS['var'] ] ))? $opt[ $sin_CSS['var'] ] : $sin_CSS['default'];
-						$css = str_replace('$',$css_val,$sin_CSS['css'] );
-						echo $css.';';
+			foreach($sa['multicss'] as $sin_CSS){
+				if(!empty($sin_CSS['replace'])){
+					$css = $sin_CSS['replace'];
+					foreach($sin_CSS['var'] as $index=>$var){
+						$css_val = (!empty($opt[ $var] ))? 
+							$opt[ $var ] : $sin_CSS['default'][$index];
+
+						$css = str_replace('$'.$index ,$css_val, $css );
 					}
 					
+					echo $css.';';
+				}else{
+					$css_val  = (!empty($opt[ $sin_CSS['var'] ] ))? $opt[ $sin_CSS['var'] ] : $sin_CSS['default'];
+					$css = str_replace('$',$css_val,$sin_CSS['css'] );
+					echo $css.';';
 				}
-				echo '}';
-			}else{
-				$css_val  = (!empty($opt[ $sa['var'] ] ))? $opt[ $sa['var'] ] : $sa['default'];
-				$css = str_replace('$',$css_val,$sa['css'] );
-				echo $sa['item'].'{'.$css.'}';
+				
 			}
+			echo '}';
+		}else{
+			$css_val  = (!empty($opt[ $sa['var'] ] ))? $opt[ $sa['var'] ] : $sa['default'];
+			$css = str_replace('$',$css_val,$sa['css'] );
+			echo $sa['item'].'{'.$css.'}';
 		}
 	}
 	

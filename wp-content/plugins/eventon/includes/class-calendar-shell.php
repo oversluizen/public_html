@@ -21,7 +21,7 @@ class evo_cal_shell {
 	// Load calendar required files
 		public function load_evo_files(){
 			global $eventon;
-			$eventon->frontend->load_default_evo_scripts();
+			$eventon->load_default_evo_scripts();
 			$this->load_google_maps_api();
 		}
 
@@ -188,27 +188,28 @@ class evo_cal_shell {
 		function load_google_maps_api(){
 			// google maps loading conditional statement
 			if( !empty($this->cal->evopt1['evcal_cal_gmap_api']) && ($this->cal->evopt1['evcal_cal_gmap_api']=='yes') 	){
-
-				// remove completly
 				if(!empty($this->cal->evopt1['evcal_gmap_disable_section']) && $this->cal->evopt1['evcal_gmap_disable_section']=='complete'){
 
 					$this->cal->google_maps_load = false;
-					wp_dequeue_script( 'evcal_gmaps');
+
 					wp_enqueue_script( 'eventon_init_gmaps_blank');
 					wp_enqueue_script( 'eventon_gmaps_blank');
-				}else{ // remove only gmaps API
+				}else{
 
 					//update_option('evcal_gmap_load',true);
 					$this->cal->google_maps_load = true;
-					wp_enqueue_script( 'eventon_init_gmaps');
+					wp_enqueue_script( 'eventon_init_gmaps_blank');
 					wp_enqueue_script('eventon_gmaps');
-					wp_dequeue_script( 'evcal_gmaps');
 				}
 
-			}else { // NOT disabled
+			}else {
 
 				//update_option('evcal_gmap_load',true);
 				$this->cal->google_maps_load = true;
+
+				wp_enqueue_script( 'evcal_gmaps');
+				wp_enqueue_script( 'eventon_gmaps');
+				wp_enqueue_script('eventon_init_gmaps');
 
 				// load map files only to frontend
 				if ( !is_admin() ){
@@ -230,7 +231,7 @@ class evo_cal_shell {
 
 			// *** GET STARTING month and year
 			if($fixed_month!=0 && $fixed_year!=0){
-				$focused_month_num = (int)$fixed_month;
+				$focused_month_num = $fixed_month;
 				$focused_year = $fixed_year;
 			}else{
 			// GET offset month/year values

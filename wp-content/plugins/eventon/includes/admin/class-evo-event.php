@@ -3,7 +3,7 @@
 /**
  * Event Class
  *
- * The eventon event creating the right event object - deprecating
+ * The eventon event creating the right event object
  *
  * @class 		eventon_event
  * @version		0.1
@@ -11,7 +11,7 @@
  * @category	Class
  * @author 		eventon
  */
-class evo_event_item {
+class evo_event {
 	
 	public function get_event($the_event=''){
 		global $post;

@@ -2,12 +2,12 @@
 /**
  * 
  * eventon addons class
- * connected from each addons
+ * This will be used to control everything about eventon addons
  *
  * @author 		AJDE
  * @category 	Admin
  * @package 	EventON/Classes
- * @version     2.6.1
+ * @version     2.5
  */
 
 if(class_exists('evo_addons')) return;
@@ -17,84 +17,19 @@ class evo_addons{
 	private $addon_data;
 	private $urls;
 	private $notice_code;
-	private $addon = false;
 
 	function __construct($arr=''){
 		// assign initial values for instance of addon
 		$this->addon_data = $arr;
-	
-		// set up addon instance
-		if(isset($arr['slug'])){
-			$this->addon = new EVO_Product($arr['slug']);
-		}
 
 		// when first time addon installed and updated from old version
-		$this->version_comparison();
-		
-		// once version change check is done run main updater
+		$this->addon_first_acquaintance();
+
+		// run updater
 		if(is_admin()){
 			$this->updater();
-		}	
+		}		
 	}
-
-	// check if addon updated or installed
-		function version_comparison(){
-
-			if(!$this->addon) return false;
-
-			// new install
-			if( !$this->addon->get_version() || 
-				( $this->addon->get_version() && version_compare($this->addon->get_version() , $this->addon_data['version'], '<' ) && isset($this->addon_data['version']))
-			){
-				// update version
-				$this->addon->set_version( $this->addon_data['version'] );
-
-				do_action('evo_addon_version_change', $this->addon_data['version']);
-			}
-		}
-		
-	// return eventon version
-		public function get_eventon_version(){
-			global $eventon;
-			return $eventon->version;
-		}
-
-	/// the MAIN updater function
-		public function updater(){
-			global $pagenow;
-			
-			// only for admin
-			if(is_admin() && !empty($pagenow) && in_array($pagenow, array(
-				'plugins.php',
-				'update-core.php',
-				'admin.php',
-				'admin-ajax.php',				
-				'plugin-install.php',				
-			) ) ){
-				
-				$ADDON = new EVO_Product($this->addon_data['slug'], true);
-
-				if( ($pagenow == 'admin.php' && isset($_GET['tab']) && $_GET['tab']=='evcal_4' )
-					|| $pagenow!='admin.php'
-				){
-					
-					// set up the new addon product for eventon					
-					$ADDON->setup(
-						array(
-							'ID'=> (!empty($this->addon_data['ID'])? $this->addon_data['ID']: ''),
-							'version'=>$this->addon_data['version'], 
-							'slug'=>$this->addon_data['slug'],
-							'plugin_slug'=>$this->addon_data['plugin_slug'],
-							'name'=>$this->addon_data['name'],
-							'guide_file'=> isset($this->addon_data['guide_file'])?
-								$this->addon_data['guide_file']:
-								(( isset($this->addon_data['plugin_path']) && file_exists($this->addon_data['plugin_path'].'/guide.php') )? 
-								$this->addon_data['plugin_url'].'/guide.php':null),
-						)
-					);	
-				}
-			}
-		}
 
 	// Check for eventon compatibility
 		function evo_version_check(){
@@ -122,12 +57,78 @@ class evo_addons{
 			return $decypher[$code];
 		}
 
+	// check if addon updated or installed
+		function addon_first_acquaintance(){
+			$evo_products = get_option('_evo_products');
+
+			// new install
+			if(empty($evo_products[$this->addon_data['slug']]['version'] ) ){
+				// update options with new version values
+				$this->update_version_number($evo_products);
+
+			}elseif( version_compare($this->addon_data['version'], 
+				$evo_products[$this->addon_data['slug']]['version']) > 0
+			){
+				// updating to a new version
+				$this->update_version_number($evo_products);
+			}
+		}
+		function update_version_number($products_array=''){
+			$new_products = array();
+			$new_products[$this->addon_data['slug']]['version']  = $this->addon_data['version'];
+			$new_data = (is_array($products_array))? array_merge($products_array, $new_products): $new_products;
+			update_option('_evo_products',$new_data);
+
+			do_action('evo_addon_version_change', $this->addon_data['version']);
+		}
+
+	// return eventon version
+		public function get_eventon_version(){
+			global $eventon;
+			return $eventon->version;
+		}
+
+	/// the MAIN updater function
+		public function updater(){
+			global $pagenow, $eventon;
+			
+			$__needed_pages = $this->get_check_pages();
+
+			// only for admin
+			if(is_admin() && !empty($pagenow) && in_array($pagenow, $__needed_pages) ){
+				
+				if($pagenow == 'admin.php' && isset($_GET['tab']) && $_GET['tab']=='evcal_4' 
+					|| $pagenow!='admin.php'){
+					
+					// INITIATE Updater for addon product
+					$path = AJDE_EVCAL_PATH;
+					require_once( $path .'/includes/admin/class-evo-updater.php' );
+
+					$this->evo_updater = new evo_updater( 
+						array(
+							'version'=>$this->addon_data['version'], 
+							'slug'=>$this->addon_data['slug'],
+							'plugin_slug'=>$this->addon_data['plugin_slug'],
+							'name'=>$this->addon_data['name'],
+							'guide_file'=> !empty($this->addon_data['guide_file'])?
+								$this->addon_data['guide_file']:
+								(( file_exists($this->addon_data['plugin_path'].'/guide.php') )? 
+								$this->addon_data['plugin_url'].'/guide.php':null),
+						)
+					);	
+				}
+			}
+		}
+
 	// Deactivate Addon from eventon products
 		public function remove_addon(){
-			$PROD = new EVO_Product_Lic($this->addon_data['slug']);
-			return $PROD->deactivate();
+			return evo_license()->deactivate($this->addon_data['slug']);
 		}
-	
+	// return the current page names that should be used to check updates
+		function get_check_pages(){
+			return array('update-core.php',
+				'admin-ajax.php', 'plugin-install.php','admin.php');
+		}
 
 
 }

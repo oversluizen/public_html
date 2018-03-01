@@ -36,20 +36,12 @@ class evo_admin {
 
 // admin init
 	function eventon_admin_init() {
-		
-		//$tt = get_site_option('_site_transient_update_plugins');
-		//$transient_package = isset($tt->response[ 'eventon-action-user/eventon-action-user.php']->package)?	$tt->response[ 'eventon-action-user/eventon-action-user.php']->package: false;
-		//print_r($transient_package);
-		//print_r($tt);
-		
-		// Includes
-			require_once(AJDE_EVCAL_PATH.'/includes/updates/class-evo_plugins_api_data.php');
 
 		global $pagenow, $typenow, $wpdb, $post;	
 
 		$postType = !empty($_GET['post_type'])? $_GET['post_type']: false;
-	   
-	    if(!$postType && !empty($_GET['post']))   	$postType = get_post_type($_GET['post']);
+	    if(!$postType && !empty($_GET['post']))
+	    	$postType = get_post_type($_GET['post']);
 		
 		if ( $postType && $postType == "ajde_events" ) {		
 			// Event Post Only
@@ -57,7 +49,7 @@ class evo_admin {
 
 			foreach ( $print_css_on as $page ){
 				add_action( 'admin_print_styles-'. $page, array($this,'eventon_admin_post_css') );
-				add_action( 'admin_print_scripts-'. $page, array($this,'eventon_admin_post_script') );			
+				add_action( 'admin_print_scripts-'. $page, array($this,'eventon_admin_post_script') );
 			}
 						
 			// taxonomy only page
@@ -87,11 +79,6 @@ class evo_admin {
 			$_eventon_create_pages = get_option('_eventon_create_pages'); // get saved status for creating pages
 			if(empty($_eventon_create_pages) || $_eventon_create_pages!= 1){
 				evo_install::create_pages();
-			}
-
-		// force update checking on wp-admin
-			if($pagenow =='update-core.php' && isset($_REQUEST['force-check']) && $_REQUEST['force-check']==1){
-				EVO_Prods()->get_remote_prods_data();
 			}
 
 		// when an addon is updated or installed - since 2.5
@@ -248,19 +235,19 @@ class evo_admin {
 			}
 			
 			// ALL wp-admin
-			wp_register_style('evo_font_icons',AJDE_EVCAL_URL.'/assets/fonts/font-awesome.css',array(), $eventon->version);
+			wp_register_style('evo_font_icons',AJDE_EVCAL_URL.'/assets/fonts/font-awesome.css');
 			wp_enqueue_style( 'evo_font_icons' );
 
 			// wp-admin styles
-			 	wp_enqueue_style( 'evo_wp_admin',AJDE_EVCAL_URL.'/assets/css/admin/wp_admin.css',array(), $eventon->version);
+			 	wp_enqueue_style( 'evo_wp_admin',AJDE_EVCAL_URL.'/assets/css/admin/wp_admin.css');
 
 
 			// styles for WP>=3.8
 			if($wp_version>=3.8)
-				wp_enqueue_style( 'newwp',AJDE_EVCAL_URL.'/assets/css/admin/wp3.8.css',array(), $eventon->version);
+				wp_enqueue_style( 'newwp',AJDE_EVCAL_URL.'/assets/css/admin/wp3.8.css');
 			// styles for WP<3.8
 			if($wp_version<3.8)
-				wp_enqueue_style( 'newwp',AJDE_EVCAL_URL.'/assets/css/admin/wp_old.css',array(), $eventon->version);
+				wp_enqueue_style( 'newwp',AJDE_EVCAL_URL.'/assets/css/admin/wp_old.css');
 
 			
 
@@ -440,8 +427,8 @@ class evo_admin {
 	}
 
 	public function addon_exists($slug){
-		$addon = new EVO_Product($slug);
-		return $addon->is_installed();
+		$addons = get_option('_evo_products');
+		return (!empty($addons) && array_key_exists($slug, $addons))? true: false;
 	}
 	function eventon_load_colorpicker(){
 		global $ajde;

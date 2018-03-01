@@ -8,7 +8,7 @@
  * @author 		AJDE
  * @category 	Admin
  * @package 	EventON/Classes
- * @version     2.6.1
+ * @version     2.2.27
  */
 
 if(!class_exists('evo_addon')){
@@ -100,11 +100,13 @@ class evo_addon{
 				){
 					
 					// INITIATE Updater for addon product
-					$ADDON = new EVO_Product($this->addon_data['slug'], true);
+					//$path = AJDE_EVCAL_PATH;
+					//require_once( $path .'/includes/admin/class-evo-updater.php' );
 
-					$ADDON->setup( 
+					if(!class_exists('evo_updater')) return;
+
+					$this->evo_updater = new evo_updater( 
 						array(
-							'ID'=> (!empty($this->addon_data['ID'])? $this->addon_data['ID']: ''),
 							'version'=>$this->addon_data['version'], 
 							'slug'=>$this->addon_data['slug'],
 							'plugin_slug'=>$this->addon_data['plugin_slug'],
@@ -121,8 +123,8 @@ class evo_addon{
 
 	// Deactivate Addon from eventon products
 		public function remove_addon(){
-			$PROD = new EVO_Product_Lic($this->addon_data['slug']);
-			return $PROD->deactivate();
+			if(!empty($this->evo_updater))
+				return $this->evo_updater->product->deactivate($this->addon_data['slug']);
 		}
 	// return the current page names that should be used to check updates
 		function get_check_pages(){

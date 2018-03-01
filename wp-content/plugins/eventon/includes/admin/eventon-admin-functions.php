@@ -166,7 +166,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	}
 
 // create backend pages
-// @updated 2.6.1
 	function eventon_create_page($slug, $option, $page_title = '', $page_content = '', $post_parent = 0 ){
 		global $wpdb;
 
@@ -194,8 +193,6 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	    );
 	    $page_id = wp_insert_post( $page_data );
 	    update_option( $option, $page_id );
-
-	    return $page_id;
 	}
 
 // save event functions
