@@ -57,6 +57,7 @@ class EVO_Template_Loader {
 			$file 	= 'taxonomy-event_type.php';
 			$paths[] 	= AJDE_EVCAL_PATH . '/templates/';
 		}
+
 		// Event location taxonomy
 		elseif( is_tax(array('event_location'))){
 			$file 	= 'taxonomy-event_location.php';
@@ -67,6 +68,8 @@ class EVO_Template_Loader {
 			$file 	= 'taxonomy-event_organizer.php';
 			$paths[] 	= AJDE_EVCAL_PATH . '/templates/';
 		}
+
+		$file = apply_filters('evo_template_loader_file', $file);
 
 		// FILE Exist
 		if ( $file ) {			

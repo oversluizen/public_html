@@ -190,7 +190,8 @@ class eventon_taxonomies{
 					'description'=>array(
 						'type'=>'textarea',
 						'name'=>'Location Description',
-						'var'=>'description'				
+						'var'=>'description',
+						'value'=> ($event_tax_term? $event_tax_term->description:''),				
 					),
 					'location'=>array(
 						'type'=>'text',
@@ -202,11 +203,13 @@ class eventon_taxonomies{
 						'type'=>'text',
 						'name'=>'Location City (Optional)',
 						'var'=>'location_city'				
-					),'location_state'=>array(
+					),
+					'location_state'=>array(
 						'type'=>'text',
 						'name'=>'Location State (Optional)',
 						'var'=>'location_state'				
-					),'location_country'=>array(
+					),
+					'location_country'=>array(
 						'type'=>'text',
 						'name'=>'Location Country (Optional)',
 						'var'=>'location_country'				
@@ -305,7 +308,8 @@ class eventon_taxonomies{
 			        	$term = get_term_by('id', $term_id, 'event_location'); 
 			        	$imgID = !empty($term_meta['evo_loc_img'])? $term_meta['evo_loc_img']:false;
 
-			        	$ADDRESS = esc_attr( !empty($term_meta['location_address']) ) ? esc_attr( $term_meta['location_address'] ) : '-';
+			        	$ADDRESS = !empty($term_meta['location_address']) ? 
+			        		stripslashes(esc_attr( $term_meta['location_address'] )) : '-';
 
 			        	$lon = (!empty($term_meta['location_lon']))? esc_attr( $term_meta['location_lon'] ) : false;
 			        	$lat = (!empty($term_meta['location_lat']))? esc_attr( $term_meta['location_lat'] ) : false;	

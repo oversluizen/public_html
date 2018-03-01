@@ -40,13 +40,19 @@ function eventon_get_eventtop_print($array, $evOPT, $evOPT2){
 			case 'day_block':
 
 				//print_r($object);
-
+				
 				$OT.="<span class='evcal_cblock ".( $object->yearlong?'yrl ':null).( $object->monthlong?'mnl ':null)."' data-bgcolor='".$object->color."' data-smon='".$object->start['F']."' data-syr='".$object->start['Y']."'>";
 				
-						
+				// include dayname if allowed via settings
+				$dayname = '';
+				if( is_array($object->eventtop_fields) && in_array('dayname', $object->eventtop_fields)){
+					$dayname = (!empty($object->html['start']['day'])? $object->html['start']['day']:'');
+				}
+
 				$time_data = apply_filters('evo_eventtop_dates', array(
 					'start'=>array(
 						'year'=> ($object->show_start_year=='yes'? $object->html['start']['year']:''),	
+						'day'=>$dayname,
 						'date'=> (!empty($object->html['start']['date'])?$object->html['start']['date']:''),
 						'month'=>  (!empty($object->html['start']['month'])?$object->html['start']['month']:''),
 						'time'=>  (!empty($object->html['start']['time'])?$object->html['start']['time']:''),
@@ -76,19 +82,19 @@ function eventon_get_eventtop_print($array, $evOPT, $evOPT2){
 					$OT .= "</span>";
 				}
 			
-			/*	
-			$day_content = apply_filters('evo_eventtop_day_block', array(
-					'year'=> ($object->showyear=='yes'?$object->start['Y']:''),
-					'date'=> $object->day_name.$object->html['html_date'],
-					'time'=> $object->html['html_time']
-				), $object);
+				/*	
+				$day_content = apply_filters('evo_eventtop_day_block', array(
+						'year'=> ($object->showyear=='yes'?$object->start['Y']:''),
+						'date'=> $object->day_name.$object->html['html_date'],
+						'time'=> $object->html['html_time']
+					), $object);
 
-				foreach($day_content as $index=>$value){
-					if(empty($value)) continue;
+					foreach($day_content as $index=>$value){
+						if(empty($value)) continue;
 
-					$OT.= "<em class='evo_".$index."' >".$value.'</em>';
-				}
-			*/
+						$OT.= "<em class='evo_".$index."' >".$value.'</em>';
+					}
+				*/
 				
 				$OT.= "<em class='clear'></em>";
 				$OT .= "</span>";
@@ -133,13 +139,15 @@ function eventon_get_eventtop_print($array, $evOPT, $evOPT2){
 				$OT.= "<span class='evcal_desc_info' >";
 
 				// time
-				if($object->fields_ && in_array('time',$object->fields))
+				if($object->fields_ && in_array('time',$object->fields) && isset($object->html)){
 					$OT.= "<em class='evcal_time'>".$object->html['html_fromto'].(!empty($object->timezone)? ' <em class="evo_etop_timezone">'.$object->timezone. '</em>':null)."</em> ";
+				}
+				
 				
 				// location information
 				if($object->fields_){
 					// location name
-					$LOCname = (in_array('locationame',$object->fields) && $object->locationname)? $object->locationname: false;
+					$LOCname = (in_array('locationame',$object->fields) && isset($object->locationname) )? $object->locationname: false;
 
 					// location address
 					$LOCadd = (in_array('location',$object->fields) && !empty($object->locationaddress))? stripslashes($object->locationaddress): false;

@@ -4,10 +4,12 @@
  * @version 0.8
  */
 
-if(!is_admin()) return;
+class EVO_Addons_List{
 
+
+public function get_list(){
 // list of addons
-	$addons = array(
+	$addons = apply_filters('evo_addons_details_list',array(
 		'eventon-action-user' => array(
 			'id'=>'EVOAU',
 			'name'=>'Action User',
@@ -155,6 +157,41 @@ if(!is_admin()) return;
 			'link'=>'http://www.myeventon.com/addons/event-wishlist',
 			'download'=>'http://www.myeventon.com/addons/event-wishlist',
 			'desc'=>'Add events to wishlist'
+		),'eventon-dynamic-pricing'=>array(
+			'id'=>'EVODP',
+			'name'=>'Event Dynamic Pricing',
+			'link'=>'http://www.myeventon.com/addons/dynamic-pricing',
+			'download'=>'http://www.myeventon.com/addons/dynamic-pricing',
+			'desc'=>'Dynamic prices for event tickets'
+		),'eventon-ticket-options'=>array(
+			'id'=>'EVOTO',
+			'name'=>'Ticket Options',
+			'link'=>'http://www.myeventon.com/addons/ticket-options',
+			'download'=>'http://www.myeventon.com/addons/ticket-options',
+			'desc'=>'Create various pricing options for event tickets'
+		),'eventon-bookings'=>array(
+			'id'=>'EVOBO',
+			'name'=>'Bookings',
+			'link'=>'http://www.myeventon.com/addons/bookings',
+			'download'=>'http://www.myeventon.com/addons/bookings',
+			'desc'=>'Sell event tickets as time slot based bookings or appointments'
+		),'eventon-reminders'=>array(
+			'id'=>'EVORM',
+			'name'=>'Reminders',
+			'link'=>'http://www.myeventon.com/addons/reminders',
+			'download'=>'http://www.myeventon.com/addons/reminders',
+			'desc'=>'Set custom reminders for events'
 		)
-	);
+	));
+	
+	return $addons;
+}
+
+function addon($slug){
+	$list = $this->get_list();
+	if(!isset($list[$slug]) ) return false;
+
+	return $list[$slug];
+}
+}
 ?>

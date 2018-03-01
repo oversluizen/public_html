@@ -3,7 +3,7 @@
  * evo_frontend class for front and backend.
  *
  * @class 		evo_frontend
- * @version		2.5.2
+ * @version		2.6.1
  * @package		EventON/Classes
  * @category	Class
  * @author 		AJDE
@@ -21,11 +21,21 @@ class evo_frontend {
 		// eventon related wp options access on frontend
 		$this->evo_options = get_option('evcal_options_evcal_1');
 		$this->evo_lang_opt = get_option('evcal_options_evcal_2');
-
-		// hooks for frontend
+	
+		// register styles and scripts
 		add_action( 'init', array( $this, 'register_scripts' ), 10 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'load_default_evo_styles' ), 10 );
-		add_action( 'wp_head', array( $this, 'load_dynamic_evo_styles' ), 50 );
+
+		if(!evo_settings_val('evo_load_scripts_only_onevo', $this->evo_options)){
+			add_action( 'wp_enqueue_scripts', array( $this, 'load_evo_scripts_styles' ), 10 );
+			add_action( 'wp_head', array( $this, 'load_dynamic_evo_styles' ), 50 );
+		}
+		if(evo_settings_val('evo_load_scripts_only_onevo', $this->evo_options) && 
+			evo_settings_val('evo_load_all_styles_onpages', $this->evo_options)
+		){
+			add_action( 'wp_enqueue_scripts', array( $this, 'load_default_evo_styles' ), 50 );
+			add_action( 'wp_head', array( $this, 'load_dynamic_evo_styles' ), 50 );
+		}
+		
 		add_filter('body_class', array($this, 'body_classes'), 10,1);
 
 		$this->evopt1 = $eventon->evo_generator->evopt1;
@@ -45,8 +55,11 @@ class evo_frontend {
 			add_action('evo_trash_past_events', array($this, 'evo_perform_trash_past_events'));	
 
 		add_action( 'wp_footer', array( $this, 'footer_code' ) ,15);
+
+		
 	}
 
+	
 	// styles and scripts
 		public function register_scripts() {
 			global $eventon;
@@ -54,8 +67,10 @@ class evo_frontend {
 			$evo_opt= $this->evo_options;			
 			
 			// Google gmap API script -- loadded from class-calendar_generator.php	
-			//wp_enqueue_script('select2',AJDE_EVCAL_URL.'/assets/js/select2.min.js');
+			//$apikey = !empty($evo_opt['evo_gmap_api_key'])? '?key='.$evo_opt['evo_gmap_api_key'] :'';
+			//wp_enqueue_script('testgmap','https://maps.googleapis.com/maps/api/js'.$apikey);
 			//wp_enqueue_style( 'select2',AJDE_EVCAL_URL.'/assets/css/select2.css');
+			
 			wp_register_script('evo_mobile',$eventon->assets_path.'js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
 			wp_register_script('evcal_easing', $eventon->assets_path. 'js/jquery.easing.1.3.js', array('jquery'),'1.0',true );//2.2.24
 			wp_register_script('evo_mouse', $eventon->assets_path. 'js/jquery.mousewheel.min.js', array('jquery'),$eventon->version,true );//2.2.24
@@ -120,6 +135,12 @@ class evo_frontend {
 						if($value!== false) {eval($php_codes);}						
 					}
 				}
+
+			// pluggable
+				do_action('evo_register_other_styles_scripts');
+
+
+
 		}
 		public function register_evo_dynamic_styles(){
 			global $eventon;
@@ -144,7 +165,7 @@ class evo_frontend {
 				
 				$dynamic_css = get_option('evo_dyn_css');
 				if(!empty($dynamic_css)){
-					echo '<style type ="text/css">'.$dynamic_css.'</style>';
+					echo '<style type ="text/css" rel="eventon_dynamic_styles">'.$dynamic_css.'</style>';
 				}				
 			}else{
 				wp_enqueue_style( 'eventon_dynamic_styles');
@@ -324,7 +345,7 @@ class evo_frontend {
 					if(!empty($pmv['evcal_organizer']))
 						echo '<meta property="article:author" content="'.$pmv['evcal_organizer'][0].'" />';
 
-				echo ob_get_clean();
+				echo apply_filters('evo_facebook_header_metadata', ob_get_clean());
 			endif;
 		}
 		// add eventon single event card field to filter
@@ -403,7 +424,7 @@ class evo_frontend {
 							'key'=>'eventonsm_tw',
 							'counter' =>1,
 							'favicon' => 'twitter.png',
-							'url' => '<a class="tw evo_ss" onclick="'.$tw_js.'" href="http://twitter.com/share?text=TITLECOUNT&#32;-&#32;" title="Share on Twitter" rel="nofollow" target="_blank" data-url="PERMALINK"><i class="fa fa-twitter"></i></a>',
+							'url' => '<a class="tw evo_ss" onclick="'.$tw_js.'" href="http://twitter.com/share?text=TITLECOUNT&#32;-&#32;&url=PERMALINK" title="Share on Twitter" rel="nofollow" target="_blank" data-url="PERMALINK"><i class="fa fa-twitter"></i></a>',
 						),
 						'LinkedIn'=> array(
 							'key'=>'eventonsm_ln',
@@ -438,10 +459,16 @@ class evo_frontend {
 							if($sm_site=='EmailShare'){
 								$url = $sm_site_val['url'];
 
-								$mailtocontent = 'Event Name: '.$title.'%0A';
-								$mailtocontent .= 'Event Date: '.$datetime_string .'%0A';
-								$mailtocontent .= 'Link: '.$encodeURL;
+								$mailtocontent = '';
+								foreach( apply_filters('evo_emailshare_data', array(
+									'event_name'=> array('label'=> evo_lang('Event Name'), 'value'=>$post_title),
+									'event_date'=> array('label'=> evo_lang('Event Date'), 'value'=>$datetime_string),
+									'link'=> array('label'=> evo_lang('Link'), 'value'=>$encodeURL),
 
+								)) as $key=>$data){
+									$mailtocontent .= $data['label'] .': '. str_replace('+','%20',$data['value']) . '%0A';
+								}
+								
 								// removed urlencode on title
 								$title 		= str_replace('+','%20',($post_title));
 
@@ -518,9 +545,12 @@ class evo_frontend {
 
 				$file_name = 'email_'.$part.'.php';
 
+				$childThemePath = get_stylesheet_directory();	
+
 				$paths = array(
 					0=> TEMPLATEPATH.'/'.$eventon->template_url.'templates/email/',
-					1=> AJDE_EVCAL_PATH.'/templates/email/',
+					1=> $childThemePath.'/'.$eventon->template_url.'templates/email/',
+					2=> AJDE_EVCAL_PATH.'/templates/email/',
 				);
 
 				foreach($paths as $path){				
@@ -622,10 +652,13 @@ class evo_frontend {
 			));
 
 			if(count($lightboxWindows)>0){
-				echo "<div class='evo_lightboxes'>";
+
+				$display = (evo_settings_val('evo_load_scripts_only_onevo', $this->evo_options) && !evo_settings_val('evo_load_all_styles_onpages', $this->evo_options))? 'none':'block';
+
+				echo "<div class='evo_lightboxes' style='display:{$display}'>";
 				foreach($lightboxWindows as $key=>$lb){
 					?>
-					<div class='evo_lightbox <?php echo $key;?> <?php echo !empty($lb['classes'])? $lb['classes']:'';?>' id='<?php echo !empty($lb['id'])? $lb['id']:'';?>'>
+					<div class='evo_lightbox <?php echo $key;?> <?php echo !empty($lb['classes'])? $lb['classes']:'';?>' id='<?php echo !empty($lb['id'])? $lb['id']:'';?>' >
 						<div class="evo_content_in">													
 							<div class="evo_content_inin">
 								<div class="evo_lightbox_content">

@@ -40,79 +40,14 @@ if ( ! function_exists( 'eventon_settings' ) ) {
 			$current_section = (isset($_GET['section']) )? sanitize_text_field( urldecode($_GET['section'])):'';	
 
 		// Update or add options
-			if( isset($_POST['evcal_noncename']) && isset( $_POST ) ){
-				if ( wp_verify_nonce( $_POST['evcal_noncename'], AJDE_EVCAL_BASENAME ) ){
-					
-					foreach($_POST as $pf=>$pv){
-						if( ($pf!='evcal_styles' && $focus_tab!='evcal_4') || $pf!='evcal_sort_options'){
-							
-							$pv = (is_array($pv))? $pv: addslashes(esc_html(stripslashes(($pv)))) ;
-							$evcal_options[$pf] = $pv;
-						}
-						if($pf=='evcal_sort_options'){
-							$evcal_options[$pf] =$pv;
-						}					
-					}
-					
-					// General settings page - write styles to head option
-					if($focus_tab=='evcal_1' && isset($_POST['evcal_css_head']) && $_POST['evcal_css_head']=='yes'){
-						$eventon->evo_admin->update_dynamic_styles();
-					}					
-					
-					//language tab
-					if($focus_tab=='evcal_2'){
-						$new_lang_opt = array();
-						$_lang_version = (!empty($_GET['lang']))? $_GET['lang']: 'L1';
-
-						$lang_opt = get_option('evcal_options_evcal_2');
-						if(!empty($lang_opt) ){
-							$new_lang_opt[$_lang_version] = $evcal_options;
-							$new_lang_opt = array_merge($lang_opt, $new_lang_opt);
-
-						}else{
-							$new_lang_opt[$_lang_version] =$evcal_options;
-						}
-						
-						update_option('evcal_options_evcal_2', $new_lang_opt);
-						
-					}elseif($focus_tab == 'evcal_1' || empty($focus_tab)){
-						// store custom meta box count
-						$cmd_count = evo_calculate_cmd_count();
-						$evcal_options['cmd_count'] = $cmd_count;
-
-						update_option('evcal_options_'.$focus_tab, $evcal_options);
-
-					// all other settings tabs
-					}else{
-						//do_action('evo_save_settings',$focus_tab, $evcal_options);
-						$evcal_options = apply_filters('evo_save_settings_optionvals', $evcal_options, $focus_tab);
-						update_option('evcal_options_'.$focus_tab, $evcal_options);
-					}
-					
-					// STYLES
-					if( isset($_POST['evcal_styles']) )
-						update_option('evcal_styles', strip_tags(stripslashes($_POST['evcal_styles'])) );
-
-					// PHP Codes
-					if( isset($_POST['evcal_php']) )
-						update_option('evcal_php', strip_tags(stripslashes($_POST['evcal_php'])) );
-					
-					$_POST['settings-updated']='true';			
-				
-					// update dynamic styles file
-						$eventon->evo_admin->generate_dynamic_styles_file();
-
-				// nonce check
-				}else{
-					die( __( 'Action failed. Please refresh the page and retry.', 'eventon' ) );
-				}	
-			}
+			$ajde_settings->evo_save_settings($focus_tab, $current_section);
 			
 		// Load eventon settings values for current tab
 			$evcal_opt = $ajde_settings->get_current_tab_values('evcal_options_');	
 		
 		// activation notification
-			if(!$eventon->evo_updater->kriyathmakada()){
+			$EVO_prod = new EVO_Product_Lic('eventon');
+			if(!$EVO_prod->kriyathmakada()){
 				echo '<div class="update-nag">'.__('EventON is not activated, it must be activated to use! <a href="'.get_admin_url().'admin.php?page=eventon&tab=evcal_4">Enter License Now</a>','eventon').'</div>';
 			}
 

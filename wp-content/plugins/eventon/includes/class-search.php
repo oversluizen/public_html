@@ -110,76 +110,76 @@ class evo_search{
 	  	$list_searcheable_acf = array("title", "evcal_subtitle", "excerpt_short", "excerpt_long");
 	  	return $list_searcheable_acf;
 	}
-	function advanced_custom_search( $where, $wp_query ) {
-	    global $wpdb, $eventon;
+		function advanced_custom_search( $where, $wp_query ) {
+		    global $wpdb, $eventon;
 
-	    if(!evo_settings_check_yn( $this->options, 'EVOSR_advance_search')) return $where;
-	   
-	    if ( empty( $where ))  return $where;
+		    if(!evo_settings_check_yn( $this->options, 'EVOSR_advance_search')) return $where;
+		   
+		    if ( empty( $where ))  return $where;
 
-	    //if( is_admin()) return $where;
+		    //if( is_admin()) return $where;
 
-	    // restrict this only to event post search
-	    if( $wp_query->query['post_type']!= 'ajde_events') return $where;
-	 
-	    // get search expression
-	    $terms = $wp_query->query_vars[ 's' ];
+		    // restrict this only to event post search
+		    if( $wp_query->query['post_type']!= 'ajde_events') return $where;
+		 
+		    // get search expression
+		    $terms = $wp_query->query_vars[ 's' ];
 
-	    // explode search expression to get search terms
-	    $exploded = explode( ' ', $terms );
-	    if( $exploded === FALSE || count( $exploded ) == 0 )  $exploded = array( 0 => $terms );
-	         
-	    // reset search in order to rebuilt it as we whish
-	    $where = '';
-	    $tableprefix = $wpdb->prefix;
+		    // explode search expression to get search terms
+		    $exploded = explode( ' ', $terms );
+		    if( $exploded === FALSE || count( $exploded ) == 0 )  $exploded = array( 0 => $terms );
+		         
+		    // reset search in order to rebuilt it as we whish
+		    $where = '';
+		    $tableprefix = $wpdb->prefix;
 
-	    // get searcheable_acf, a list of advanced custom fields you want to search content in
-	    $list_searcheable_acf = $this->list_searcheable_acf();
-	    foreach( $exploded as $tag ) :
-	        $where .= " 
-	          AND (
-	            (".$tableprefix."posts.post_title LIKE '%$tag%')
-	            OR (".$tableprefix."posts.post_content LIKE '%$tag%')
-	            OR EXISTS (
-	              SELECT * FROM ".$tableprefix."postmeta
-		              WHERE post_id = ".$tableprefix."posts.ID
-		                AND (";
-	        foreach ($list_searcheable_acf as $searcheable_acf) :
-	          if ($searcheable_acf == $list_searcheable_acf[0]):
-	            $where .= " (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
-	          else :
-	            $where .= " OR (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
-	          endif;
-	        endforeach;
-		        $where .= ")
-	            )
-	            OR EXISTS (
-	              SELECT * FROM ".$tableprefix."comments
-	              WHERE comment_post_ID = ".$tableprefix."posts.ID
-	                AND comment_content LIKE '%$tag%'
-	            )
-	            OR EXISTS (
-	              SELECT * FROM ".$tableprefix."terms
-	              INNER JOIN ".$tableprefix."term_taxonomy
-	                ON ".$tableprefix."term_taxonomy.term_id = ".$tableprefix."terms.term_id
-	              INNER JOIN wp_term_relationships
-	                ON ".$tableprefix."term_relationships.term_taxonomy_id = ".$tableprefix."term_taxonomy.term_taxonomy_id
-	              WHERE (
-	          		taxonomy = 'event_location'
-	            		OR taxonomy = 'event_organizer'          		
-	            		OR taxonomy = 'event_speaker'          		
-	            		OR taxonomy = 'event_type'
-	            		OR taxonomy = 'event_type_2'
-	            		OR taxonomy = 'event_type_3'
-	          		)
-	              	AND object_id = ".$tableprefix."posts.ID
-	              	AND ".$tableprefix."terms.name LIKE '%$tag%'
-	            )
-	        )";
-	    endforeach;
+		    // get searcheable_acf, a list of advanced custom fields you want to search content in
+		    $list_searcheable_acf = $this->list_searcheable_acf();
+		    foreach( $exploded as $tag ) :
+		        $where .= " 
+		          AND (
+		            (".$tableprefix."posts.post_title LIKE '%$tag%')
+		            OR (".$tableprefix."posts.post_content LIKE '%$tag%')
+		            OR EXISTS (
+		              SELECT * FROM ".$tableprefix."postmeta
+			              WHERE post_id = ".$tableprefix."posts.ID
+			                AND (";
+		        foreach ($list_searcheable_acf as $searcheable_acf) :
+		          if ($searcheable_acf == $list_searcheable_acf[0]):
+		            $where .= " (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
+		          else :
+		            $where .= " OR (meta_key LIKE '%" . $searcheable_acf . "%' AND meta_value LIKE '%$tag%') ";
+		          endif;
+		        endforeach;
+			        $where .= ")
+		            )
+		            OR EXISTS (
+		              SELECT * FROM ".$tableprefix."comments
+		              WHERE comment_post_ID = ".$tableprefix."posts.ID
+		                AND comment_content LIKE '%$tag%'
+		            )
+		            OR EXISTS (
+		              SELECT * FROM ".$tableprefix."terms
+		              INNER JOIN ".$tableprefix."term_taxonomy
+		                ON ".$tableprefix."term_taxonomy.term_id = ".$tableprefix."terms.term_id
+		              INNER JOIN wp_term_relationships
+		                ON ".$tableprefix."term_relationships.term_taxonomy_id = ".$tableprefix."term_taxonomy.term_taxonomy_id
+		              WHERE (
+		          		taxonomy = 'event_location'
+		            		OR taxonomy = 'event_organizer'          		
+		            		OR taxonomy = 'event_speaker'          		
+		            		OR taxonomy = 'event_type'
+		            		OR taxonomy = 'event_type_2'
+		            		OR taxonomy = 'event_type_3'
+		          		)
+		              	AND object_id = ".$tableprefix."posts.ID
+		              	AND ".$tableprefix."terms.name LIKE '%$tag%'
+		            )
+		        )";
+		    endforeach;
 
-	    return $where;
-	}
+		    return $where;
+		}
 
 	// include events in default wordpress search 
 		function enable_events_search($value){
@@ -189,6 +189,8 @@ class evo_search{
 		function include_events_search($query){
 
 			if(!evo_settings_val('EVOSR_default_search',$this->options)) return $query;
+
+			if( is_admin()) return $query;
 
 			// Check to verify it's search page
 			if( $query->is_search ) {
@@ -206,6 +208,7 @@ class evo_search{
 				if(!in_array('ajde_events', $searchable_types)) 
 					$searchable_types[] = 'ajde_events';
 
+				//$query->set( 'post_type', array( 'post', 'ajde_events' ) );
 				$query->set( 'post_type', $searchable_types );
 			}
 			return $query;

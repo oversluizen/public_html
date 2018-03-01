@@ -65,7 +65,8 @@ class EVO_Shortcodes {
 						
 			// OUT PUT	
 			// check if member only calendar
-			if($eventon->frontend->is_member_only($args) ){			
+			if($eventon->frontend->is_member_only($args) ){
+				EVO()->frontend->load_evo_scripts_styles();					
 				ob_start();				
 				echo $eventon->evo_generator->generate_events_list($args);			
 				return ob_get_clean();		
@@ -95,7 +96,8 @@ class EVO_Shortcodes {
 			// OUT PUT
 			
 			// check if member only calendar
-			if($eventon->frontend->is_member_only($args) ){			
+			if($eventon->frontend->is_member_only($args) ){	
+				EVO()->frontend->load_evo_scripts_styles();		
 				ob_start();				
 				echo $eventon->evo_generator->eventon_generate_calendar($args);			
 				return ob_get_clean();
@@ -108,6 +110,8 @@ class EVO_Shortcodes {
 		function single_event_box($atts){
 			global $eventon;
 
+			EVO()->frontend->load_evo_scripts_styles();		
+			
 			add_filter('eventon_shortcode_defaults', array($this,'evoSE_add_shortcode_defaults'), 10, 1);
 			$supported_defaults = $eventon->evo_generator->shell->get_supported_shortcode_atts();	
 

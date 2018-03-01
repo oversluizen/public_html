@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Event Related Class
+ * Single Event Template Related Class
  * @version 2.5.4
  */
 class evo_sinevent{
@@ -26,6 +26,7 @@ class evo_sinevent{
 	// hook for single event page
 		function before_main_content(){
 			$this->page_header();
+			EVO()->frontend->load_evo_scripts_styles();		
 		}
 		function after_content(){
 			$this->page_content();
@@ -33,6 +34,7 @@ class evo_sinevent{
 		}
 		function sidebar_placement(){
 			$this->sidebar();
+			?><div class="clear"></div><?php
 		}
 		function after_content_loop(){			
 			?></div><!-- #content --><?php

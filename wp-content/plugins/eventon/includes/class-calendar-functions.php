@@ -92,7 +92,7 @@ class evo_fnc{
     }
 
 
-// wpde based event post meta retrieval
+// wpdb based event post meta retrieval
 // @since 2.5.5
 	function event_meta($event_id, $fields){
 		global $wpdb;
@@ -110,24 +110,65 @@ class evo_fnc{
 		}
 
 		//print_r($fields_str);
-
-		$results = $wpdb->get_results(  
-			"SELECT MT.meta_value
-			FROM $wpdb->postmeta AS MT
-			WHERE MT.meta_key IN ({$fields_str}) 
-			AND MT.post_id='{$event_id}' ORDER BY MT.meta_key DESC");
+        $sql = "SELECT MT.meta_value
+            FROM $wpdb->postmeta AS MT
+            WHERE MT.meta_key IN ({$fields_str}) 
+            AND MT.post_id='{$event_id}' ORDER BY MT.meta_key DESC";
+		$results = $wpdb->get_results( $sql);
 
 		if(!$results && count($results)>0) return false;
 
-		//print_r($results);
+		//print_r($sql);
 		//print_r($fields);
 
 		$output = array();
 		foreach($results as $index=>$result){
 			$output[ $fields[$index]] = maybe_unserialize($result->meta_value);
 		}
+        //print_r($output);
 		return $output;
 
 	}
+
+// use this to save multiple event post meta values with one data base query 
+// @since 2.5.6
+    function update_event_meta($event_id, $fields){
+        // check required values
+        $event_id = absint($event_id); if(!$event_id) return false;
+        $table = _get_meta_table('post');   if(!$table) return false;
+
+
+        $values = array();
+        foreach($fields as $meta_key=>$meta_value){
+            $meta_key = wp_unslash($meta_key);
+            $meta_value = maybe_serialize(wp_unslash($meta_value));
+
+            $values[] = "('{$meta_key}','{$meta_value}','{$event_id}')";
+        }
+
+        $values = implode(',', $values);
+
+        global $wpdb;
+
+        $res = $wpdb->update(
+            $table,
+            array(
+                'meta_value'=>'yes'
+            ),
+            array(
+                'meta_key'=>'_evoto_block_assoc'
+            )
+        );
+
+        /*$results = $wpdb->query(  
+            "INSERT INTO $wpdb->postmeta (meta_key, meta_value, post_id)
+            VALUES ('_evoto_block_assoc','yes','1840') 
+            ON DUPLICATE KEY UPDATE meta_key=VALUES(meta_key), meta_value=VALUES(meta_value)");
+
+        echo $wpdb->show_errors(); 
+        echo $wpdb->print_error();
+        */
+
+    }
 
 }

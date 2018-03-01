@@ -115,7 +115,7 @@ class evo_cal_help {
 			}else{
 				$new_array = $array;
 			}	
-			return $new_array;
+			return apply_filters('evo_eventcard_array_after_sorted', $new_array, $array);
 		}
 
 	// get repeating intervals for the event

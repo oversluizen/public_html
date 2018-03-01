@@ -55,6 +55,7 @@ jQuery(document).ready(function($){
 
 		// when lightbox open triggered
 		$('body').on('evolightbox_show',function(){
+			$('.evo_lightboxes').show();
 			$('body').addClass('evo_overflow');
 			$('html').addClass('evo_overflow');
 		});
@@ -144,16 +145,21 @@ jQuery(document).ready(function($){
 				
 				if( obj.attr('href')!='' &&  obj.attr('href')!== undefined){
 					return;
-				// if there is no href like single event box	
 				}else{
 					var url = obj.parent().siblings('.evo_event_schema').find('a').attr('href');
-
-					window.open(url, '_self');
+					if(obj.attr('target') == '_blank'){  window.open(url);}else{ window.open(url, '_self');}
 					return false;
 				}
 
+			// open as external link
 			}else if(ux_val=='2'){
-				return;
+				var url = obj.parent().siblings('.evo_event_schema').find('a').attr('href');
+				if(url !== undefined && url != ''){
+					if(obj.attr('target') == '_blank'){  window.open(url);}else{ window.open(url, '_self');}					
+				}
+				return false;
+
+			// do not do anything
 			}else if(ux_val=='X'){
 				return false;
 			}else if(ux_val=='none'){
@@ -162,15 +168,12 @@ jQuery(document).ready(function($){
 				
 				// redirecting to external link
 				if(exlk=='1' && ux_val!='1'){
-					// if there is a href and <a>
+					// if there is no href
 					if( obj.attr('href')!='' &&  obj.attr('href')!== undefined){
 						return;
-
-					// if there is no href like single event box	
 					}else{
 						var url = obj.siblings('.evo_event_schema').find('a').attr('href');
-
-						window.location = url;
+						if(obj.attr('target') == '_blank'){  window.open(url);}else{ window.open(url, '_self');}						
 						return false;
 					}
 				// SLIDE DOWN eventcard
@@ -224,70 +227,6 @@ jQuery(document).ready(function($){
 			}
 
 		});
-
-	// Jumper scrolling		
-		if($('body').find('.evo_jumper_months').length>0){
-			$('.evo_jumper_months').mousewheel(function(e, delta) {
-				//$(this).scrollLeft -= (delta * 40);
-				OBJ = $(this);
-				
-				var cur_mleft = parseInt(OBJ.css('marginLeft')),
-					width = parseInt(OBJ.css('width') ),
-					Pwid = OBJ.parent().width();
-				maxMLEFT = (width-Pwid)*(-1);
-
-				if( cur_mleft<=0){
-					
-					var new_marl = (cur_mleft+ (delta * 140));					
-					if(new_marl>0){ new_marl=0;}
-					
-					// moving to left
-					if(delta == -1 && ( (new_marl*(-1))< (width -200)) ){
-						new_marl = ( new_marl <maxMLEFT)? maxMLEFT: new_marl;
-
-						if(new_marl<0)
-							OBJ.stop().animate({'margin-left': new_marl });
-						
-					}else if(delta == 1){
-						OBJ.stop().animate({'margin-left': new_marl });
-					}
-				}
-				e.preventDefault();
-			});
-			// touch function
-				$('.evo_jumper_months').on('swipeleft',function(event){				
-					swiping('swipeleft', $(this));
-					event.preventDefault();
-				});
-				$('.evo_jumper_months').on('swiperight',function(event){				
-					swiping('swiperight', $(this));
-					event.preventDefault();
-				});
-
-				function swiping(direction, OBJ){
-					var leftNow = parseInt(OBJ.css('marginLeft'));
-					var Pwid = OBJ.parent().width();
-					var width = parseInt(OBJ.css('width') );
-					maxMLEFT = (width-Pwid)*(-1);
-					swipeMove = 300;
-					
-					if(direction =='swipeleft'){
-						var newLEFT = ( leftNow - swipeMove );	
-						// /console.log(newLEFT);
-
-						if( newLEFT*(-1) < (width) ){
-							newLEFT = ( newLEFT <maxMLEFT)? maxMLEFT: newLEFT;
-							OBJ.stop().animate({'margin-left': newLEFT });
-						}
-					}else{
-						var newLEFT = ( leftNow + swipeMove );	
-						// /console.log(newLEFT);
-
-						newLEFT = ( newLEFT >0 )? 0: newLEFT;
-						OBJ.stop().animate({'margin-left': newLEFT });
-					}					
-				}
-		}
 
 	// GO TO TODAY
 	// @since 2.3
@@ -526,7 +465,7 @@ jQuery(document).ready(function($){
 				}
 			});		
 		
-		// filtering section
+		// filtering section open and close menu
 			$('.filtering_set_val').click(function(){
 				// close sorting
 					sortSelect = $(this).closest('.eventon_sorting_section').find('.evo_srt_options');
@@ -555,6 +494,7 @@ jQuery(document).ready(function($){
 					filter_section = $(this).closest('.eventon_filter_line');
 				var filter = $(this).closest('.eventon_filter');
 				var filter_current_set_val = filter.attr('data-filter_val');
+				FILTER_DROPDOWN = $(this).parent();
 
 				// for filter values with checkboxes
 				if(filter_section.hasClass('selecttype')){				
@@ -573,8 +513,11 @@ jQuery(document).ready(function($){
 				if(filter_current_set_val == new_filter_val){
 					$(this).parent().fadeOut();
 				}else{
-					// set new filtering changes				
-					var evodata = $(this).closest('.eventon_sorting_section').siblings('.evo-data');
+					// set new filtering changes	
+					CAL = $(this).closest('.ajde_evcal_calendar');	
+					var evodata = CAL.find('.evo-data');
+					CAL_ARG = CAL.find('.cal_arguments');
+					CAL_ARG.attr('data-show_limit_paged',0);
 					var cmonth = parseInt( evodata.attr('data-cmonth'));
 					var cyear = parseInt( evodata.attr('data-cyear'));	
 					var sort_by = evodata.attr('data-sort_by');
@@ -584,10 +527,11 @@ jQuery(document).ready(function($){
 					filter.attr({'data-filter_val':new_filter_val});	
 					evodata.attr({'data-filters_on':'true'});
 					
+
 					ajax_post_content(sort_by,cal_id,'none','filering');
 					
-					// reset the new values		
-					//console.log(new_filter_val);		
+					
+					// reset the new values				
 					var new_filter_name = $(this).html();
 					$(this).parent().find('p').removeClass('evf_hide');
 					$(this).addClass('evf_hide');
@@ -1156,7 +1100,7 @@ jQuery(document).ready(function($){
 			$.ajax({
 				beforeSend: function(){
 					ev_cal.find('.eventon_events_list').slideUp('fast');
-					ev_cal.find('#eventon_loadbar').slideDown().css({width:'0%'}).animate({width:'100%'});
+					ev_cal.find('#eventon_loadbar').slideDown();
 				},
 				type: 'POST',
 				url:the_ajax_script.ajaxurl,
@@ -1168,7 +1112,7 @@ jQuery(document).ready(function($){
 					ev_cal.find('.eventon_events_list').html(data.content);
 														
 				},complete:function(){
-					ev_cal.find('#eventon_loadbar').css({width:'100%'}).slideUp();
+					ev_cal.find('#eventon_loadbar').slideUp();
 					ev_cal.find('.eventon_events_list').delay(300).slideDown('slow');
 					ev_cal.evoGenmaps({'delay':400});
 				}

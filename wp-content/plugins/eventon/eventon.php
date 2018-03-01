@@ -1,15 +1,17 @@
 <?php
 /**
- * Plugin Name: EventON |  VestaThemes.com
+ * Plugin Name: EventON
  * Plugin URI: http://www.myeventon.com/
  * Description: A beautifully crafted minimal calendar experience
- * Version: 2.5.5
+ * Version: 2.6.2
  * Author: AshanJay
  * Author URI: http://www.ashanjay.com
  * Requires at least: 4.0
- * Tested up to: 4.8
+ * Tested up to: 4.9
+ * 
  * Text Domain: eventon
  * Domain Path: /lang/languages/
+ * 
  * @package EventON
  * @category Core
  * @author AJDE
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 if ( ! class_exists( 'EventON' ) ) {
 
 class EventON {
-	public $version = '2.5.5';
+	public $version = '2.6.2';
 	/**
 	 * @var evo_generator
 	 */
@@ -54,6 +56,8 @@ class EventON {
 		
 		// Installation
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
+
+		add_filter('cron_schedules',array($this,'new_schedule'));	
 		
 		// Include required files
 		$this->includes();
@@ -65,8 +69,6 @@ class EventON {
 		
 		// Deactivation
 		register_deactivation_hook( AJDE_EVCAL_FILE, array($this,'deactivate'));
-
-		$products = get_option('_evo_products');
 	}
 
 	/**
@@ -84,23 +86,9 @@ class EventON {
 		define( "EVENTON_BASE", basename(dirname(__FILE__)) ); //eventON
 		define( "BACKEND_URL", get_bloginfo('url').'/wp-admin/' ); 
 		$this->assets_path = str_replace(array('http:','https:'), '',AJDE_EVCAL_URL).'/assets/';
-		// save addon class file url so addons can access this
-		$this->evo_url();
+		
 	}
-	public function evo_url($resave=false){
-		$init = get_option('eventon_addon_urls');
-		if(empty($init) || $resave){
-			$path = AJDE_EVCAL_PATH;
-			$arr = array(
-				'addons'=>$path.'/classes/class-evo-addons.php',
-				'date'=> time()
-			);
-			update_option('eventon_addon_urls',$arr);
-			$init = $arr;
-		}
-		return $init;
-	}	
-	
+		
 	/**
 	 * Include required files
 	 * 
@@ -112,6 +100,8 @@ class EventON {
 
 		// post types
 		include_once( 'includes/class-evo-addons.php' );
+		include_once('includes/admin/class-evo-products.php' );					
+		include_once('includes/admin/class-evo-product.php' );
 		include_once( 'includes/helpers/helper_factory.php' );
 		include_once( 'includes/class-evo-post-types.php' );
 		include_once( 'includes/class-multi-data-types.php' );
@@ -120,9 +110,12 @@ class EventON {
 		include_once( 'includes/class-evo-helper.php' );
 		include_once( 'includes/class-evo-install.php' );
 		include_once( 'includes/class-cronjobs.php' );
+		include_once( 'includes/class-deprecations.php' );
 		
 		include_once('ajde/ajde.php' );
 			
+		include_once( 'includes/class-environment.php' );
+		include_once( 'includes/class-calendar.php' );
 		include_once( 'includes/eventon-core-functions.php' );
 		include_once( 'includes/class-calendar-functions.php' );
 		include_once( 'includes/class-event.php' );
@@ -131,20 +124,22 @@ class EventON {
 		include_once( 'includes/class-calendar-shell.php' );
 		include_once( 'includes/class-calendar-body.php' );		
 		include_once( 'includes/class-calendar-helper.php' );
-		include_once( 'includes/class-calendar_generator.php' );			
+		include_once( 'includes/class-calendar_generator.php' );	
 
-		if ( is_admin() ){			
+
+		if ( is_admin() ){	
+			include_once('includes/admin/settings/class-addon-details.php' );	
 			include_once('includes/class-intergration-visualcomposer.php' );
+			include_once('includes/admin/class-views.php' );
 			include_once('includes/admin/eventon-admin-functions.php' );
 			include_once('includes/admin/eventon-admin-html.php' );
 			include_once('includes/admin/eventon-admin-taxonomies.php' );
 			include_once('includes/admin/post_types/ajde_events.php' );
 			include_once('includes/admin/welcome.php' );				
 			include_once('includes/admin/class-evo-event.php' );
-			include_once('includes/admin/class-evo-admin.php' );
-			include_once('includes/admin/class-licenses.php' );	
-			include_once('includes/admin/class-evo-updater.php' );					
-			include_once('includes/admin/class-evo-product.php' );					
+			include_once('includes/admin/class-evo-admin.php' );	
+			include_once('includes/admin/class-licenses.php' );						
+			include_once('includes/admin/class-evo-errors.php' );					
 		}
 		if ( ! is_admin() || defined('DOING_AJAX') ){
 			// Functions
@@ -160,6 +155,8 @@ class EventON {
 	
 	/** Init eventON when WordPress Initialises.	 */
 	public function init() {
+
+		// $this->rewrite_tag();
 		
 		// Set up localisation
 		$this->load_plugin_textdomain();
@@ -177,9 +174,8 @@ class EventON {
 			$this->shortcodes	= new EVO_Shortcodes();	
 		}
 		if(is_admin()){
-			$this->evo_event 	= new evo_event();
+			$this->evo_event_item 	= new evo_event_item();
 			$this->evo_admin 	= new evo_admin();
-			$this->license 		= new evo_license();
 			$this->taxonomies	= new eventon_taxonomies();	
 		}
 		
@@ -187,29 +183,60 @@ class EventON {
 		eventon_init_caps();
 		
 		global $pagenow;
-		$__needed_pages = array('update-core.php','plugins.php', 'admin.php','admin-ajax.php', 'plugin-install.php','index.php','post.php','post-new.php','widgets.php');
-
-		// only for admin Eventon updater
-			if(is_admin()  ){
-
-				// Initiate eventon updater	
-				$this->evo_updater = new evo_updater (
-					array(
-						'version'=>$this->version, 
-						'slug'=> strtolower(EVENTON_BASE),
-						'plugin_slug'=> AJDE_EVCAL_BASENAME,
-						'name'=>EVENTON_BASE,
-						'file'=>__FILE__
-					)
-				);	
-			}
+		
+		// Initiate eventon 
+		$this->init_evo_product();
 		
 		// Init action
 		do_action( 'eventon_init' );
+
 	}
+
+	// URL Reqrite
+		function rewrite_tag(){
+			global $wp,$wp_rewrite;
+			$wp->add_query_var('ri');
+
+			add_rewrite_tag('%ri%','([0-9]+)');
+			//add_rewrite_rule( '^ri/[0-9]+)/?','&ri=$matches[1]', 'top' );
+			//add_rewrite_rule('^/ri/([0-9]+)/', '?ri=$matches[1]', 'top');
+			add_rewrite_rule(
+				'events/([^/]+)/ri/([^/]+)/?', 
+				'index.php?pagename=$1&post_type=ajde_events&ri=$2', 
+				'top'
+			);
+			//flush_rewrite_rules(false);
+		}
+
+	// Initiate evo product
+		function init_evo_product(){
+			$ADDON = new evo_addons(array(
+				'ID'=> 'EVO',
+				'version'=> $this->version,
+				'slug'=>strtolower(EVENTON_BASE),
+				'plugin_slug'=>AJDE_EVCAL_BASENAME,
+				'name'=>EVENTON_BASE
+			));
+		}
+
 	/** register_widgets function. */
 		function register_widgets() {
 			include_once( 'includes/class-evo-widget-main.php' );
+		}
+
+	// CRON
+		function new_schedule(){
+			 if(!isset($schedules["weekly"])){
+		        $schedules["weekly"] = array(
+		            'interval' => 60*60*24*7,
+		            'display' => __('Once every week'));
+		    }
+		    if(!isset($schedules["3days"])){
+		        $schedules["3days"] = array(
+		            'interval' => 60*60*24*3,
+		            'display' => __('Every three days'));
+		    }
+		    return $schedules;
 		}
 	
 	// MOVED functions
@@ -220,7 +247,7 @@ class EventON {
 			}
 		/*	Legend popup box across wp-admin	*/
 			public function throw_guide($content, $position='', $echo=true){
-				global $ajde;
+				global $ajde;  
 				if(!is_admin()) return false;
 				$content = $ajde->wp_admin->tooltips($content, $position);
 				if($echo){ echo $content;  }else{ return $content; }			
@@ -236,20 +263,7 @@ class EventON {
 			public function get_email_body($part, $def_location, $args='', $paths=''){
 				return $this->frontend->get_email_body($part, $def_location, $args='', $paths='');
 			}
-		// since 2.3.6
-			public function register_evo_dynamic_styles(){ 
-				$this->frontend->register_evo_dynamic_styles();
-			}public function load_dynamic_evo_styles(){
-				$this->frontend->load_dynamic_evo_styles();
-			}public function load_default_evo_scripts(){
-				$this->frontend->load_default_evo_scripts();
-			}public function load_default_evo_styles(){
-				$this->frontend->load_default_evo_styles();
-			}public function load_evo_scripts_styles(){
-				$this->frontend->load_evo_scripts_styles();
-			}public function evo_styles(){
-				add_action('wp_head', array($this, 'load_default_evo_scripts'));
-			}
+		
 	/** Activate function to store version.	 */
 		public function activate(){
 			set_transient( '_evo_activation_redirect', 1, 60 * 60 );		
@@ -303,7 +317,8 @@ class EventON {
 	 * @return void
 	 */
 	public function load_plugin_textdomain() {
-		$locale = apply_filters( 'plugin_locale', get_locale(), 'eventon' );
+		$locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
+		$locale = apply_filters( 'plugin_locale', $locale, 'eventon' );
 		
 		load_textdomain( 'eventon', WP_LANG_DIR . "/eventon/eventon-admin-".$locale.".mo" );
 		load_textdomain( 'eventon', WP_LANG_DIR . "/plugins/eventon-admin-".$locale.".mo" );		

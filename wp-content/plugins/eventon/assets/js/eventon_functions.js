@@ -115,9 +115,9 @@
 			var OPT = $.extend({}, defaults, opt);
 
 			if(OPT.direction == 'start'){
-				$(this).find('#eventon_loadbar').slideDown().css({width:'0%'}).animate({width:'100%'})
+				$(this).find('#eventon_loadbar').slideDown();
 			}else{
-				$(this).find('#eventon_loadbar').css({width:'100%'}).delay(400).slideUp();
+				$(this).find('#eventon_loadbar').slideUp();
 			}
 		}
 
