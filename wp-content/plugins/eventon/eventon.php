@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: EventON
+ * Plugin Name: EventON |  VestaThemes.com
  * Plugin URI: http://www.myeventon.com/
  * Description: A beautifully crafted minimal calendar experience
  * Version: 2.5.5
