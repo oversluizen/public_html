@@ -421,9 +421,10 @@ class EVO_Product{
 		$this->set_prop('version', $value);
 	}
 
-	public function kriyathmakada(){			
-		return ($this->get_prop('status') && $this->get_prop('status') == 'active' && $this->get_prop('key') ) ?
-			true: false;
+	public function kriyathmakada(){
+		return true;
+		// return ($this->get_prop('status') && $this->get_prop('status') == 'active' && $this->get_prop('key') ) ?
+			// true: false;
 	}
 
 	// eventon products kriyathmakada kiya baleema		

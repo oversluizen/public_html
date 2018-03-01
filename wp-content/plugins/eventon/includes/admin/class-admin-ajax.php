@@ -616,7 +616,6 @@ class EVO_admin_ajax{
 	// Validation of eventon products
 		function validate_license(){
 			global $eventon;
-
 			$status = 'bad'; 
 			$error_code = 11; 
 			$error_msg_add = $html = '';
