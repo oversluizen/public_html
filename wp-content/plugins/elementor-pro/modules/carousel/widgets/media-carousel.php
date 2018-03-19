@@ -567,7 +567,6 @@ class Media_Carousel extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'caption_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'selector' => '{{WRAPPER}} .elementor-carousel-image-overlay',
 				'condition' => [

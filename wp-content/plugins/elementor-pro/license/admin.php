@@ -176,8 +176,8 @@ class Admin {
 							<span style="color: #ff0000; font-style: italic;"><?php _e( 'Expired', 'elementor-pro' ); ?></span>
 						<?php elseif ( API::STATUS_SITE_INACTIVE === $license_data['license'] ) : ?>
 							<span style="color: #ff0000; font-style: italic;"><?php _e( 'Mismatch', 'elementor-pro' ); ?></span>
-						 <?php elseif ( API::STATUS_INVALID === $license_data['license'] ) : ?>
-						<span style="color: #ff0000; font-style: italic;"><?php _e( 'Invalid', 'elementor-pro' ); ?></span>
+						<?php elseif ( API::STATUS_INVALID === $license_data['license'] ) : ?>
+							<span style="color: #ff0000; font-style: italic;"><?php _e( 'Invalid', 'elementor-pro' ); ?></span>
 						<?php else : ?>
 							<span style="color: #008000; font-style: italic;"><?php _e( 'Active', 'elementor-pro' ); ?></span>
 						<?php endif; ?>
@@ -192,7 +192,7 @@ class Admin {
                     <?php endif; ?>
 
                     <?php if ( API::STATUS_INVALID === $license_data['license'] ) : ?>
-						<p><?php echo __( '<strong>Your license key doesn\'t match your current domain</strong>. This is most likely due to a change in the domain URL of your site (including HTTPS/SSL migration). Please deactivate the license and then reactivate it again.', 'elementor-pro' ); ?></p>
+                        <p><?php echo __( '<strong>Your license key doesn\'t match your current domain</strong>. This is most likely due to a change in the domain URL of your site (including HTTPS/SSL migration). Please deactivate the license and then reactivate it again.', 'elementor-pro' ); ?></p>
                     <?php endif; ?>
 				<?php endif; ?>
 			</form>

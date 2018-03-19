@@ -300,7 +300,6 @@ class Animated_Headline extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-headline',
 			]
@@ -334,7 +333,6 @@ class Animated_Headline extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'words_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-headline-dynamic-text',
 				'exclude' => ['font_size'],

@@ -1,5 +1,5 @@
 <?php
-namespace ElementorPro\Modules\HoverBox;
+namespace ElementorPro\Modules\CallToAction;
 
 use ElementorPro\Base\Module_Base;
 
@@ -11,11 +11,11 @@ class Module extends Module_Base {
 
 	public function get_widgets() {
 		return [
-			'Hover_Box',
+			'Call_To_Action',
 		];
 	}
 
 	public function get_name() {
-		return 'hover-box';
+		return 'call-to-action';
 	}
 }

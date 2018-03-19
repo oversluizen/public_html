@@ -14,8 +14,10 @@ final class Manager {
 	public function __construct() {
 		$modules = [
 			'query-control',
+			'css-filter-control',
 			'custom-css',
 			'global-widget',
+			'assets-manager',
 
 			// Modules with Widgets.
 			'posts',
@@ -25,7 +27,7 @@ final class Manager {
 			'animated-headline',
 			'pricing',
 			'flip-box',
-			//'hover-box',
+			'call-to-action',
 			'carousel',
 			'countdown',
 			'share-buttons',
@@ -38,9 +40,7 @@ final class Manager {
 
 		foreach ( $modules as $module_name ) {
 			$class_name = str_replace( '-', ' ', $module_name );
-
 			$class_name = str_replace( ' ', '', ucwords( $class_name ) );
-
 			$class_name = __NAMESPACE__ . '\\Modules\\' . $class_name . '\Module';
 
 			/** @var Module_Base $class_name */

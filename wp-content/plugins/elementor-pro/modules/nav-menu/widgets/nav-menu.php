@@ -35,6 +35,12 @@ class Nav_Menu extends Widget_Base {
 		return [ 'smartmenus' ];
 	}
 
+	public function on_export( $element ) {
+		unset( $element['settings']['menu'] );
+
+		return $element;
+	}
+
 	protected function get_nav_menu_index() {
 		return $this->nav_menu_index++;
 	}
@@ -531,7 +537,6 @@ class Nav_Menu extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'menu_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'separator' => 'before',
 				'selector' => '{{WRAPPER}} .elementor-nav-menu--main',
@@ -736,7 +741,6 @@ class Nav_Menu extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'dropdown_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'exclude' => [ 'line_height' ],
 				'selector' => '{{WRAPPER}} .elementor-nav-menu--dropdown',
@@ -748,7 +752,6 @@ class Nav_Menu extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'dropdown_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-nav-menu--dropdown',
 				'separator' => 'before',
 			]
@@ -821,7 +824,6 @@ class Nav_Menu extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'dropdown_divider',
-				'label' => __( 'Divider', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-nav-menu--dropdown li:not(:last-child)',
 				'exclude' => [ 'width' ],
 			]

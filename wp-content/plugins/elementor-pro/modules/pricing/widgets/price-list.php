@@ -136,7 +136,6 @@ class Price_List extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'heading_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-price-list-header',
 			]
@@ -170,7 +169,6 @@ class Price_List extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-price-list-description',
 			]
@@ -278,7 +276,6 @@ class Price_List extends Base_Widget {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'image_size',
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'default' => 'thumbnail',
 			]
 		);

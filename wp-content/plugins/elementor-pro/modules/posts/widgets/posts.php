@@ -91,7 +91,6 @@ class Posts extends Base_Widget {
 			Group_Control_Posts::get_type(),
 			[
 				'name' => 'posts',
-				'label' => __( 'Posts', 'elementor-pro' ),
 			]
 		);
 

@@ -81,7 +81,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'image', // Actually its `image_size`
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'default' => 'thumbnail',
 				'condition' => [
 					'graphic_element' => 'image',
@@ -581,7 +580,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'image_border',
-				'label' => __( 'Image Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-flip-box__image img',
 				'condition' => [
 					'graphic_element' => 'image',
@@ -817,7 +815,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography_a',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__front .elementor-flip-box__layer__title',
 				'condition' => [
@@ -857,7 +854,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography_a',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__front .elementor-flip-box__layer__description',
 				'condition' => [
@@ -1008,7 +1004,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography_b',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__back .elementor-flip-box__layer__title',
 				'condition' => [
@@ -1069,7 +1064,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'description_typography_b',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-flip-box__back .elementor-flip-box__layer__description',
 				'condition' => [
@@ -1113,7 +1107,6 @@ class Flip_Box extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-flip-box__button',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'condition' => [

@@ -256,7 +256,6 @@ class Testimonial_Carousel extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'content_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-testimonial__text',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 			]
@@ -290,7 +289,6 @@ class Testimonial_Carousel extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'name_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-testimonial__name',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 			]
@@ -324,7 +322,6 @@ class Testimonial_Carousel extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-testimonial__title',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 			]

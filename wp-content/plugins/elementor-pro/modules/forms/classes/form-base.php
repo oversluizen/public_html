@@ -149,6 +149,7 @@ class Form_Base extends Base_Widget {
 						'elementor-field-type-' . $item['field_type'],
 						'elementor-field-group',
 						'elementor-column',
+						'elementor-field-group-' . $item['_id'],
 					],
 				],
 				'input' . $i => [

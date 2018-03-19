@@ -253,7 +253,6 @@ class Skin_Cards extends Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'badge_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'selector' => '{{WRAPPER}} .elementor-post__card .elementor-post__badge',
 				'exclude' => [ 'font_size', 'line-height' ],

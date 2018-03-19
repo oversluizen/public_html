@@ -23,6 +23,9 @@ class Tel extends Field_Base {
 	}
 
 	public function validation( $field, Classes\Form_Record $record, Classes\Ajax_Handler $ajax_handler ) {
+		if ( empty( $field['value'] ) ) {
+			return;
+		}
 		if ( preg_match( '/^[0-9#&+*-=.]+$/', $field['value'] ) !== 1 ) {
 			$ajax_handler->add_error( $field['id'], __( 'Only numbers and phone characters (#, -, *, etc) are accepted.', 'elementor-pro' ) );
 		}

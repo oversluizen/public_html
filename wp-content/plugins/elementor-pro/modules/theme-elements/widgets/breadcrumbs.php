@@ -117,7 +117,6 @@ class Breadcrumbs extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}}',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 			]

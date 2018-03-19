@@ -1,4 +1,4 @@
-/*! elementor-pro - v1.13.0 - 16-01-2018 */
+/*! elementor-pro - v1.15.3 - 07-03-2018 */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var ElementorProFrontend = function( $ ) {
 	var self = this;
@@ -1553,7 +1553,7 @@ module.exports = elementorFrontend.Module.extend( {
 	},
 
 	initMasonry: function() {
-		this.elements.$posts.imagesLoaded().always( this.runMasonry );
+		imagesLoaded( this.elements.$posts, this.runMasonry );
 	},
 
 	runMasonry: function() {
@@ -1743,6 +1743,17 @@ var SlidesHandler = elementorFrontend.Module.extend( {
 		$slider.slick( $slider.data( this.getSettings( 'attributes.dataSliderOptions' ) ) );
 	},
 
+	onPanelShow: function() {
+		var $slider = this.elements.$slider;
+
+		$slider.slick( 'slickPause' );
+
+		// On switch between slides while editing. stop again.
+		$slider.on( 'afterChange', function() {
+			$slider.slick( 'slickPause' );
+		} );
+	},
+
 	bindEvents: function() {
 		var $slider = this.elements.$slider,
 			settings = this.getSettings(),
@@ -1750,6 +1761,10 @@ var SlidesHandler = elementorFrontend.Module.extend( {
 
 		if ( ! animation ) {
 			return;
+		}
+
+		if ( elementorFrontend.isEditMode() ) {
+			elementor.hooks.addAction( 'panel/open_editor/widget/slides', this.onPanelShow );
 		}
 
 		$slider.on( {

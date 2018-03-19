@@ -251,7 +251,6 @@ class Countdown extends Base_Widget {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'box_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-countdown-item',
 				'separator' => 'before',
 			]

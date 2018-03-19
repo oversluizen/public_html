@@ -103,7 +103,6 @@ class Portfolio extends Base_Widget {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'thumbnail_size',
-				'label' => __( 'Image Size', 'elementor-pro' ),
 				'exclude' => [ 'custom' ],
 				'default' => 'medium',
 				'prefix_class' => 'elementor-portfolio--thumbnail-size-',
@@ -199,7 +198,6 @@ class Portfolio extends Base_Widget {
 			Group_Control_Posts::get_type(),
 			[
 				'name' => 'posts',
-				'label' => __( 'Posts', 'elementor-pro' ),
 			]
 		);
 
@@ -378,7 +376,6 @@ class Portfolio extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography_title',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-portfolio-item__title',
 				'condition' => [
@@ -434,7 +431,6 @@ class Portfolio extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography_filter',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-portfolio__filter',
 			]

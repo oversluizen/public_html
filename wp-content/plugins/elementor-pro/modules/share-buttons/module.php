@@ -141,12 +141,16 @@ class Module extends Module_Base {
 	}
 
 	public function localize_settings( $localized_settings ) {
-		if ( ! empty( $this->get_api_key() ) && ! empty( $this->get_api_url() ) ) {
+		$api_key = $this->get_api_key();
+		$api_url = $this->get_api_url();
+
+		if ( ! empty( $api_key ) && ! empty( $api_url ) ) {
 			$localized_settings['donreach'] = [
 				'key' => $this->get_api_key(),
 				'api_url' => $this->get_api_url(),
 			];
 		}
+
 		return $localized_settings;
 	}
 

@@ -7,6 +7,7 @@ use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Scheme_Color;
 use Elementor\Scheme_Typography;
+use ElementorPro\Classes\Utils;
 use ElementorPro\Modules\Forms\Classes\Ajax_Handler;
 use ElementorPro\Modules\Forms\Classes\Form_Base;
 use ElementorPro\Modules\Forms\Module;
@@ -106,6 +107,7 @@ class Form extends Form_Base {
 								'textarea',
 								'number',
 								'url',
+								'password',
 							],
 						],
 					],
@@ -741,21 +743,6 @@ class Form extends Form_Base {
 			]
 		);
 
-		$this->add_control(
-			'subscriber_already_exists_message',
-			[
-				'label' => __( 'Subscriber Already Exists Message', 'elementor-pro' ),
-				'type' => Controls_Manager::TEXT,
-				'default' => $default_messages[ Ajax_Handler::SUBSCRIBER_ALREADY_EXISTS ],
-				'placeholder' => $default_messages[ Ajax_Handler::SUBSCRIBER_ALREADY_EXISTS ],
-				'label_block' => true,
-				'condition' => [
-					'custom_messages!' => '',
-				],
-				'render_type' => 'none',
-			]
-		);
-
 		$this->end_controls_section();
 
 		$this->start_controls_section(
@@ -814,9 +801,6 @@ class Form extends Form_Base {
 				'label' => __( 'Label', 'elementor-pro' ),
 				'type' => Controls_Manager::HEADING,
 				'separator' => 'before',
-				'condition' => [
-					'show_labels!' => '',
-				],
 			]
 		);
 
@@ -842,9 +826,6 @@ class Form extends Form_Base {
 					'body {{WRAPPER}} .elementor-labels-above .elementor-field-group > label' => 'padding-bottom: {{SIZE}}{{UNIT}};',
 					// for the label position = above option
 				],
-				'condition' => [
-					'show_labels!' => '',
-				],
 			]
 		);
 
@@ -860,9 +841,6 @@ class Form extends Form_Base {
 					'type' => Scheme_Color::get_type(),
 					'value' => Scheme_Color::COLOR_3,
 				],
-				'condition' => [
-					'show_labels!' => '',
-				],
 			]
 		);
 
@@ -876,7 +854,6 @@ class Form extends Form_Base {
 					'{{WRAPPER}} .elementor-mark-required .elementor-field-label:after' => 'color: {{COLOR}};',
 				],
 				'condition' => [
-					'show_labels!' => '',
 					'mark_required' => 'yes',
 				],
 			]
@@ -888,9 +865,6 @@ class Form extends Form_Base {
 				'name' => 'label_typography',
 				'selector' => '{{WRAPPER}} .elementor-field-group > label',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
-				'condition' => [
-					'show_labels!' => '',
-				],
 			]
 		);
 
@@ -1018,7 +992,6 @@ class Form extends Form_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'selector' => '{{WRAPPER}} .elementor-button',
 			]
@@ -1042,7 +1015,6 @@ class Form extends Form_Base {
 		$this->add_group_control(
 			Group_Control_Border::get_type(), [
 				'name' => 'button_border',
-				'label' => __( 'Border', 'elementor-pro' ),
 				'placeholder' => '1px',
 				'default' => '1px',
 				'selector' => '{{WRAPPER}} .elementor-button',
@@ -1201,7 +1173,7 @@ class Form extends Form_Base {
 
 		?>
 		<form class="elementor-form" method="post" <?php echo $this->get_render_attribute_string( 'form' ); ?>>
-			<input type="hidden" name="post_id" value="<?php echo get_the_ID() ?>" />
+			<input type="hidden" name="post_id" value="<?php echo Utils::get_current_post_id() ?>" />
 			<input type="hidden" name="form_id" value="<?php echo $this->get_id() ?>" />
 
 			<div <?php echo $this->get_render_attribute_string( 'wrapper' ); ?>>

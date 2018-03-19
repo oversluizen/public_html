@@ -237,7 +237,6 @@ class Blockquote extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'content_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-blockquote__content',
 			]
 		);
@@ -281,7 +280,6 @@ class Blockquote extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'author_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-blockquote__author',
 			]
 		);
@@ -476,7 +474,6 @@ class Blockquote extends Widget_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'button_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-blockquote__tweet-button span, {{WRAPPER}} .elementor-blockquote__tweet-button i',
 				'separator' => 'before',
 			]
@@ -650,7 +647,6 @@ class Blockquote extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'box_border',
-				'label' => __( 'Box Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-blockquote',
 			]
 		);
@@ -701,7 +697,6 @@ class Blockquote extends Widget_Base {
 			Group_Control_Border::get_type(),
 			[
 				'name' => 'box_border_hover',
-				'label' => __( 'Box Border', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-blockquote:hover',
 			]
 		);

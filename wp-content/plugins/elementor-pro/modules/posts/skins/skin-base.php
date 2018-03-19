@@ -80,7 +80,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Image_Size::get_type(),
 			[
 				'name' => 'thumbnail_size',
-				'label' => __( 'Thumbnail Size', 'elementor-pro' ),
 				'default' => 'medium',
 				'exclude' => [ 'custom' ],
 				'condition' => [
@@ -499,7 +498,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_1,
 				'selector' => '{{WRAPPER}} .elementor-post__title, {{WRAPPER}} .elementor-post__title a',
 				'condition' => [
@@ -571,7 +569,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'meta_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 				'selector' => '{{WRAPPER}} .elementor-post__meta-data',
 				'condition' => [
@@ -629,7 +626,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'excerpt_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_3,
 				'selector' => '{{WRAPPER}} .elementor-post__excerpt p',
 				'condition' => [
@@ -691,7 +687,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'read_more_typography',
-				'label'    => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-post__read-more',
 				'scheme' => Scheme_Typography::TYPOGRAPHY_4,
 				'condition' => [

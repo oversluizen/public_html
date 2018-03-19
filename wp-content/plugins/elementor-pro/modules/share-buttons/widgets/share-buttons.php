@@ -552,7 +552,6 @@ class Share_Buttons extends Base_Widget {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'typography',
-				'label' => __( 'Typography', 'elementor-pro' ),
 				'selector' => '{{WRAPPER}} .elementor-share-btn__title, {{WRAPPER}} .elementor-share-btn__counter',
 				'exclude' => [ 'line_height' ],
 			]

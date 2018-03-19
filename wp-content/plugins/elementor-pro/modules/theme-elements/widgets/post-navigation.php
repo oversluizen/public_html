@@ -197,7 +197,6 @@ class Post_Navigation extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'label_typography',
-				'label' => __( 'Label Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 				'selector' => '{{WRAPPER}} span.post-navigation__prev--label, {{WRAPPER}} span.post-navigation__next--label',
 				'exclude' => [ 'line_height' ],
@@ -269,7 +268,6 @@ class Post_Navigation extends Base {
 			Group_Control_Typography::get_type(),
 			[
 				'name' => 'title_typography',
-				'label' => __( 'Title Typography', 'elementor-pro' ),
 				'scheme' => Scheme_Typography::TYPOGRAPHY_2,
 				'selector' => '{{WRAPPER}} span.post-navigation__prev--title, {{WRAPPER}} span.post-navigation__next--title',
 				'exclude' => [ 'line_height' ],
