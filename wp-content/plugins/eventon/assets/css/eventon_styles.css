@@ -1887,11 +1887,11 @@
 			border-radius: 5px;
 			overflow: hidden;
 		}
-		.evo_lightbox .evo_lightbox_body p.loading_content{text-align: center;padding: 80px;}
+		.evo_lightbox .evo_lightbox_body p.loading_content{text-align: center;padding: 80px; margin: 0;}
 		.evo_lightbox .evo_lightbox_body p.loading_content:before{content:". . .";display: block;}
 		.evo_lightbox .evcal_cblock .evo_time{display: none;}
 		.evo_lightbox .bordb{border-bottom: 1px solid #cdcdcd;	}
-		.evo_lightbox.eventcard .evo_lightbox_body{background-color: #fff; border-radius: 5px; overflow: hidden;}
+		.evo_lightbox.eventcard .evo_lightbox_body, .evo_lightbox .evo_lightbox_body{background-color: #fff; border-radius: 5px; overflow: hidden;}
 		.evo_lightbox .evopop_top .ev_ftImg{display: none;}
 
 		.evo_lightbox ul{list-style:none; padding: 0; margin: 0;		}
@@ -1901,8 +1901,13 @@
 			padding: 10px 0;
 		}
 
-		body.evo_overflow{overflow: hidden;}
+		body.evo_overflow{overflow: hidden; position:absolute;height:100%; width:100%;}
 		html.evo_overflow{overflow-y:initial;overflow-x:initial;}
+		
+		@media all and (min-width:569px) and (max-width: 768px) {
+			.evo_lightbox{position: fixed;}
+			body.evo_overflow{position: absolute;}
+		}
 	/* lightbox transition effects */
 		.evo_lightbox{
 			opacity: 0;

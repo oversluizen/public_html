@@ -116,7 +116,7 @@ class evo_fnc{
             AND MT.post_id='{$event_id}' ORDER BY MT.meta_key DESC";
 		$results = $wpdb->get_results( $sql);
 
-		if(!$results && count($results)>0) return false;
+		if(!$results && count($results) ==0) return false;
 
 		//print_r($sql);
 		//print_r($fields);

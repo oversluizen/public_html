@@ -35,10 +35,12 @@ function initialize(map_canvas_id, address,mapformat, zoom_level, location_type,
 			mapTypeId:mapformat,	
 			zoom: zoom_level,
 			styles: styles,
-			zoomControl:true
+			zoomControl:true,
+			scrollwheel: true,
 		}
 	}
 	
+	//console.log(myOptions);
 	
 	var map_canvas = document.getElementById(map_canvas_id);
 	map = new google.maps.Map(map_canvas, myOptions);

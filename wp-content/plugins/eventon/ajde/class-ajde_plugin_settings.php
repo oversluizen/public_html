@@ -27,8 +27,7 @@ class ajde_settings{
 		return array($current_tab_number=> $this->tab_props );
 	}
 
-	private function set_settings_tab_prop(){		
-
+	private function set_settings_tab_prop(){	
 		if(array_key_exists('EVO_Settings', $GLOBALS) && isset($GLOBALS['EVO_Settings'][$this->options_pre .$this->focus_tab])){
 			global $EVO_Settings;
 			$this->tab_props  = $EVO_Settings[$this->options_pre .$this->focus_tab];
@@ -73,8 +72,7 @@ class ajde_settings{
 			// custom fields
 			$_cmd_num = evo_calculate_cmd_count($this->tab_props);
 			for($x=1; $x<=$_cmd_num; $x++){
-				if( !empty($this->get_prop('evcal_ec_f'.$x.'a1')) && !empty($this->get_prop('evcal_af_'.$x)) && $this->get_prop('evcal_af_'.$x)=='yes'
-				){
+				if( $this->get_prop('evcal_ec_f'.$x.'a1') && $this->get_prop('evcal_af_'.$x) && $this->get_prop('evcal_af_'.$x)=='yes'){
 					$rearrange_items['customfield'.$x] = array('customfield'.$x,$this->get_prop('evcal_ec_f'.$x.'a1') );
 				}
 			}
@@ -120,7 +118,6 @@ class ajde_settings{
 					$pv = (is_array($pv))? $pv: addslashes(esc_html(stripslashes(($pv)))) ;
 					$options[$pf] = $pv;
 				}
-
 				update_option($options_pre.$this->focus_tab, $options);
 			}
 		}
@@ -151,8 +148,7 @@ class ajde_settings{
 				}					
 				
 				//language tab
-					if($focus_tab=='evcal_2'){
-						
+					if($focus_tab=='evcal_2'){						
 						
 						$new_lang_opt = array();
 						$_lang_version = (!empty($_GET['lang']))? $_GET['lang']: 'L1';
@@ -195,6 +191,10 @@ class ajde_settings{
 			
 				// update dynamic styles file
 					EVO()->evo_admin->generate_dynamic_styles_file();
+
+				// update the global values with new saved settings values
+				$this->tab_props = $evcal_options;
+				$GLOBALS['EVO_Settings'][$this->options_pre .$focus_tab] = $this->tab_props;
 
 			// nonce check
 			}else{

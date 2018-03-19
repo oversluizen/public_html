@@ -57,22 +57,6 @@ class Widget_Image_Gallery extends Widget_Base {
 	}
 
 	/**
-	 * Get widget categories.
-	 *
-	 * Retrieve the list of categories the image gallery widget belongs to.
-	 *
-	 * Used to determine where to display the widget in the editor.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @return array Widget categories.
-	 */
-	public function get_categories() {
-		return [ 'general-elements' ];
-	}
-
-	/**
 	 * Add lightbox data to image link.
 	 *
 	 * Used to add lightbox data attributes to image link HTML.
@@ -109,14 +93,18 @@ class Widget_Image_Gallery extends Widget_Base {
 			[
 				'label' => __( 'Add Images', 'elementor' ),
 				'type' => Controls_Manager::GALLERY,
+				'dynamic' => [
+					'active' => true,
+				],
 			]
 		);
 
 		$this->add_group_control(
 			Group_Control_Image_Size::get_type(),
 			[
-				'name' => 'thumbnail',
+				'name' => 'thumbnail', // Usage: `{name}_size` and `{name}_custom_dimension`, in this case `thumbnail_size` and `thumbnail_custom_dimension`.
 				'exclude' => [ 'custom' ],
+				'separator' => 'none',
 			]
 		);
 
@@ -356,7 +344,7 @@ class Widget_Image_Gallery extends Widget_Base {
 	 * @access protected
 	 */
 	protected function render() {
-		$settings = $this->get_settings();
+		$settings = $this->get_settings_for_display();
 
 		if ( ! $settings['wp_gallery'] ) {
 			return;

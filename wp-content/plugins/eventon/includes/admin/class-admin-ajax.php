@@ -193,9 +193,9 @@ class EVO_admin_ajax{
 				if(!empty($_POST['event_tax_termid'])){
 					wp_set_object_terms( $_POST['eventid'], (int)$_POST['event_tax_termid'], $tax , false);
 					$status = 'good';
-					$content = 'Changes successfully saved!';	
+					$content = __('Changes successfully saved!','eventon');	
 				}else{
-					$content = 'Term ID was not passed!';	
+					$content = __('Term ID was not passed!','eventon');	
 				}
 			break;
 			case 'new':
@@ -267,7 +267,7 @@ class EVO_admin_ajax{
 						}
 					}
 
-					print_r($term_meta);
+					//print_r($term_meta);
 
 					// save meta values
 						evo_save_term_metas($tax, $taxtermID, $term_meta);
@@ -275,7 +275,7 @@ class EVO_admin_ajax{
 						wp_set_object_terms( $_POST['eventid'], $taxtermID, $tax , false);	
 
 					$status = 'good';
-					$content = 'Changes successfully saved!';	
+					$content = __('Changes successfully saved!','eventon');	
 				}
 
 			break;
@@ -295,9 +295,9 @@ class EVO_admin_ajax{
 			if(!empty($_POST['termid'])){
 				wp_remove_object_terms( $_POST['eventid'], (int)$_POST['termid'], $_POST['tax'] , false);
 				$status = 'good';
-				$content = 'Changes successfully saved!';	
+				$content = __('Changes successfully saved!','eventon');	
 			}else{
-				$content = 'Term ID was not passed!';	
+				$content = __('Term ID was not passed!','eventon');	
 			}
 
 			echo json_encode(array(
@@ -616,6 +616,7 @@ class EVO_admin_ajax{
 	// Validation of eventon products
 		function validate_license(){
 			global $eventon;
+
 			$status = 'bad'; 
 			$error_code = 11; 
 			$error_msg_add = $html = '';

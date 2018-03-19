@@ -3,11 +3,11 @@
  * Plugin Name: EventON
  * Plugin URI: http://www.myeventon.com/
  * Description: A beautifully crafted minimal calendar experience
- * Version: 2.6.2
+ * Version: 2.6.5
  * Author: AshanJay
  * Author URI: http://www.ashanjay.com
  * Requires at least: 4.0
- * Tested up to: 4.9
+ * Tested up to: 4.9.1
  * 
  * Text Domain: eventon
  * Domain Path: /lang/languages/
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 if ( ! class_exists( 'EventON' ) ) {
 
 class EventON {
-	public $version = '2.6.2';
+	public $version = '2.6.5';
 	/**
 	 * @var evo_generator
 	 */
@@ -109,8 +109,7 @@ class EventON {
 		include_once( 'includes/class-evo-datetime.php' );
 		include_once( 'includes/class-evo-helper.php' );
 		include_once( 'includes/class-evo-install.php' );
-		include_once( 'includes/class-cronjobs.php' );
-		include_once( 'includes/class-deprecations.php' );
+		include_once( 'includes/class-cronjobs.php' );		
 		
 		include_once('ajde/ajde.php' );
 			
@@ -124,7 +123,8 @@ class EventON {
 		include_once( 'includes/class-calendar-shell.php' );
 		include_once( 'includes/class-calendar-body.php' );		
 		include_once( 'includes/class-calendar-helper.php' );
-		include_once( 'includes/class-calendar_generator.php' );	
+		include_once( 'includes/class-calendar_generator.php' );
+		include_once( 'includes/class-deprecations.php' );	
 
 
 		if ( is_admin() ){	

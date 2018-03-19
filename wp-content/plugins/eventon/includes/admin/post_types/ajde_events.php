@@ -24,6 +24,7 @@ class evo_ajde_events{
 		add_filter( 'manage_edit-ajde_events_sortable_columns', array($this,'eventon_custom_events_sort'));
 		add_filter( 'request', array($this,'eventon_custom_event_orderby') );
 
+		add_filter( 'list_table_primary_column', array( $this, 'list_table_primary_column' ), 10, 2 );
 		add_filter( 'post_row_actions', array($this,'eventon_duplicate_event_link_row'),10,2 );
 		add_action( 'post_submitbox_misc_actions', array($this,'eventon_duplicate_event_post_button') );
 
@@ -49,8 +50,6 @@ class evo_ajde_events{
 			$columns = array();
 			$columns["cb"] = "<input type=\"checkbox\" />";
 			
-
-			//$columns["title"] = __( 'Event Name', 'eventon' );
 			$columns["name"] = __( 'Event Name', 'eventon' );
 
 			$columns["event_location"] = __( 'Location', 'eventon' );
@@ -377,6 +376,16 @@ class evo_ajde_events{
 			return $vars;
 		}
 
+	// Set list table primary column for events
+		function list_table_primary_column( $default, $screen_id ) {
+
+			if ( 'edit-ajde_events' === $screen_id ) {
+				return 'name';
+			}
+
+			return $default;
+		}
+
 	// Duplicate event
 		function eventon_duplicate_event_link_row($actions, $post) {
 
@@ -571,7 +580,7 @@ class evo_ajde_events{
 			<?php
 		}
 
-		// SAVE
+		// SAVE QUICK EDIT
 		function eventon_admin_event_quick_edit_save( $post_id, $post ) {
 
 			if ( ! $_POST || is_int( wp_is_post_revision( $post_id ) ) || is_int( wp_is_post_autosave( $post_id ) ) ) return $post_id;
@@ -583,7 +592,8 @@ class evo_ajde_events{
 			global $eventon, $wpdb;
 
 			// Save fields
-			if ( isset( $_POST['evcal_subtitle'] ) ) update_post_meta( $post_id, 'evcal_subtitle', eventon_clean( $_POST['evcal_subtitle'] ) );
+			if ( isset( $_POST['evcal_subtitle'] ) ) 
+				update_post_meta( $post_id, 'evcal_subtitle', eventon_clean( $_POST['evcal_subtitle'] ) );
 					
 			
 			$proper_time = 	evoadmin_get_unix_time_fromt_post($post_id);
@@ -597,14 +607,24 @@ class evo_ajde_events{
 			if ( !empty($proper_time['unix_end']) )
 				update_post_meta( $post_id, 'evcal_erow', $proper_time['unix_end']);
 			
-			
-			// featured
-			if( isset( $_POST['_featured'] ) )
-				update_post_meta( $post_id, '_featured', $_POST['_featured']  );
 
+			foreach( apply_filters('eventon_quick_save_fields', array(
+				'_featured',
+				'evo_hide_endtime',
+				'evcal_allday',
+				'evo_exclude_ev',
+				'evcal_gmap_gen',
+				'evcal_hide_locname',
+				'evo_access_control_location',
+				'evo_evcrd_field_org',
+			)) as $field){
+				if( !isset($_POST[ $field ])) continue;
+				update_post_meta( $post_id, $field, $_POST[ $field ]  );
+			}
+			
+			
 			// menu order
-			if( isset( $_POST['_menu_order'] ) ){
-				
+			if( isset( $_POST['_menu_order'] ) ){				
 				$newpostdata['menu_order'] = 5;
 		        $newpostdata['ID'] = $post_id;
 				//wp_update_post($newpostdata);

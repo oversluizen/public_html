@@ -13,7 +13,7 @@ function print_ajde_customization_form($cutomization_pg_array, $ajdePT, $extra_t
 	
 	global $ajde;
 	$wp_admin = $ajde->wp_admin;
-	$textdomain = 'nylon';
+	$textdomain = 'eventon';
 	
 	// initial variables
 		$font_sizes = array('10px','11px','12px','13px','14px','16px','18px','20px', '22px', '24px','28px','30px','36px','42px','48px','54px','60px');
@@ -529,13 +529,13 @@ function print_ajde_customization_form($cutomization_pg_array, $ajdePT, $extra_t
 			</div>
 			<div class="ajde-collapse-menu" id='collapse-button'>
 				<span class="collapse-button-icon"></span>
-				<span class="collapse-button-label"><?php _e('Collapse Menu',$textdomain);?></span>
+				<span class="collapse-button-label"><?php _e('Collapse Menu','eventon');?></span>
 			</div>
 			</td><td width='100%'  valign='top'>
 				<div id='acus_right' class='ajde_backender_uix'>
 					<p id='acus_arrow' style='top:4px'></p>
 					<div class='customization_right_in'>
-						<div style='display:none' id='ajde_color_guide'>Testing</div>
+						<div style='display:none' id='ajde_color_guide'>Loading</div>
 						<div id='ajde_clr_picker' class="cp cp-default" style='display:none'></div>
 						<?php echo $rightside.$extra_tabs;?>
 					</div>

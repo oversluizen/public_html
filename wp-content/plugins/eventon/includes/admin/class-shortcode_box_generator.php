@@ -173,7 +173,7 @@ class eventon_admin_shortcode_box{
 				)
 			),
 			'lang'=>array(
-				'name'=>'Language Variation (<a href="'.get_admin_url().'admin.php?page=eventon&tab=evcal_2">Update Language Text</a>)',
+				'name'=>'Language Variation (<a href="'.get_admin_url().'admin.php?page=eventon&tab=evcal_2">'.__('Update Language Text','eventon').'</a>)',
 				'type'=>'select',
 				'guide'=>__('Select which language variation text to use','eventon'),
 				'var'=>'lang',
@@ -376,7 +376,7 @@ class eventon_admin_shortcode_box{
 			$shortcode_guide_array = apply_filters('eventon_shortcode_popup', array(
 				array(
 					'id'=>'s1',
-					'name'=>'Main Calendar',
+					'name'=> __('Main Calendar','eventon'),
 					'code'=>'add_eventon',
 					'variables'=>apply_filters('eventon_basiccal_shortcodebox', array(
 						$this->shortcode_default_field('cal_id')
@@ -497,7 +497,7 @@ class eventon_admin_shortcode_box{
 				),
 				array(
 					'id'=>'s2',
-					'name'=>'Event Lists',
+					'name'=> __('Event Lists','eventon'),
 					'code'=>'add_eventon_list',
 					'variables'=> apply_filters('eventon_basiclist_shortcodebox',array(
 						$this->shortcode_default_field('number_of_months')
@@ -591,7 +591,7 @@ class eventon_admin_shortcode_box{
 				),
 				array(
 					'id'=>'s_SE',
-					'name'=>'Single Event',
+					'name'=>__('Single Event','eventon'),
 					'code'=>'add_single_eventon',
 					'variables'=>array(
 						array(
@@ -632,7 +632,8 @@ class eventon_admin_shortcode_box{
 							'var'=>'ext_url',
 							'placeholder'=>'http://'
 						),
-						$this->shortcode_default_field('lang')
+						$this->shortcode_default_field('lang'),
+						$this->shortcode_default_field('etc_override')
 						,array(
 							'name'=>'Repeat Interval ID',
 							'type'=>'text','var'=>'repeat_interval',

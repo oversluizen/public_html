@@ -148,6 +148,8 @@ class WP_List_Util {
 			foreach ( $this->output as $key => $value ) {
 				if ( is_object( $value ) ) {
 					$this->output[ $key ] = $value->$field;
+					// var_dump($this->output[ $key ], $value->$field);
+					// die();
 				} else {
 					$this->output[ $key ] = $value[ $field ];
 				}

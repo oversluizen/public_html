@@ -43,13 +43,8 @@ class evo_event_metaboxes{
 
 			if ( isset( $_GET['post'] ) ) {
 
-				$event_pmv = get_post_custom($post->ID);
-
-				$evo_exclude_ev = evo_meta($event_pmv, 'evo_exclude_ev');
-				$_featured = evo_meta($event_pmv, '_featured');
-				$_cancel = evo_meta($event_pmv, '_cancel');
-				$_onlyloggedin = evo_meta($event_pmv, '_onlyloggedin');
-				$_completed = evo_meta($event_pmv, '_completed');
+				// Global Event Props will be set initially right here
+				$event = new EVO_Event($post->ID);
 			?>
 				<div class="misc-pub-section" >
 				<div class='evo_event_opts'>
@@ -57,7 +52,7 @@ class evo_event_metaboxes{
 						<?php 	echo $ajde->wp_admin->html_yesnobtn(
 							array(
 								'id'=>'evo_exclude_ev', 
-								'var'=>$evo_exclude_ev,
+								'var'=> $event->get_prop('evo_exclude_ev'),
 								'input'=>true,
 								'label'=>__('Exclude from calendar','eventon'),
 								'guide'=>__('Set this to Yes to hide event from showing in all calendars','eventon'),
@@ -69,7 +64,7 @@ class evo_event_metaboxes{
 						<?php 	echo $ajde->wp_admin->html_yesnobtn(
 							array(
 								'id'=>'_featured', 
-								'var'=>$_featured,
+								'var'=> $event->get_prop('_featured'),
 								'input'=>true,
 								'label'=>__('Featured Event','eventon'),
 								'guide'=>__('Make this event a featured event','eventon'),
@@ -81,7 +76,7 @@ class evo_event_metaboxes{
 						<?php 	echo $ajde->wp_admin->html_yesnobtn(
 							array(
 								'id'=>'_completed', 
-								'var'=>$_completed,
+								'var'=> $event->get_prop('_completed'),
 								'input'=>true,
 								'label'=>__('Event Completed','eventon'),
 								'guide'=>__('Mark this event as completed','eventon'),
@@ -93,7 +88,7 @@ class evo_event_metaboxes{
 						<?php 	echo $ajde->wp_admin->html_yesnobtn(
 							array(
 								'id'=>'_cancel', 
-								'var'=>$_cancel,
+								'var'=> $event->get_prop('_cancel'),
 								'input'=>true,
 								'label'=>__('Cancel Event','eventon'),
 								'guide'=>__('Cancel this event','eventon'),
@@ -105,7 +100,7 @@ class evo_event_metaboxes{
 						<?php 	echo $ajde->wp_admin->html_yesnobtn(
 							array(
 								'id'=>'_onlyloggedin', 
-								'var'=>$_onlyloggedin,
+								'var'=> $event->get_prop('_onlyloggedin'),
 								'input'=>true,
 								'label'=>__('Only for loggedin users','eventon'),
 								'guide'=>__('This will make this event only visible if the users are loggedin to this site','eventon'),
@@ -114,12 +109,12 @@ class evo_event_metaboxes{
 						?>	
 					</p>
 					<?php
-						$_cancel_reason = evo_meta($event_pmv,'_cancel_reason');
+						$_cancel_reason = $event->get_prop('_cancel_reason');
 					?>
 					<p id='evo_editevent_cancel_text' style='display:<?php echo (!empty($_cancel) && $_cancel=='yes')? 'block':'none';?>'><textarea name="_cancel_reason" style='width:100%' rows="3" placeholder='<?php _e('Type the reason for cancelling','eventon');?>'><?php echo $_cancel_reason;?></textarea></p>
 					<?php
 						// @since 2.2.28
-						do_action('eventon_event_submitbox_misc_actions',$post->ID, $event_pmv);
+						do_action('eventon_event_submitbox_misc_actions',$event);
 					?>
 				</div>
 				</div>
@@ -132,8 +127,10 @@ class evo_event_metaboxes{
 				
 			// Use nonce for verification
 			wp_nonce_field( plugin_basename( __FILE__ ), 'evo_noncename_2' );
-			$p_id = get_the_ID();
-			$ev_vals = get_post_custom($p_id);
+			$event_id = get_the_ID();
+
+			$event = new EVO_Event($event_id);
+			$ev_vals = $event->get_data();
 			
 			$evOpt = get_option('evcal_options_evcal_1');
 
@@ -149,7 +146,7 @@ class evo_event_metaboxes{
 						<em id='evColor' style='background-color:<?php echo (!empty($hexcolor) )? $hexcolor: 'na'; ?>'></em>
 						<p class='evselectedColor'>
 							<span class='evcal_color_hex evcal_chex'  ><?php echo (!empty($hexcolor) )? $hexcolor: 'Hex code'; ?></span>
-							<span class='evcal_color_selector_text evcal_chex'><?php _e('Click here to pick a color');?></span>
+							<span class='evcal_color_selector_text evcal_chex'><?php _e('Click here to pick a color','eventon');?></span>
 						</p>
 					</div>
 					<p style='margin-bottom:0; padding-bottom:0'><i><?php _e('OR Select from other colors','eventon');?></i></p>
@@ -424,10 +421,13 @@ class evo_event_metaboxes{
 										<select name="_evo_lang">
 										<?php 
 
+										$_evo_lang = (!empty($ev_vals["_evo_lang"]))? $ev_vals["_evo_lang"][0]: 'L1';
+
 										$lang_variables = apply_filters('eventon_lang_variation', array('L1','L2', 'L3'));
 
 										foreach($lang_variables as $lang){
-											echo "<option value='{$lang}'>{$lang}</option>";
+											$slected = ($lang == $_evo_lang)? 'selected="selected"':null;
+											echo "<option value='{$lang}' {$slected}>{$lang}</option>";
 										}
 										?></select>
 									</p>
@@ -1403,7 +1403,7 @@ class evo_event_metaboxes{
 					break;
 					case 'button':
 						?>
-						<p style='text-align:center; padding-top:10px'><span class='evo_btn evo_term_submit'><?php echo $is_new? 'Add New':'Save Changes';?></span></p>
+						<p style='text-align:center; padding-top:10px'><span class='evo_btn evo_term_submit'><?php echo $is_new? __('Add New','eventon'): __('Save Changes','eventon');?></span></p>
 						<?php
 					break;
 				}

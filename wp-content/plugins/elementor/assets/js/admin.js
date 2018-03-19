@@ -1,4 +1,4 @@
-/*! elementor - v1.9.7 - 27-02-2018 */
+/*! elementor - v1.9.8 - 13-03-2018 */
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 ( function( $ ) {
 	'use strict';
@@ -20,7 +20,11 @@
 				$importButton: $( '#elementor-import-template-trigger' ),
 				$importArea: $( '#elementor-import-template-area' ),
 				$settingsForm: $( '#elementor-settings-form' ),
-				$settingsTabsWrapper: $( '#elementor-settings-tabs-wrapper' )
+				$settingsTabsWrapper: $( '#elementor-settings-tabs-wrapper' ),
+				$addNew: $( '.post-type-elementor_library #wpbody-content .page-title-action:first, #elementor-template-library-add-new' ),
+				$addNewDialogHeader:  $( '.elementor-templates-modal__header' ),
+				$addNewDialogClose:  $( '.elementor-templates-modal__header__close-modal' ),
+				$addNewDialogContent:  $( '#elementor-new-template-dialog-content' )
 			};
 
 			this.cache.$settingsFormPages = this.cache.$settingsForm.find( '.elementor-settings-form-page' );
@@ -71,6 +75,11 @@
 				}
 
 				self.toggleStatus();
+			} );
+
+			self.cache.$addNew.on( 'click', function( event ) {
+				event.preventDefault();
+				self.getNewTemplateModal().show();
 			} );
 
 			self.cache.$goToEditLink.on( 'click', function() {
@@ -196,9 +205,46 @@
 
 			this.initTemplatesImport();
 
+			this.initNewTemplateDialog();
+
 			this.initMaintenanceMode();
 
 			this.goToSettingsTabFromHash();
+		},
+
+		initNewTemplateDialog: function() {
+			var self = this,
+				modal;
+
+			self.getNewTemplateModal = function() {
+				if ( ! modal ) {
+					var dialogsManager = new DialogsManager.Instance();
+
+					modal = dialogsManager.createWidget( 'lightbox', {
+						id: 'elementor-new-template-modal',
+						className: 'elementor-templates-modal',
+						headerMessage: self.cache.$addNewDialogHeader,
+						message: self.cache.$addNewDialogContent.children(),
+						hide: {
+							onButtonClick: false
+						},
+						position: {
+							my: 'center',
+							at: 'center'
+						},
+						onReady: function() {
+							DialogsManager.getWidgetType( 'lightbox' ).prototype.onReady.apply( this, arguments );
+
+							self.cache.$addNewDialogClose.on( 'click', function() {
+								modal.hide();
+							} );
+						}
+					} );
+				}
+
+				return modal;
+			};
+
 		},
 
 		initTemplatesImport: function() {
@@ -448,11 +494,23 @@ var Module = function() {
 	};
 
 	this.on = function( eventName, callback ) {
-		if ( ! events[ eventName ] ) {
-			events[ eventName ] = [];
+		if ( 'object' === typeof eventName ) {
+			$.each( eventName, function( singleEventName ) {
+				self.on( singleEventName, this );
+			} );
+
+			return self;
 		}
 
-		events[ eventName ].push( callback );
+		var eventNames = eventName.split( ' ' );
+
+		eventNames.forEach( function( singleEventName ) {
+			if ( ! events[ singleEventName ] ) {
+				events[ singleEventName ] = [];
+			}
+
+			events[ singleEventName ].push( callback );
+		} );
 
 		return self;
 	};

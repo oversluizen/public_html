@@ -80,7 +80,7 @@ class evo_search{
 				$new_shortcode_array = array(
 					array(
 						'id'=>'s_SR',
-						'name'=>'Search Box',
+						'name'=>__('Search Box','eventon'),
 						'code'=>'add_eventon_search',
 						'variables'=>array(
 							array(
@@ -92,9 +92,9 @@ class evo_search{
 							$evo_shortcode_box->shortcode_default_field('lang'),
 							$evo_shortcode_box->shortcode_default_field('number_of_months'),
 							array(
-								'name'=>'Search all events (past and current)',
+								'name'=>__('Search all events (past and current)','eventon'),
 								'type'=>'YN',
-								'guide'=>'Setting this will disregard number of months value and will search in all the events.',
+								'guide'=>__('Setting this will disregard number of months value and will search in all the events.','eventon'),
 								'default'=>'no',
 								'var'=>'search_all',
 							)

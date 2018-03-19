@@ -1483,7 +1483,7 @@ class EVO_generator {
 			// all day event check
 				if($_is_allday){
 					$data_array['start']['time'] = 'allday';
-					$data_array['end']['time'] = '';
+					$data_array['end'] = '';
 				}else{
 					$dv_time = $this->generate_time($date_args);
 					$data_array['start']['time'] = $dv_time['start'];
@@ -2167,7 +2167,7 @@ class EVO_generator {
 							),
 							'image'=>array(
 								'type'=>'meta',
-								'content'=> (!empty($img_med_src) &&!empty($img_med_src[0])? $img_med_src[0]:$event_permalink)
+								'content'=> (!empty($img_src) &&!empty($img_src[0])? $img_src[0]:$event_permalink)
 							),
 							'description'=>array(
 								'type'=>'meta',

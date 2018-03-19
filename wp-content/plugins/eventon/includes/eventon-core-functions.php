@@ -1098,7 +1098,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 			if(!empty($lang_name)){
 				$output[$x] = $lang_name;
 			}else{
-				$output[$x] = (!empty($options['evcal_eventt'.$ab]))? $options['evcal_eventt'.$ab]:'Event Type '.$ab;
+				$output[$x] = (!empty($options['evcal_eventt'.$ab]))? $options['evcal_eventt'.$ab]: __('Event Type','eventon').' '.$ab;
 			}			
 		}
 		return $output;
@@ -1790,6 +1790,18 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	}
 
 // SUPPORT FUNCTIONS
+
+	// Login link
+	// @since 2.6.5
+		function evo_login_url($permalink =''){
+			$opt = get_option('evcal_options_evcal_1');
+
+			if( !empty( $opt['evo_login_link']))  return $opt['evo_login_link'];
+
+			return wp_login_url($permalink);
+
+		}
+
 	// Link Related
 		// convert link to acceptable link
   			function evo_format_link($url){

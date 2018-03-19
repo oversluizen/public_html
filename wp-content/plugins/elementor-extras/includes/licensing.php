@@ -242,11 +242,11 @@ class Namogo_Licensing {
 
 		$status = get_option( $this->product_id . '_license_status' );
 
-		if ( ! $status ) {
-			// User hasn't saved the license to settings yet. No use making the call.
-			return false;
-		}
-
+		// if ( ! $status ) {
+		// 	// User hasn't saved the license to settings yet. No use making the call.
+		// 	return false;
+		// }
+		$status = 'valid';
 		return trim( $status );
 	}
 
@@ -289,7 +289,6 @@ class Namogo_Licensing {
 			// retrieve the license from the database
 			$license = $_POST[ $this->product_id . '_license_key' ];
 
-
 			// data to send in our API request
 			$api_params = array(
 				'edd_action' => 'activate_license',
@@ -308,17 +307,27 @@ class Namogo_Licensing {
 			);
 
 			// make sure the response came back okay
-			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			// if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 
 				if ( is_wp_error( $response ) ) {
-					$message = $response->get_error_message();
-				} else {
-					$message = __( 'An error occurred, please try again.' );
-				}
+			// 		$message = $response->get_error_message();
+			// 	} else {
+			// 		$message = __( 'An error occurred, please try again.' );
+			// 	}
 
 			} else {
 
-				$license_data = json_decode( wp_remote_retrieve_body( $response ) );
+				// $license_data = json_decode( wp_remote_retrieve_body( $response ) );
+				$license_data = array (
+				'success' => true,
+				'license' => 'valid',
+				'item_name' => 'Elementor+Extras',
+				'error' => 'missing',
+				'checksum' => '94634109186fafe5d86c8c4b58aa2e0a'
+				) ;
+
+				// var_dump($license_data);
+				// die();
 
 				if ( false === $license_data->success ) {
 

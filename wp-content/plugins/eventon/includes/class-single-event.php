@@ -1,9 +1,14 @@
 <?php
 /**
  * Single Event Template Related Class
+ * Initiated only on single event page
  * @version 2.5.4
  */
 class evo_sinevent{
+
+	public $RI = 0;
+	public $L = 'L1';
+
 	public function __construct(){
 		$this->evo_opt = get_option('evcal_options_evcal_1');
 
@@ -21,6 +26,27 @@ class evo_sinevent{
 		add_action('eventon_oneevent_head', array($this, 'oneevent_head'), 10);
 		add_action('eventon_oneevent_repeat_header', array($this, 'oneevent_repeat_header'), 10);
 		add_action('eventon_oneevent_event_data', array($this, 'oneevent_event_data'), 10);
+
+		// Set query Repeat instance for page
+		global $wp_query;
+
+		if( isset($_GET['ri']))	$this->RI = (int)$_GET['ri'];
+		if( isset($_GET['l'])) $this->L = $_GET['l'];
+
+		if(isset($wp_query->query["var"])){
+			$url_var = $wp_query->query["var"];
+			
+			$url_var = explode('.', $url_var);
+			$vars = array();
+			
+			foreach($url_var as $var){
+				$split = explode('-', $var);
+
+				// RI
+				if($split[0] == 'ri') $this->RI = (int)$split[1];
+				if($split[0] == 'l') $this->L = $split[1];
+			}
+		}
 	}
 
 	// hook for single event page
@@ -61,23 +87,26 @@ class evo_sinevent{
 		}
 		function oneevent_head(){
 
-			$repeati = (isset($_GET['ri']))? $_GET['ri']: 0;
-			$lang = (isset($_GET['l']))? $_GET['l']: 'L1';	
+			$repeati = $this->RI;
+			$lang = $this->L;	
+
 
 			?><div id='evcal_head' class='calendar_header'><p id='evcal_cur'><?php echo $this->get_single_event_header(get_the_ID(), $repeati, $lang);?></p></div><?php
 		}
 		function oneevent_repeat_header(){
-			$repeati = (isset($_GET['ri']))? $_GET['ri']: 0;
+			$repeati = $this->RI;
 			$this->repeat_event_header($repeati, get_the_ID() );
 		}
 
 		function oneevent_event_data(){
 			global $eventon;
 
-			$repeati = (isset($_GET['ri']))? $_GET['ri']: 0;
-			$lang = (isset($_GET['l']))? $_GET['l']: 'L1';
+			$repeati = $this->RI;
+			$lang = $this->L;
 
-			$content =  $eventon->evo_generator->get_single_event_data( get_the_ID(), $lang, $repeati);			
+			$single_events_args = apply_filters('eventon_single_event_page_data',array());
+
+			$content =  $eventon->evo_generator->get_single_event_data( get_the_ID(), $lang, $repeati, $single_events_args);			
 			echo $content[0]['content'];
 		}
 
@@ -211,6 +240,7 @@ class evo_sinevent{
 
 			// next link 
 			if($ri<$repeat_count){
+				$ri = (int)$ri;
 				$next = $date->get_correct_formatted_event_repeat_time($ev_vals, ($ri+1));
 				//print_r($next); 
 				$next_link = $this->get_repeat_event_url($event_permalink, ($ri+1) );
@@ -234,7 +264,7 @@ class evo_sinevent{
 			$sin_event_evodata = apply_filters('evosin_evodata_vals',array(
 				'mapformat'=> (($evopt1['evcal_gmap_format']!='')?$evopt1['evcal_gmap_format']:'roadmap'),
 				'mapzoom'=> ( ($evopt1['evcal_gmap_zoomlevel']!='')?$evopt1['evcal_gmap_zoomlevel']:'12' ),
-				'mapscroll'=> ( evo_settings_val('evcal_gmap_scroll' ,$evopt1)?'true':'false'),
+				'mapscroll'=> ( !evo_settings_val('evcal_gmap_scroll' ,$evopt1)?'true':'false'),
 				'evc_open'=>'1',
 				'mapiconurl'=> ( !empty($evopt1['evo_gmap_iconurl'])? $evopt1['evo_gmap_iconurl']:''),
 			));
@@ -256,4 +286,3 @@ class evo_sinevent{
 
 }
 
-new evo_sinevent();

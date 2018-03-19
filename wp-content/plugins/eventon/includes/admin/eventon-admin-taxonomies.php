@@ -181,7 +181,7 @@ class eventon_taxonomies{
 				return array(
 					'term_name'=>array(
 						'type'=>'text',
-						'name'=>'Location Name',
+						'name'=> __('Location Name','eventon'),
 						'placeholder'=>'eg. Irving City Park',
 						'value'=> ($event_tax_term? $event_tax_term->name:''),
 						'var'=>	'term_name',
@@ -189,38 +189,38 @@ class eventon_taxonomies{
 					),
 					'description'=>array(
 						'type'=>'textarea',
-						'name'=>'Location Description',
+						'name'=>__('Location Description','eventon'),
 						'var'=>'description',
 						'value'=> ($event_tax_term? $event_tax_term->description:''),				
 					),
 					'location'=>array(
 						'type'=>'text',
-						'name'=>'Location Address',
+						'name'=>__('Location Address','eventon'),
 						'placeholder'=>'eg. 12 Rue de Rivoli, Paris',
 						'var'=>'location_address'				
 					),
 					'location_city'=>array(
 						'type'=>'text',
-						'name'=>'Location City (Optional)',
+						'name'=>__('Location City (Optional)','eventon'),
 						'var'=>'location_city'				
 					),
 					'location_state'=>array(
 						'type'=>'text',
-						'name'=>'Location State (Optional)',
+						'name'=>__('Location State (Optional)','eventon'),
 						'var'=>'location_state'				
 					),
 					'location_country'=>array(
 						'type'=>'text',
-						'name'=>'Location Country (Optional)',
+						'name'=>__('Location Country (Optional)','eventon'),
 						'var'=>'location_country'				
 					),
 					'evcal_lat'=>array(
 						'type'=>'text',
-						'name'=>'Latitude',	
+						'name'=>__('Latitude','eventon'),	
 						'var'=> 'location_lat'					
 					),'evcal_lon'=>array(
 						'type'=>'text',
-						'name'=>'Longitude',
+						'name'=>__('Longitude','eventon'),
 						'var'=> 'location_lon'					
 					),'evcal_location_link'=>array(
 						'type'=>'text',
@@ -229,7 +229,7 @@ class eventon_taxonomies{
 					),
 					'evo_loc_img'=>array(
 						'type'=>'image',
-						'name'=>'Location Image',
+						'name'=>__('Location Image','eventon'),
 						'var'=>	'evo_loc_img'	
 					),
 					'submit'=>array('type'=>'button',)
@@ -240,7 +240,7 @@ class eventon_taxonomies{
 				return array(
 					'term_name'=>array(
 						'type'=>'text',
-						'name'=>'Organizer Name',
+						'name'=>__('Organizer Name','eventon'),
 						'placeholder'=>'eg. Electronic Entertainments',
 						'value'=> ($event_tax_term? $event_tax_term->name:''),
 						'var'=>	'term_name',
@@ -248,32 +248,32 @@ class eventon_taxonomies{
 					),
 					'description'=>array(
 						'type'=>'textarea',
-						'name'=>'Organizer Description',
+						'name'=>__('Organizer Description','eventon'),
 						'var'=>'description'				
 					),
 					'evcal_org_contact'=>array(
 						'type'=>'text',
-						'name'=>'Organizer Contact Information',
+						'name'=>__('Organizer Contact Information','eventon'),
 						'placeholder'=>'eg. noone [at] someemail.com',
 						'var'=>'evcal_org_contact'				
 					),
 					'evcal_org_address'=>array(
 						'type'=>'text',
-						'name'=>'Organizer Address',	
+						'name'=>__('Organizer Address','eventon'),	
 						'var'=> 'evcal_org_address'					
 					),'evcal_org_exlink'=>array(
 						'type'=>'text',
-						'name'=>'Organizer Link',
+						'name'=>__('Organizer Link','eventon'),
 						'var'=> 'evcal_org_exlink'					
 					),
 					'_evocal_org_exlink_target'=>array(
 						'type'=>'yesno',
-						'name'=>'Open link in new window',	
+						'name'=>__('Open link in new window','eventon'),	
 						'var'=>'_evocal_org_exlink_target'					
 					),
 					'evo_org_img'=>array(
 						'type'=>'image',
-						'name'=>'Organizer Image',
+						'name'=>__('Organizer Image','eventon'),
 						'var'=>	'evo_org_img'	
 					),
 					'submit'=>array('type'=>'button',)

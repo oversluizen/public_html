@@ -247,3 +247,30 @@ if ( ! function_exists( 'astra_woo_shop_thumbnail_wrap_end' ) ) {
 		echo '</div>';
 	}
 }
+
+
+/**
+ * Woocommerce filter - Widget Products Tags
+ */
+if ( ! function_exists( 'astra_widget_product_tag_cloud_args' ) ) {
+
+	/**
+	 * Woocommerce filter - Widget Products Tags
+	 *
+	 * @param  array $args Tag arguments.
+	 * @return array       Modified tag arguments.
+	 */
+	function astra_widget_product_tag_cloud_args( $args = array() ) {
+
+		$sidebar_link_font_size            = astra_get_option( 'font-size-body' );
+		$sidebar_link_font_size['desktop'] = ( '' != $sidebar_link_font_size['desktop'] ) ? $sidebar_link_font_size['desktop'] : 15;
+
+		$args['smallest'] = intval( $sidebar_link_font_size['desktop'] ) - 2;
+		$args['largest']  = intval( $sidebar_link_font_size['desktop'] ) + 3;
+		$args['unit']     = 'px';
+
+		return apply_filters( 'astra_widget_product_tag_cloud_args', $args );
+	}
+	add_filter( 'woocommerce_product_tag_cloud_widget_args', 'astra_widget_product_tag_cloud_args', 90 );
+
+}

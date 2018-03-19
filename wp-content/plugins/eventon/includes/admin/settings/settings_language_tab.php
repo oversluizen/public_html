@@ -2,7 +2,7 @@
 /**
  * Language Settings 
  *
- * @version		2.4.7
+ * @version		2.6.5
  * @package		EventON/settings
  * @category	Settings
  * @author 		AJDE
@@ -18,7 +18,8 @@ class evo_settings_lang{
 		$this->evopt = get_option('evcal_options_evcal_1');
 		$this->lang_version = (!empty($_GET['lang']))? $_GET['lang']: 'L1';
 		
-		$this->lang_options = (!empty($this->evcal_opt[2][$this->lang_version]))? $this->evcal_opt[2][$this->lang_version]:null;
+		$evo_opt_lang = get_option('evcal_options_evcal_2');
+		$this->lang_options = (!empty($evo_opt_lang[$this->lang_version]))? $evo_opt_lang[$this->lang_version]:null;
 
 		$this->lang_variations = apply_filters('eventon_lang_variation', array('L1','L2', 'L3'));
 		$this->uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
@@ -176,6 +177,7 @@ class evo_settings_lang{
 			return $output;
 		}
 
+		// Language section fields
 		function language_variables_array(){
 			$output =  array(
 				array('type'=>'togheader','name'=>__('Months and Dates','eventon')),
@@ -235,19 +237,19 @@ class evo_settings_lang{
 					),array(
 						'label'=>'Title','name'=>'evcal_lang_stitle',
 					),array(
-						'label'=>'All','name'=>'evcal_lang_all',
+						'label'=>__('All','eventon'),'name'=>'evcal_lang_all',
 						'placeholder'=>'Sort options all text'
 					),array(
-						'label'=>'Current Month','name'=>'evcal_lang_gototoday',
+						'label'=>__('Current Month','eventon'),'name'=>'evcal_lang_gototoday',
 					),array('label'=>'Apply Filters','name'=>'evcal_lang_apply_filters'),
 
 					array('type'=>'togend'),
 				array('type'=>'togheader','name'=>__('Event Card','eventon')),
 					array(
-						'label'=>'Location Name','name'=>'evcal_lang_location_name',
+						'label'=>__('Location Name','eventon'),'name'=>'evcal_lang_location_name',
 					)
-					,array('label'=>'Location','name'=>'evcal_lang_location')
-					,array('label'=>'Event Location','name'=>'evcal_evcard_loc')
+					,array('label'=>__('Location','eventon'),'name'=>'evcal_lang_location')
+					,array('label'=>__('Event Location','eventon'),'name'=>'evcal_evcard_loc')
 					,array(
 						'label'=>'Type your address','name'=>'evcalL_getdir_placeholder',
 						'legend'=>'Get directions section'

@@ -155,34 +155,30 @@ class EVO_Product{
 
 		function set_transient($transient){
 
-			if( property_exists( $transient, 'checked') ) {
-				if( $checked = $transient->checked ) {
-					$this->plugindata_from_file();
+			$this->plugindata_from_file();
 
-					$item = array(
-						'id'	=> 'evo-'.$this->slug,
-						'slug'	=> $this->slug,
-						'plugin'=> $this->get_prop('plugin_slug'),
-						'new_version'=> ($this->get_prop('remote_version')? $this->get_prop('remote_version'):''),
-						'version'=>$this->get_prop('version'),
-						'url'=>$this->get_prop('plugin_uri')
-					);	
+			$item = array(
+				'id'	=> 'evo-'.$this->slug,
+				'slug'	=> $this->slug,
+				'plugin'=> $this->get_prop('plugin_slug'),
+				'new_version'=> ($this->get_prop('remote_version')? $this->get_prop('remote_version'):''),
+				'version'=>$this->get_prop('version'),
+				'url'=>$this->get_prop('plugin_uri')
+			);	
 
-					if($this->get_prop('package') && $this->is_active()){
-						$item['package'] = $this->get_prop('package');
-					}
+			if($this->get_prop('package') && $this->is_active()){
+				$item['package'] = $this->get_prop('package');
+			}
 
-					// if newer version available
-					if($this->get_prop('version') && $this->get_prop('remote_version') && 
-						version_compare( $this->get_prop('version'), $this->get_prop('remote_version'), '<' )
-					){
-						$transient->response[ $this->get_prop('plugin_slug') ] = (object) $item;
-						unset($transient->no_update[ $this->get_prop('plugin_slug') ]);
-					}else{
-						$transient->no_update[ $this->get_prop('plugin_slug') ] = (object) $item;
-						unset($transient->response[ $this->get_prop('plugin_slug') ]);
-					}
-				}
+			// if newer version available
+			if($this->get_prop('version') && $this->get_prop('remote_version') && 
+				version_compare( $this->get_prop('version'), $this->get_prop('remote_version'), '<' )
+			){
+				$transient->response[ $this->get_prop('plugin_slug') ] = (object) $item;
+				unset($transient->no_update[ $this->get_prop('plugin_slug') ]);
+			}else{
+				$transient->no_update[ $this->get_prop('plugin_slug') ] = (object) $item;
+				unset($transient->response[ $this->get_prop('plugin_slug') ]);
 			}
 
             return $transient;
@@ -421,10 +417,10 @@ class EVO_Product{
 		$this->set_prop('version', $value);
 	}
 
-	public function kriyathmakada(){
+	public function kriyathmakada(){			
 		return true;
-		// return ($this->get_prop('status') && $this->get_prop('status') == 'active' && $this->get_prop('key') ) ?
-			// true: false;
+	// 	($this->get_prop('status') && $this->get_prop('status') == 'active' && $this->get_prop('key') ) ?
+	// 		true: false;
 	}
 
 	// eventon products kriyathmakada kiya baleema		

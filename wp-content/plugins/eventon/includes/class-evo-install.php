@@ -56,12 +56,11 @@ class evo_install {
 		foreach($crons as $cron_hook=>$data){
 
 			if (! wp_next_scheduled ( $cron_hook )){
-				echo $cron_hook;
+				// echo $cron_hook;
 				wp_schedule_event( time(), $data['frequency'], $cron_hook );
 			} 				
 
-			if(!empty($data['callback']))
-				add_action($cron_hook, $data['callback'] );
+			if(!empty($data['callback'])) add_action($cron_hook, $data['callback'] );
 
 		}
 

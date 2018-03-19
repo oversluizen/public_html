@@ -58,22 +58,6 @@ class Widget_Alert extends Widget_Base {
 	}
 
 	/**
-	 * Get widget categories.
-	 *
-	 * Retrieve the list of categories the alert widget belongs to.
-	 *
-	 * Used to determine where to display the widget in the editor.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @return array Widget categories.
-	 */
-	public function get_categories() {
-		return [ 'general-elements' ];
-	}
-
-	/**
 	 * Register alert widget controls.
 	 *
 	 * Adds different input fields to allow the user to change and customize the widget settings.
@@ -271,7 +255,7 @@ class Widget_Alert extends Widget_Base {
 	 * @access protected
 	 */
 	protected function render() {
-		$settings = $this->get_settings();
+		$settings = $this->get_settings_for_display();
 
 		if ( empty( $settings['alert_title'] ) ) {
 			return;

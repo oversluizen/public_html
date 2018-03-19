@@ -179,8 +179,8 @@ class evo_ajax{
 			// Location information
 				$location_name = !empty($_GET['locn']) ? $_GET['locn'] : false;
 				$location_address = !empty($_GET['loca']) ? $_GET['loca'] : false;
-				$location = ($location_name?$location_name . ' ':'') . ($location_address?$location_address:'');
-				$location = $this->esc_ical_text($location);
+				$location = ($location_name? $location_name . ' ':'') . ($location_address?$location_address:'');
+				$location = $this->esc_ical_text( stripslashes($location) );
 
 			//error_reporting(E_ALL);
 			//ini_set('display_errors', '1');

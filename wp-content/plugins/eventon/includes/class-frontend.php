@@ -18,6 +18,7 @@ class evo_frontend {
 	public function __construct(){
 		global $eventon;
 
+		
 		// eventon related wp options access on frontend
 		$this->evo_options = get_option('evcal_options_evcal_1');
 		$this->evo_lang_opt = get_option('evcal_options_evcal_2');
@@ -56,8 +57,16 @@ class evo_frontend {
 
 		add_action( 'wp_footer', array( $this, 'footer_code' ) ,15);
 
+		add_filter('query_vars',array($this, 'query_vars'));
+		add_rewrite_endpoint('var', EP_PERMALINK);
 		
 	}
+
+	// Pass custom end points to single event URL
+		function query_vars($vars){
+			$vars[] = "var";
+			return $vars;
+		}
 
 	
 	// styles and scripts
@@ -71,6 +80,7 @@ class evo_frontend {
 			//wp_enqueue_script('testgmap','https://maps.googleapis.com/maps/api/js'.$apikey);
 			//wp_enqueue_style( 'select2',AJDE_EVCAL_URL.'/assets/css/select2.css');
 			
+			//wp_register_script('evo_mobile',plugins_url(EVENTON_BASE . '/assets/js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
 			wp_register_script('evo_mobile',$eventon->assets_path.'js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
 			wp_register_script('evcal_easing', $eventon->assets_path. 'js/jquery.easing.1.3.js', array('jquery'),'1.0',true );//2.2.24
 			wp_register_script('evo_mouse', $eventon->assets_path. 'js/jquery.mousewheel.min.js', array('jquery'),$eventon->version,true );//2.2.24
@@ -319,6 +329,11 @@ class evo_frontend {
 			//print_r($post);
 
 			if($post && $post->post_type=='ajde_events'):
+
+				// if disable OG tags set via settings
+				if( evo_settings_check_yn($this->evo_options,'evosm_disable_ogs') ) return false;
+				
+
 				//$thumbnail = get_the_post_thumbnail($post->ID, 'medium');
 				$img_id =get_post_thumbnail_id($post->ID);
 				$pmv = get_post_meta($post->ID);
@@ -334,7 +349,7 @@ class evo_frontend {
 				<meta property="og:url" content="<?php echo get_permalink($post->ID);?>" />
 				<meta property="og:description" content="<?php echo $excerpt;?>" />
 				<?php if($img_id!=''): 
-					$img_src = wp_get_attachment_image_src($img_id,'medium');
+					$img_src = wp_get_attachment_image_src($img_id,'full');
 				?>
 					<meta property="og:image" content="<?php echo $img_src[0];?>" /> 
 					<meta property="og:image:width" content="<?php echo $img_src[1];?>" /> 
@@ -647,7 +662,8 @@ class evo_frontend {
 					'id'=>'',
 					'classes'=>'eventon_events_list',
 					'CLin'=>'eventon_list_event evo_pop_body evcal_eventcard',
-					'CLclosebtn'
+					'CLclosebtn',
+					'content'=>''
 				)
 			));
 
@@ -663,7 +679,7 @@ class evo_frontend {
 							<div class="evo_content_inin">
 								<div class="evo_lightbox_content">
 									<a class='evolbclose <?php echo !empty($lb['CLclosebtn'])? $lb['CLclosebtn']:'';?>'>X</a>
-									<div class='evo_lightbox_body <?php echo !empty($lb['CLin'])? $lb['CLin']:'';?>'></div>
+									<div class='evo_lightbox_body <?php echo !empty($lb['CLin'])? $lb['CLin']:'';?>'><?php echo !empty($lb['content'])? $lb['content']:'';?> </div>
 								</div>
 							</div>							
 						</div>

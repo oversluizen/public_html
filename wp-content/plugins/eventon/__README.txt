@@ -4,8 +4,8 @@ Plugin Name: EventON
 Author URI: http://ashanjay.com/
 Tags: calendar, event calendar, event posts
 Requires at least: 4.0
-Tested up to: 4.9
-Stable tag: 2.6.2
+Tested up to: 4.9.1
+Stable tag: 2.6.5
 Initial Release: 2011-12-21
 
 Event calendar plugin for wordpress that utilizes WP's custom post type.  
@@ -20,6 +20,32 @@ Event calendar plugin for wordpress that utilizes WP's custom post type. This pl
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+= 2.6.5 (2017-12-11) =
+ADDED: Option to disable auto generated og: meta tags
+ADDED: Notice for interchangeable shortcode usage
+ADDED: Single event to be able to pass arguments using filter eventon_single_event_page_data
+FIXED: all events wp-admin responsiveness
+FIXED: Language saved text are not reflecting upon page reload
+FIXED: Missing backend translation codes
+FIXED: Facebook share image to be full size
+FIXED: Single event not correctly using map scroll disable
+FIXED: Deprecation handling method
+FIXED: Quick edit not saving some of yes no values
+
+= 2.6.4 (2017-11-29) =
+FIXED: transient error on evo product class
+FIXED: End day all day events not passing value correct 
+FIXED: Settings page coming in blank
+FIXED: Event maps license product ID not correct
+FIXED: Event slider product ID error in licensing
+FIXED: evo_check_updates cron hook name getting printed in the admin pages
+FIXED: Corresponding language not saving in event edit page
+FIXED: mobile lightbox positioning
+
+= 2.6.3 (2017-11-20) =
+FIXED: alphabetical sorting for addons list
+FIXED: Setting changes not reflecting on reload
+
 = 2.6.2 (2017-11-17) = 
 ADDED: Deprecated class handing and recording for alternatives
 FIXED: license activation not working

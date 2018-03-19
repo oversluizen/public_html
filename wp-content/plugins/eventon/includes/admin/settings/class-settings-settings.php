@@ -5,6 +5,7 @@
   */
 class evo_settings_settings{
 	function __construct($evcal_opt)	{
+		
 		$this->evcal_opt = $evcal_opt;
 
 		$this->ajde_settings = new  ajde_settings('evcal_1');
@@ -38,7 +39,11 @@ class evo_settings_settings{
 					),
 					array('id'=>'evcal_cal_hide_past','type'=>'end_afterstatement'),				
 					
-					array('id'=>'evo_content_filter','type'=>'dropdown','name'=>__('Select calendar event content filter type','eventon'),'legend'=>__('This will disable the use of the_content filter on event details and custom field values.','eventon'), 'options'=>array( 'evo'=>'EventON Content Filter','def'=>'Default WordPress Filter','none'=>'No Filter')),				
+					array('id'=>'evo_content_filter','type'=>'dropdown','name'=>__('Select calendar event content filter type','eventon'),'legend'=>__('This will disable the use of the_content filter on event details and custom field values.','eventon'), 'options'=>array( 
+							'evo'=>__('EventON Content Filter','eventon'),
+							'def'=>__('Default WordPress Filter','eventon'),
+							'none'=>__('No Filter','eventon')
+						)),				
 					//array('id'=>'evcal_dis_conFilter','type'=>'yesno','name'=>__('Disable Content Filter','eventon'),'legend'=>__('This will disable to use of the_content filter on event details and custom field values.','eventon')),				
 					
 					
@@ -50,60 +55,60 @@ class evo_settings_settings{
 					array('id'=>'evcal_css_head','type'=>'yesno','name'=>__('Write dynamic styles to header','eventon'), 'legend'=>__('If making changes to appearances dont reflect on front-end try this option. This will write those dynamic styles inline to page header','eventon')),
 					array('id'=>'evcal_concat_styles','type'=>'yesno','name'=>__('Concatenate all eventon addon style files - Beta (Only supported addons)','eventon'), 'legend'=>__('Enabling this will create single style file for all the eventon addons activated in your site that support this feature. This will help improve loading speed.','eventon')),
 					
-					array('id'=>'evcal_move_trash','type'=>'yesno','name'=>__('Auto move events to trash when the event date is past'), 'legend'=>__('This will move events to trash when the event end date is past current date')),
+					array('id'=>'evcal_move_trash','type'=>'yesno','name'=>__('Auto move events to trash when the event date is past','eventon'), 'legend'=>__('This will move events to trash when the event end date is past current date','eventon')),
 
 					array('id'=>'evcal_header_generator',
 						'type'=>'yesno',
 						'name'=>__('Remove eventon generator meta data from website header','eventon'), 
-						'legend'=>__('Remove the meta data eventon place on your website header with eventon version number for debugging purposes')),
+						'legend'=>__('Remove the meta data eventon place on your website header with eventon version number for debugging purposes','eventon')),
 
 					array('id'=>'evo_donot_delete',
 						'type'=>'yesno',
 						'name'=>__('Do not delete eventon settings when I delete EventON plugin','eventon'), 
-						'legend'=>__('Activating this will not delete the saved settings for eventon when you delete eventon plugin. By Default it will delete saved data.')),
+						'legend'=>__('Activating this will not delete the saved settings for eventon when you delete eventon plugin. By Default it will delete saved data.','eventon')),
 					
 					array('id'=>'evo_rtl',
 						'type'=>'yesno',
 						'name'=>__('Enable RTL (right-to-left all eventon calendars)','eventon'), 
-						'legend'=>__('This will make all your eventon calendars RTL.')),
+						'legend'=>__('This will make all your eventon calendars RTL.','eventon')),
 
 					array('id'=>'evo_hide_shortcode_btn',
 						'type'=>'yesno',
 						'name'=>__('Hide add eventon shortcode generator button from wp-admin','eventon'), 
-						'legend'=>__('This will remove the [] ADD EVENTON button that appear above text editor next to media button. This button allow you to open shortcode generator to create eventon shortcodes easily.')
+						'legend'=>__('This will remove the [] ADD EVENTON button that appear above text editor next to media button. This button allow you to open shortcode generator to create eventon shortcodes easily.','eventon')
 					),
 					array('id'=>'evo_lang_corresp',
 						'type'=>'yesno',
 						'name'=>__('Enable language corresponding events','eventon'), 
-						'legend'=>__('This will allow you to create events only for L1, L2 etc. and show only those events in calendars specified as lang=L2 etc.')
+						'legend'=>__('This will allow you to create events only for L1, L2 etc. and show only those events in calendars specified as lang=L2 etc.','eventon')
 					),
 					array('id'=>'evo_php_coding',
 						'type'=>'yesno',
 						'name'=>__('Enable PHP code execution area in styles (For advance use only)','eventon'), 
-						'legend'=>__('This will allow you to type PHP codes and execute them on the website. But be aware this also opens the door to other security concerns.')
+						'legend'=>__('This will allow you to type PHP codes and execute them on the website. But be aware this also opens the door to other security concerns.','eventon')
 					),
 					array('id'=>'evo_login_link',
 						'type'=>'text',
 						'name'=>__('URL for custom login link','eventon'), 
-						'legend'=>__('If provided this URL will be used instead of default wordpress URL for users to login where eventon access is restricted to only login users.','eventon')
+						'legend'=>__('If provided this URL will be used instead of default wordpress URL for users to login where eventon access is restricted to only login users.','eventon','eventon')
 					),
 					array('id'=>'evo_dis_icshtmldecode',
 						'type'=>'yesno',
 						'name'=>__('Disable ICS file special character encoding','eventon'), 
-						'legend'=>__('This will disable html special character dencoding for all ics downloaded files for events')
+						'legend'=>__('This will disable html special character dencoding for all ics downloaded files for events','eventon')
 					),
 
 					array('id'=>'evo_load_scripts_only_onevo',
 						'type'=>'yesno',
 						'name'=>__('Load eventON scripts and styles only on eventON pages','eventon'), 
-						'legend'=>__('This will load eventon scripts and styles only when eventon shortcode is called in the page.'),
+						'legend'=>__('This will load eventon scripts and styles only when eventon shortcode is called in the page.','eventon'),
 						'afterstatement'=>'evo_load_scripts_only_onevo'
 					),
 						array('id'=>'evo_load_scripts_only_onevo','type'=>'begin_afterstatement'),
 						array('id'=>'evo_load_all_styles_onpages',
 							'type'=>'yesno',
 							'name'=>__('Load all eventON styles to all page headers','eventon'), 
-							'legend'=>__('This will load eventon styles into every page header. This will make sure that styles are already loaded in the page when eventon calendar HTML is loaded on to the page and avoid delay in calendar layout rendering.')
+							'legend'=>__('This will load eventon styles into every page header. This will make sure that styles are already loaded in the page when eventon calendar HTML is loaded on to the page and avoid delay in calendar layout rendering.','eventon')
 						),
 						array('id'=>'evo_load_scripts_only_onevo','type'=>'end_afterstatement'),
 
@@ -124,7 +129,7 @@ class evo_settings_settings{
 						array('id'=>'evo_remove_jsonld',
 							'type'=>'yesno',
 							'name'=>__('Remove JSON-LD data for events','eventon'), 
-							'legend'=>__('This will remove JSON-LD structured data scripts added for each event.')
+							'legend'=>__('This will remove JSON-LD structured data scripts added for each event.','eventon')
 						),
 
 
@@ -165,8 +170,13 @@ class evo_settings_settings{
 					),
 					array('id'=>'evcal_cal_gmap_api','type'=>'end_afterstatement'),
 					
-					array('id'=>'evo_gmap_api_key','type'=>'text','name'=>__('Google maps API Key (Required)','eventon').' <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">How to get API Key</a>','legend'=>'Not required with Gmap API V3, but typing a google maps API key will append the key and will enable monitoring map loading activity from google.','afterstatement'=>'evcal_cal_gmap_api'),
-					array('id'=>'evcal_gmap_scroll','type'=>'yesno','name'=>__('Disable scrollwheel zooming on Google Maps','eventon'),'legend'=>'This will stop google maps zooming when mousewheel scrolled.'),
+					array('id'=>'evo_gmap_api_key','type'=>'text','name'=>__('Google maps API Key (Required)','eventon').' <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">How to get API Key</a>',
+						'legend'=>__('Not required with Gmap API V3, but typing a google maps API key will append the key and will enable monitoring map loading activity from google.','eventon'),
+						'afterstatement'=>'evcal_cal_gmap_api'),
+					array('id'=>'evcal_gmap_scroll','type'=>'yesno',
+						'name'=>__('Disable scrollwheel zooming on Google Maps','eventon'),
+						'legend'=>__('This will stop google maps zooming when mousewheel scrolled.','eventon')
+					),
 					
 					array('id'=>'evcal_gmap_format', 'type'=>'dropdown','name'=>__('Google maps display type:','eventon'),
 						'options'=>array(
@@ -204,12 +214,14 @@ class evo_settings_settings{
 							'vintageyellowlight'=>'Vintage Yellow Light',	
 						))
 					),
-					array('id'=>'evo_gmap_iconurl','type'=>'text','name'=>__('Custom map marker icon complete http url','eventon'),'legend'=>'Type a complete http:// url for a PNG image that can be used instead of the default red google map markers.','default'=>'eg. http://www.site.com/image.png'),
+					array('id'=>'evo_gmap_iconurl','type'=>'text','name'=>__('Custom map marker icon complete http url','eventon'),
+						'legend'=> __('Type a complete http:// url for a PNG image that can be used instead of the default red google map markers.','eventon'),'default'=>'eg. http://www.site.com/image.png'
+					),
 
 					array('id'=>'evo_hide_location',
 						'type'=>'yesno',
 						'name'=>__('Make all event location information visible only to logged-in users','eventon'), 
-						'legend'=>__('This will make all the event location infor visible only to loggedin users. This option will override individual event values set for this feature.')),
+						'legend'=>__('This will make all the event location infor visible only to loggedin users. This option will override individual event values set for this feature.','eventon')),
 			)),
 
 			array(
@@ -226,13 +238,17 @@ class evo_settings_settings{
 						'name'=>__('Calendar Header month/year format. <i>(<b>Allowed values:</b> m = month name, Y = 4 digit year, y = 2 digit year)</i>','eventon') , 
 						'default'=>'m, Y'
 					),
-					array('id'=>'evo_usewpdateformat','type'=>'yesno','name'=>__('Use WP default Date format in eventON calendar (Excluding eventCard event date format)','eventon'), 'legend'=>__('Select this option to use the default WP Date format through out eventON calendar parts excluding eventCard main date format. Default format: yyyy/mm/dd','eventon')),
+					array('id'=>'evo_usewpdateformat','type'=>'yesno',
+						'name'=>__('Use WP default Date format in eventON calendar (Excluding eventCard event date format)','eventon'), 
+						'legend'=>__('Select this option to use the default WP Date format through out eventON calendar parts excluding eventCard main date format. Default format: yyyy/mm/dd','eventon')),
 										
-					array('id'=>'evo_timeF','type'=>'yesno','name'=>__('Allow universal event time format on eventCard','eventon'),'legend'=>'This will change the time format on eventCard to be a universal set format regardless of the month events span for.','afterstatement'=>'evo_timeF'),
+					array('id'=>'evo_timeF','type'=>'yesno','name'=>__('Allow universal event time format on eventCard','eventon'),
+						'legend'=>__('This will change the time format on eventCard to be a universal set format regardless of the month events span for.','eventon'),
+							'afterstatement'=>'evo_timeF'),
 						array('id'=>'evo_timeF','type'=>'begin_afterstatement'),
 						array('id'=>'evo_timeF_v','type'=>'text','name'=>__('Time Format','eventon'), 'default'=>'F j(l) g:ia'),
 						array('id'=>'evcal_api_mu_note','type'=>'note',
-							'name'=>'Acceptable date/time values: php <a href="http://php.net/manual/en/function.date.php" target="_blank">date()</a> '),
+							'name'=>__('Acceptable date/time values: php <a href="http://php.net/manual/en/function.date.php" target="_blank">date()</a> ','eventon')),
 						array('id'=>'evo_timeF','type'=>'end_afterstatement'),
 
 					array('id'=>'evcal_sh001','type'=>'subheader','name'=>__('Back-end Time/Date Settings','eventon')),
@@ -241,7 +257,10 @@ class evo_settings_settings{
 							'60'=>'1','12'=>'5','6'=>'10','4'=>'15','2'=>'30'
 						)
 					),
-					array('id'=>'evo_time_offset','type'=>'text','name'=>__('Custom eventon only time offset value (in minutes)','eventon'), 'legend'=>__('If the iCS download time or add to calendar time is off by some time use this to fix that offset number. You can use +/- with time in minutes','eventon'),'default'=>'eg. +120'),
+					array('id'=>'evo_time_offset','type'=>'text',
+						'name'=>__('Custom eventon only time offset value (in minutes)','eventon'), 
+						'legend'=>__('If the iCS download time or add to calendar time is off by some time use this to fix that offset number. You can use +/- with time in minutes','eventon'),
+						'default'=>'eg. +120'),
 			))),
 			array(
 				'id'=>'evcal_001a',
@@ -541,6 +560,11 @@ class evo_settings_settings{
 	// single events
 		function single_events(){
 			$data[] = array('id'=>'evosm','type'=>'subheader','name'=>'Single Event Page');
+
+			$data[] = array('id'=>'evosm_disable_ogs','type'=>'yesno',
+				'name'=>__('Disable auto generated OG: meta data in the single event page header.','eventon'),
+				'legend'=> __('Auto generated OG: meta tags will help your website share proper information via facebook.','eventon')
+			);
 			$data[] = array('id'=>'evosm_1','type'=>'yesno','name'=>'Create Single Events Page Sidebar',
 							'legend'=>'This will create a sidebar for single event page, to which you can add widgets from Appearance > Widget'
 						);

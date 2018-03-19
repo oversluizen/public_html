@@ -41,6 +41,7 @@ class EVO_Template_Loader {
 				return $template;
 
 			include_once('class-single-event.php');
+			new evo_sinevent();
 			
 			$paths[] 	= AJDE_EVCAL_PATH . '/templates/';
 			$file 	= 'single-ajde_events.php';

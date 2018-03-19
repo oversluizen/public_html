@@ -12,7 +12,7 @@ class EVO_Event{
 	private $pmv ='';
 
 	public function __construct($event_id, $event_pmv='', $ri = 0){
-		$this->event_id = $this->ID = $event_id;
+		$this->event_id = $this->ID = (int)$event_id;
 		$this->set_event_data($event_pmv);
 		$this->ri = $ri;
 	}
@@ -123,8 +123,6 @@ class EVO_Event{
 
 			$this->pmv = (!empty($pmv))? $pmv : get_post_custom($this->event_id);
 			$GLOBALS['EVO_props'][$this->event_id] = $this->pmv;
-			
-			
 		}
 		function get_data(){ return $this->pmv;}
 		function get_prop($field){
@@ -136,7 +134,6 @@ class EVO_Event{
 			$this->pmv[$field] = $value;
 
 			if($update) update_post_meta($this->ID, $field, $value);
-
 			if($update_obj)	$this->set_event_data();
 		}
 
@@ -155,6 +152,19 @@ class EVO_Event{
 				'pmv'=>$this->pmv
 			);
 			$GLOBALS['EVO_Event'] = (object)$data;
+		}
+		function get_event_post(){
+			global $wpdb;
+
+			$results = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID='{$this->event_id}'");
+			
+			if($results && count($results)>0){
+				$results = $results[0];
+				$this->author = $results->post_author;
+				$this->post_date = $results->post_date;
+				$this->content = $results->post_content;
+				$this->excerpt = $results->post_excerpt;
+			}
 		}
 		function get_start_unix(){	return (int)$this->get_prop('evcal_srow');	}
 		function get_end_unix(){	return (int)$this->get_prop('evcal_erow');	}
@@ -187,8 +197,8 @@ class EVO_Event{
 				) as $key){
 					if(empty($LocTermMeta[$key])) continue;
 					$output[$key] = $LocTermMeta[$key];
-				}
-				
+				}				
+
 				return $output;
 				
 			}else{

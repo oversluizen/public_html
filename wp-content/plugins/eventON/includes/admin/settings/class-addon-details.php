@@ -36,7 +36,7 @@ public function get_list(){
 			'desc'=>'The list style calendar works for you but you would really like a full grid calendar? Here is the addon that will convert EventON to a full grid calendar view.'
 		),
 		'eventon-events-map'=>array(
-			'id'=>'EVOEM',
+			'id'=>'EVEM',
 			'name'=>'EventsMap',
 			'link'=>'http://www.myeventon.com/addons/events-map/',
 			'download'=>'http://www.myeventon.com/addons/events-map/',
@@ -80,7 +80,7 @@ public function get_list(){
 			'download'=>'http://www.myeventon.com/addons/weekly-view',
 			'desc'=>'Do you have too many events to fit in one month and you want to organize them into days? This addon will allow you to showcase events for one day of the month at a time.'
 		),'eventon-rss'=>array(
-			'id'=>'EVORSS',
+			'id'=>'EVORF',
 			'name'=>'RSS Feed',
 			'link'=>'http://www.myeventon.com/addons/rss-feed/',
 			'download'=>'http://www.myeventon.com/addons/rss-feed/',
@@ -116,7 +116,7 @@ public function get_list(){
 			'download'=>'http://www.myeventon.com/addons/event-photos',
 			'desc'=>'Add a photo library to events instead of one featured image'
 		),'eventon-event-slider'=>array(
-			'id'=>'EVOEP',
+			'id'=>'EVOSL',
 			'name'=>'Event Slider',
 			'link'=>'http://www.myeventon.com/addons/event-slider',
 			'download'=>'http://www.myeventon.com/addons/event-slider',
@@ -184,6 +184,8 @@ public function get_list(){
 		)
 	));
 	
+
+	ksort($addons);
 	return $addons;
 }
 

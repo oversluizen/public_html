@@ -30,8 +30,19 @@ class evo_admin {
 		add_action('media_buttons_context',  array($this,'eventon_shortcode_button'));
 		add_filter( 'tiny_mce_version', array($this,'eventon_refresh_mce') ); 
 
+		add_filter('display_post_states', array($this,'post_state'),10,2);
+
 		//add_action( 'admin_enqueue_scripts', array($this,'eventon_admin_scripts') );
 		//add_action( 'admin_enqueue_scripts', array($this,'eventon_all_backend_files') );
+	}
+
+	function post_state( $states, $post){
+		//print_r($post);
+		if (  'page' == get_post_type( $post->ID ) &&  $post->post_name == 'event-directory'){
+	        $states[] = __('Events Page'); 
+	    } 
+
+	    return $states;
 	}
 
 // admin init
@@ -380,7 +391,7 @@ class evo_admin {
 
 		//our popup's title
 	  	$text = '[ ] ADD EVENTON';
-	  	$title = 'eventON Shortcode generator';
+	  	$title = __('eventON Shortcode generator','eventon');
 
 	  	//append the icon
 	  	$context .= "<a id='evo_shortcode_btn' class='ajde_popup_trig evo_admin_btn btn_prime' data-popc='eventon_shortcode' title='{$title}' href='#'>{$text}</a>";
@@ -402,7 +413,7 @@ class evo_admin {
 			'content'=>$content, 
 			'class'=>'eventon_shortcode', 
 			'attr'=>'clear="false"', 
-			'title'=>'Shortcode Generator',			
+			'title'=> __('Shortcode Generator','eventon'),			
 			//'subtitle'=>'Select option to customize shortcode variable values'
 		));
 	}
@@ -465,9 +476,9 @@ class evo_admin {
 
 	// plugin settings page additional links
 		function eventon_plugin_links($links) { 
-		  	$settings_link = '<a href="admin.php?page=eventon">Settings</a>'; 	  
-		  	$docs_link = '<a href="http://www.myeventon.com/documentation/" target="_blank">Docs</a>';
-		  	$news_link = '<a href="http://www.myeventon.com/news/" target="_blank">News</a>'; 
+		  	$settings_link = '<a href="admin.php?page=eventon">'.__('Settings','eventon').'</a>'; 	  
+		  	$docs_link = '<a href="http://www.myeventon.com/documentation/" target="_blank">'.__('Docs','eventon').'</a>';
+		  	$news_link = '<a href="http://www.myeventon.com/news/" target="_blank">'.__('News','eventon').'</a>'; 
 		  	array_unshift($links, $settings_link, $docs_link, $news_link); 
 		  	return $links; 
 		}

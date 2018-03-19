@@ -19,12 +19,6 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 	// additional fields array 
 	$_additions = apply_filters('evo_eventcard_adds' , array());
 	
-	/*$pmv = get_post_meta(140);
-	$dt = new evo_datetime();
-	$t = $dt->get_int_correct_event_time($pmv,7);
-	print_r($t);
-	*/
-
 
 	// FOR each
 	foreach($array as $box_f=>$box){
@@ -282,8 +276,10 @@ function eventon_eventcard_print($array, $evOPT, $evoOPT2){
 						$adjusted_unix_end = evo_get_adjusted_utc($object->eend);
 
 						$__ics_url =admin_url('admin-ajax.php').'?action=eventon_ics_download&amp;event_id='.$object->event_id.'&amp;sunix='.$adjusted_unix_start.'&amp;eunix='.$adjusted_unix_end . 
-							(isset($object->location_address) ? '&amp;loca='.$object->location_address : '' ).
+							(isset($object->location_address) ? '&amp;loca='. $object->location_address : '' ).
 							(isset($object->location_name) ? '&amp;locn='.$object->location_name : '' );
+
+
 						$__googlecal_link = eventon_get_addgoogle_cal(
 							$object, 
 							$adjusted_unix_start, 

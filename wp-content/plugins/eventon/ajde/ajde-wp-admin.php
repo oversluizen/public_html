@@ -394,7 +394,7 @@ class ajde_wp_admin{
 							}
 						}
 
-						$view_html = (!empty($view))? '<span class="ajdePOSH_tax">Possible Values <span >'. $view .'</span></span>': null;	
+						$view_html = (!empty($view))? '<span class="ajdePOSH_tax">'.__('Possible Values','eventon').' <span >'. $view .'</span></span>': null;	
 					}			
 					
 					echo 
@@ -460,7 +460,7 @@ class ajde_wp_admin{
 		public function get_content($shortcode_guide_array, $base_shortcode){
 			global $ajde;
 				
-			$__text_a = __('Select option below to customize shortcode variable values', $ajde->domain);
+			$__text_a = __('Select option below to customize shortcode variable values','eventon');
 			ob_start();
 
 			?>		
@@ -468,6 +468,7 @@ class ajde_wp_admin{
 					<h3 class='notifications '><em id='ajdePOSH_back' class='fa'></em><span id='ajdePOSH_subtitle' data-section='' data-bf='<?php echo $__text_a;?>'><?php echo $__text_a;?></span></h3>
 					<div class='ajdePOSH_inner'>
 						<div class='step1 steps'>
+						<p style='    background-color: #ff896e; color: #fff;padding: 10px; font-size: 12px;'><?php _e('WARNING! If you are interchangeably using shortcode parameters between other calendar shortcodes, bare in mind, that the shortcode parameters not available in its shortcode options may not be fully supported!','eventon');?></p>
 						<?php					
 							foreach($shortcode_guide_array as $options){
 								$__step_2 = (empty($options['variables']))? ' nostep':null;

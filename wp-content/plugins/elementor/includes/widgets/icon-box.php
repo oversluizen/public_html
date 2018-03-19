@@ -57,22 +57,6 @@ class Widget_Icon_Box extends Widget_Base {
 	}
 
 	/**
-	 * Get widget categories.
-	 *
-	 * Retrieve the list of categories the icon box widget belongs to.
-	 *
-	 * Used to determine where to display the widget in the editor.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @return array Widget categories.
-	 */
-	public function get_categories() {
-		return [ 'general-elements' ];
-	}
-
-	/**
 	 * Register icon box widget controls.
 	 *
 	 * Adds different input fields to allow the user to change and customize the widget settings.
@@ -134,6 +118,9 @@ class Widget_Icon_Box extends Widget_Base {
 			[
 				'label' => __( 'Title & Description', 'elementor' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => __( 'This is the heading', 'elementor' ),
 				'placeholder' => __( 'Enter your title', 'elementor' ),
 				'label_block' => true,
@@ -145,6 +132,9 @@ class Widget_Icon_Box extends Widget_Base {
 			[
 				'label' => '',
 				'type' => Controls_Manager::TEXTAREA,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => __( 'Click edit button to change this text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.', 'elementor' ),
 				'placeholder' => __( 'Enter your description', 'elementor' ),
 				'rows' => 10,
@@ -158,6 +148,9 @@ class Widget_Icon_Box extends Widget_Base {
 			[
 				'label' => __( 'Link to', 'elementor' ),
 				'type' => Controls_Manager::URL,
+				'dynamic' => [
+					'active' => true,
+				],
 				'placeholder' => __( 'https://your-link.com', 'elementor' ),
 				'separator' => 'before',
 			]
@@ -553,7 +546,7 @@ class Widget_Icon_Box extends Widget_Base {
 	 * @access protected
 	 */
 	protected function render() {
-		$settings = $this->get_settings();
+		$settings = $this->get_settings_for_display();
 
 		$this->add_render_attribute( 'icon', 'class', [ 'elementor-icon', 'elementor-animation-' . $settings['hover_animation'] ] );
 
@@ -573,6 +566,7 @@ class Widget_Icon_Box extends Widget_Base {
 		}
 
 		$this->add_render_attribute( 'i', 'class', $settings['icon'] );
+		$this->add_render_attribute( 'i', 'aria-hidden', 'true' );
 
 		$icon_attributes = $this->get_render_attribute_string( 'icon' );
 		$link_attributes = $this->get_render_attribute_string( 'link' );
@@ -621,7 +615,7 @@ class Widget_Icon_Box extends Widget_Base {
         <div class="elementor-icon-box-wrapper">
             <div class="elementor-icon-box-icon">
                 <{{{ iconTag + ' ' + link }}} class="elementor-icon elementor-animation-{{ settings.hover_animation }}">
-                    <i class="{{ settings.icon }}"></i>
+                    <i class="{{ settings.icon }}" aria-hidden="true"></i>
                 </{{{ iconTag }}}>
             </div>
             <div class="elementor-icon-box-content">
