@@ -918,7 +918,7 @@
 	.eventon_events_list .eventon_list_event .hasFtIMG .evcal_desc, .evo_pop_body .hasFtIMG .evcal_desc{
 		padding-left:170px;
 	}
-		.eventon_events_list .eventon_list_event .no_val.hasFtIMG .evcal_desc{	padding-left: 80px}
+		.eventon_events_list .eventon_list_event .no_val.hasFtIMG .evcal_desc{	padding-left: 95px}
 		.eventon_events_list .eventon_list_event .no_val .evcal_cblock{display: none;}
 		.eventon_events_list .eventon_list_event .no_val .evcal_desc, #evcal_widget .eventon_events_list .eventon_list_event .no_val .evcal_desc{
 			padding-left: 10px;

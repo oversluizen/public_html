@@ -27,7 +27,6 @@
 		padding-left: 80px;
  		line-height: 1.8;}
  	.yesno_leg_line span.ajde_yn_btn {position: absolute;}
- 	.evomb_body .ajdeToolTip:before{color: #CECECE}
  	.evomb_body .ajdeToolTip{opacity: 0.9;}
  	.ajde_icons.fa em{z-index: 1;}
  	/*.yesno_row {display: inline-block;}*/
@@ -44,6 +43,9 @@
 	    display: block;
  	}
  	.evoloading{position: relative;}
+
+ 	body.post-type-ajde_events table .evoevent_item .row-actions{display: none;}
+ 	body.post-type-ajde_events table .evoevent_item .evo_row_actions.row-actions{display: block;}
 
 /* basic styles using class values*/
 	.tac{text-align: center;}
@@ -67,7 +69,10 @@
 
 /* Button Styles */
 	.ajde_popup .evo_btn,
-	.evo_select_tax .evo_btn, .evomb_section .evo_btn{
+	.evo_select_tax .evo_btn, .evomb_section .evo_btn,
+	.eventon_mb .actions a.button_evo,
+	a.button_evo
+	{
 		color: #fff;
 		background-color: #f1c481;
 	    border-radius: 20px;
@@ -77,9 +82,11 @@
 	    display: inline-block;
 	    text-transform: uppercase;
 	    font-weight: bold; font-size: 14px;
+	    text-decoration: none;
 	}
 	.ajde_popup .evo_btn:hover,
-	.evo_select_tax .evo_btn:hover, .evomb_section .evo_btn:hover
+	.evo_select_tax .evo_btn:hover, .evomb_section .evo_btn:hover,
+	a.button_evo:hover
 	{opacity: 0.6;}
 
 /* general */

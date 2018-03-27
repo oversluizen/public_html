@@ -2,7 +2,6 @@
 namespace Elementor\Core\Settings\Page;
 
 use Elementor\Core\Settings\Base\Model as BaseModel;
-use Elementor\Modules\PageTemplates\Module as PageTemplatesModule;
 use Elementor\Plugin;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -114,11 +113,14 @@ class Model extends BaseModel {
 	 *    Panel settings.
 	 *
 	 *    @type string $title The panel title.
- 	 * }
+	 * }
 	 */
 	public function get_panel_page_settings() {
+		$document = Plugin::$instance->documents->get( $this->post->ID );
+
 		return [
-			'title' => __( 'Document Settings', 'elementor' ),
+			/* translators: %s: Document title */
+			'title' => sprintf( __( '%s Settings', 'elementor' ), $document::get_title() ),
 		];
 	}
 
@@ -160,10 +162,17 @@ class Model extends BaseModel {
 	 * @access protected
 	 */
 	protected function _register_controls() {
-		$controls = Plugin::$instance->documents->get_doc_or_auto_save( $this->post->ID, get_current_user_id() )->get_controls();
+		// Check if it's a real model, or abstract (for example - on import )
+		if ( $this->post->ID ) {
+			$document = Plugin::$instance->documents->get_doc_or_auto_save( $this->post->ID );
 
-		foreach ( $controls as $control_id => $args ) {
-			$this->add_control( $control_id, $args );
+			if ( $document ) {
+				$controls = $document->get_controls();
+
+				foreach ( $controls as $control_id => $args ) {
+					$this->add_control( $control_id, $args );
+				}
+			}
 		}
 	}
 }

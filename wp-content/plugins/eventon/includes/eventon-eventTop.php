@@ -81,21 +81,7 @@ function eventon_get_eventtop_print($array, $evOPT, $evOPT2){
 					$OT .= $end_content;
 					$OT .= "</span>";
 				}
-			
-				/*	
-				$day_content = apply_filters('evo_eventtop_day_block', array(
-						'year'=> ($object->showyear=='yes'?$object->start['Y']:''),
-						'date'=> $object->day_name.$object->html['html_date'],
-						'time'=> $object->html['html_time']
-					), $object);
-
-					foreach($day_content as $index=>$value){
-						if(empty($value)) continue;
-
-						$OT.= "<em class='evo_".$index."' >".$value.'</em>';
-					}
-				*/
-				
+							
 				$OT.= "<em class='clear'></em>";
 				$OT .= "</span>";
 

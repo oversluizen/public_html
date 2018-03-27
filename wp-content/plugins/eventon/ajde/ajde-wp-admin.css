@@ -90,7 +90,8 @@
 	.ajde_popup.eventon_shortcode{
 		width:470px
 	}
-	.ajde_popup label{cursor: default;}	
+	.ajde_popup label{cursor: default;pointer-events:none;}	
+	.ajde_popup .ajdeYN_row label{pointer-events:all;}
 	.ajde_popup_text.loading, .ajde_popup_text .evo_lightbox_loading{
 		opacity: 0.4;
 		position: relative;
@@ -282,7 +283,6 @@
 		-o-transition: all .2s ease;
 		transition: all .2s ease;
 	}
-	.evomb_body .ajde_yn_btn{border-color:#666666;}
 	.yesno_row span.field_name, .yesno_row label{	padding-left: 80px; line-height: 1.8; 
 		/*pointer-events:none;*/
 	}
@@ -293,13 +293,21 @@
 	}
 /* tooltip */	
 	.ajdeToolTip:before{
-		content:"\f06a";
-		font-style: normal;
-		display: inline-block;		  
-		color: #9d9d9d;
-		font-size: 18px;
-		margin-top: 2px;
+		content: "?";
+	    font-style: normal;
+	    display: inline-block;
+	    color: #fff;
+	    font-size: 10px;
+	    margin-top: 2px;
+	    background-color: #e25e5e;
+	    padding: 3px;
+	    border-radius: 50%;
+	    height: 10px;
+	    width: 10px;
+	    line-height: 10px;
+	    opacity: 0.4;
 	}
+	.ajdeToolTip:hover:before{opacity: 1;}
 	span.ajdeToolTip, .yesno_row span.ajdeToolTip{
 		padding-left: 0;
 		margin-left:4px;
@@ -309,7 +317,6 @@
 		width: 13px;
 		height: 14px;
 		line-height: 110%;
-		opacity: 0.4;
 		border-radius:0px;
 		color:#fff;
 		padding:0;

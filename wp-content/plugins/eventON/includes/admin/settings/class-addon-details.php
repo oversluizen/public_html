@@ -17,7 +17,7 @@ public function get_list(){
 			'download'=>'http://www.myeventon.com/addons/action-user/',
 			'desc'=>'Wanna get event contributors involved in your EventON calendar with better permission control? You can do that plus lot more with Action User addon.',
 		),'eventon-action-user-plus' => array(
-			'id'=>'EVOPA',
+			'id'=>'EVOAUP',
 			'name'=>'Action User Plus',
 			'link'=>'http://www.myeventon.com/addons/action-user-plus/',
 			'download'=>'http://www.myeventon.com/addons/action-user-plus/',

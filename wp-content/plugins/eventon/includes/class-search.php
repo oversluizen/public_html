@@ -1,7 +1,7 @@
 <?php
 /**
  * Search Capabilities of events through out eventon
- * @version 2.5.3
+ * @version 2.6.6
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -192,8 +192,13 @@ class evo_search{
 
 			if( is_admin()) return $query;
 
+			if( empty($query->is_search)) return $query;
+
 			// Check to verify it's search page
 			if( $query->is_search ) {
+
+				if( $query->query_vars['post_type'] != 'ajde_events') return $query;
+				
 				// Get post types
 				$post_types = get_post_types(array('public' => true, 'exclude_from_search' => false), 'objects');
 				$searchable_types = array();

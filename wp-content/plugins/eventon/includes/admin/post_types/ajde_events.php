@@ -153,7 +153,9 @@ class evo_ajde_events{
 						}else{
 							echo '<span class="evoEventCirc" style="background-color:' . $event_color . '"></span>';
 						}
-						echo '</a><div class="evo_item_details">';
+						echo '</a>';
+
+					echo '<div class="evo_item_details">';
 					
 						
 					if($can_edit_post){
@@ -200,17 +202,17 @@ class evo_ajde_events{
 
 						$actions = apply_filters( 'post_row_actions', $actions, $post );
 
-					echo '<div class="row-actions">';
+					// ROW ACTIONS
+						echo '<div class="evo_row_actions row-actions">';
+							$i = 0;
+							$action_count = sizeof($actions);
 
-					$i = 0;
-					$action_count = sizeof($actions);
-
-					foreach ( $actions as $action => $link ) {
-						++$i;
-						( $i == $action_count ) ? $sep = '' : $sep = ' | ';
-						echo "<span class='$action'>$link$sep</span>";
-					}
-					echo '</div>';
+							foreach ( $actions as $action => $link ) {
+								++$i;
+								( $i == $action_count ) ? $sep = '' : $sep = ' | ';
+								echo "<span class='$action'>$link$sep</span>";
+							}
+						echo '</div>';
 					
 					get_inline_data( $post );
 				
@@ -226,7 +228,7 @@ class evo_ajde_events{
 					}
 					echo "<div class='_menu_order'>".$post->menu_order."</div>";
 					echo '</div>';
-					echo '</div>';
+					echo '</div><!--.evoevent_item-->';
 					
 				break;
 				

@@ -33,6 +33,7 @@ class evo_sinevent{
 		if( isset($_GET['ri']))	$this->RI = (int)$_GET['ri'];
 		if( isset($_GET['l'])) $this->L = $_GET['l'];
 
+		// support passing URL like ..../var/ri-2.l-L2/
 		if(isset($wp_query->query["var"])){
 			$url_var = $wp_query->query["var"];
 			
@@ -46,6 +47,8 @@ class evo_sinevent{
 				if($split[0] == 'ri') $this->RI = (int)$split[1];
 				if($split[0] == 'l') $this->L = $split[1];
 			}
+
+			//print_r($this->L);
 		}
 	}
 
@@ -211,6 +214,8 @@ class evo_sinevent{
 			
 			$ev_vals = get_post_meta($eventid);
 
+			$EVO_Event = new EVO_Event($eventid , $ev_vals, $ri, false);
+
 			if( !evo_check_yn($ev_vals, 'evcal_repeat')) return false;
 
 			$repeat_intervals = (!empty($ev_vals['repeat_intervals']))? 
@@ -224,17 +229,16 @@ class evo_sinevent{
 			// if there is only one time range in the repeats that means there are no repeats
 			if($repeat_count == 0) return false;
 			$date = new evo_datetime();
-
-			$event_permalink = get_permalink($eventid);
 			
 			echo "<div class='evose_repeat_header'><p><span class='title'>".evo_lang('This is a repeating event'). "</span>";
 			echo "<span class='ri_nav'>";
+
 
 			// previous link
 			if($ri>0){ 
 				$prev = $date->get_correct_formatted_event_repeat_time($ev_vals, ($ri-1));
 				// /print_r($prev);
-				$prev_link = $this->get_repeat_event_url($event_permalink, ($ri-1) );
+				$prev_link = $EVO_Event->get_permalink( ($ri-1), $this->L);
 				echo "<a href='{$prev_link}' class='prev' title='{$prev['start_']}'><b class='fa fa-angle-left'></b><em>{$prev['start_']}</em></a>";
 			}
 
@@ -243,21 +247,12 @@ class evo_sinevent{
 				$ri = (int)$ri;
 				$next = $date->get_correct_formatted_event_repeat_time($ev_vals, ($ri+1));
 				//print_r($next); 
-				$next_link = $this->get_repeat_event_url($event_permalink, ($ri+1) );
+				$next_link = $EVO_Event->get_permalink( ($ri+1), $this->L );
 				echo "<a href='{$next_link}' class='next' title='{$next['start_']}'><em>{$next['start_']}</em><b class='fa fa-angle-right'></b></a>";
 			}
 			
 			echo "</span><span class='clear'></span></p></div>";
 		}
-
-		function get_repeat_event_url($permalink, $ri){
-			if(strpos($permalink, '?')!== false){ // ? exists
-				return $permalink. '&ri='.$ri;
-			}else{
-				return $permalink. '?ri='.$ri;
-			}
-		}
-
 
 		function get_evo_data(){
 			$evopt1 = $this->evo_opt;

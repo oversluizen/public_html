@@ -16,7 +16,7 @@
 	// complete styles array
 	$style_array = apply_filters('eventon_inline_styles_array', array(
 		array(
-			'item'=>'.eventon_events_list .eventon_list_event .desc_trig',
+			'item'=>'.eventon_events_list .eventon_list_event .desc_trig, .evopop_top',
 			'css'=>'background-color:#$', 'var'=>'evcal__bgc4',	'default'=>'fafafa'
 		),array(
 			'item'=>'.eventon_events_list .eventon_list_event .desc_trig:hover',
@@ -84,7 +84,7 @@
 			'item'=>'.ajde_evcal_calendar .evo_sort_btn:hover',
 			'css'=>'color:#$', 'var'=>'evcal__sotH',	'default'=>'d8d8d8'
 		),array(
-			'item'=>'#evcal_list .eventon_list_event .evcal_desc em',
+			'item'=>'#evcal_list .eventon_list_event .evcal_desc em,  .evo_lightboxes .evcal_desc em',
 			'css'=>'color:#$', 'var'=>'evcal__fc6',	'default'=>'8c8c8c'
 		),array(
 			'item'=>'#evcal_list .eventon_list_event .evcal_desc em a',
@@ -116,13 +116,16 @@
 			'item'=>'.evcal_evdata_row .evcal_evdata_cell h3, .evo_clik_row .evo_h3',
 			'css'=>'font-size:$', 'var'=>'evcal_fs_001',	'default'=>'18px'
 		),array(
-			'item'=>'#evcal_list .eventon_list_event .evcal_cblock',
+			'item'=>'#evcal_list .eventon_list_event .evcal_cblock, .evo_lightboxes .evo_pop_body .evcal_cblock',
 			'css'=>'color:#$', 'var'=>'evcal__fc2',	'default'=>'ABABAB'
 		),array(
 			'item'=>'.evcal_evdata_row .evcal_evdata_cell h2, .evcal_evdata_row .evcal_evdata_cell h3',
 			'css'=>'color:#$', 'var'=>'evcal__fc4',	'default'=>'6B6B6B'
 		),array(
-			'item'=>'#evcal_list .eventon_list_event .evcal_eventcard p, .ajde_evcal_calendar .eventon_events_list .eventon_desc_in ul',
+			'item'=>'#evcal_list .eventon_list_event .evcal_eventcard p, 
+				.ajde_evcal_calendar .eventon_events_list .eventon_desc_in ul,
+				.evo_lightboxes .evo_pop_body .evcal_evdata_row .evcal_evdata_cell p,
+				.evo_lightboxes .evcal_evdata_cell p a' ,
 			'css'=>'color:#$', 'var'=>'evcal__fc5',	'default'=>'656565'
 		),array(
 			'name'=>'Event Card color',
@@ -144,7 +147,8 @@
 		)
 		//eventtop
 		,array(
-			'item'=>'.eventon_events_list .eventon_list_event .evcal_list_a:after,  .evcal_list_a:after',
+			'item'=>'.eventon_events_list .eventon_list_event .evcal_list_a:after,  
+			.evcal_list_a:after',
 			'css'=>'background-color:#$', 'var'=>'evcal__evcbrb0',	'default'=>'cdcdcd'
 		),array(
 			'item'=>'.eventon_events_list .eventon_list_event .evcal_list_a.featured_event',
@@ -153,7 +157,7 @@
 			'item'=>'.eventon_events_list .eventon_list_event .evcal_list_a.featured_event:hover',
 			'css'=>'background-color:#$', 'var'=>'evcal__bgc5h',	'default'=>'FAE4D7'
 		),array(
-			'item'=>'#eventon_loadbar_section',
+			'item'=>'#eventon_loadbar_section, .evopop_top',
 			'css'=>'border-color:#$', 'var'=>'evcal__evcbrb0',	'default'=>'cdcdcd'
 		)
 			/* featured events tag */
@@ -188,11 +192,13 @@
 
 		,array(
 			'name'=>'Event title color',
-			'item'=>'#evcal_list .eventon_list_event .evcal_desc span.evcal_event_title, .evo_popup .eventon_events_list .eventon_list_event .evcal_desc span.evcal_event_title',
+			'item'=>'#evcal_list .eventon_list_event .evcal_desc span.evcal_event_title, 
+				.evo_lightboxes .evo_pop_body .evcal_desc span.evcal_desc2',
 			'css'=>'color:#$', 'var'=>'evcal__fc3',	'default'=>'6B6B6B'
 		),array(
 			'name'=>'Event sub title color',
-			'item'=>'.eventon_events_list .eventon_list_event .evcal_desc span.evcal_event_subtitle, .evo_pop_body .evcal_desc span.evcal_event_subtitle',
+			'item'=>'.eventon_events_list .eventon_list_event .evcal_desc span.evcal_event_subtitle, 
+				.evo_lightboxes .evo_pop_body .evcal_desc span.evcal_event_subtitle',
 			'css'=>'color:#$', 'var'=>'evcal__fc3st',	'default'=>'6B6B6B'
 		),array(
 			'item'=>'.fp_popup_option i',

@@ -5,6 +5,7 @@ use Elementor\Controls_Manager;
 use Elementor\Core\Base\Document;
 use Elementor\Modules\PageTemplates\Module as PageTemplatesModule;
 use Elementor\Group_Control_Background;
+use Elementor\Plugin;
 use Elementor\Settings;
 use Elementor\Core\Settings\Manager as SettingsManager;
 use Elementor\Utils;
@@ -58,8 +59,11 @@ class Post extends Document {
 				'type' => Controls_Manager::SWITCHER,
 				'label_off' => __( 'No', 'elementor' ),
 				'label_on' => __( 'Yes', 'elementor' ),
-				// translators: %s: Setting Page link
-				'description' => sprintf( __( 'Not working? You can set a different selector for the title in the <a href="%s" target="_blank">Settings page</a>.', 'elementor' ), Settings::get_url() . '#tab-style' ),
+				'description' => sprintf(
+					/* translators: %s: Setting page link */
+					__( 'Not working? You can set a different selector for the title in the <a href="%s" target="_blank">Settings page</a>.', 'elementor' ),
+					Settings::get_url() . '#tab-style'
+				),
 				'selectors' => [
 					'{{WRAPPER}} ' . $page_title_selector => 'display: none',
 				],
@@ -101,6 +105,8 @@ class Post extends Document {
 		);
 
 		$document->end_controls_section();
+
+		Plugin::$instance->controls_manager->add_custom_css_controls( $document, Controls_Manager::TAB_STYLE );
 	}
 
 	/**
@@ -123,7 +129,7 @@ class Post extends Document {
 			);
 		}
 
-		if ( current_theme_supports( 'post-thumbnails' ) ) {
+		if ( current_theme_supports( 'post-thumbnails' ) && post_type_supports( $document->post->post_type, 'thumbnail' ) ) {
 			$document->add_control(
 				'post_featured_image',
 				[

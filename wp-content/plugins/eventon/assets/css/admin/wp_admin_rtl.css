@@ -22,3 +22,8 @@
 	float: right;
 	margin: 0 0 0 5px;
 }
+
+body.rtl .ajdePOSH_inner .steps{float: right;}
+body.rtl .ajde_yn_btn_label{padding-left: 0; padding-right: 80px;}
+body.rtl #ajdePOSH_outter .ajdeToolTip{left: 10px; right: auto;}
+body.rtl .ajde_yn_btn.NO .btn_inner{}

@@ -1,4 +1,4 @@
-/*! elementor - v1.9.8 - 13-03-2018 */
+/*! elementor - v2.0.0 - 26-03-2018 */
 @charset "UTF-8";
 .dialog-widget-content {
   background-color: #fff;
@@ -224,6 +224,10 @@ body {
   -o-transition: right 0.5s, width 0.5s;
   transition: right 0.5s, width 0.5s; }
 
+#elementor-preview .ps-scrollbar-y-rail,
+#elementor-panel .ps-scrollbar-y-rail {
+  z-index: 2; }
+
 #elementor-loading {
   position: fixed;
   top: 0;
@@ -378,17 +382,17 @@ body {
     cursor: pointer; }
   .elementor-button:not(.elementor-button-state) .elementor-state-icon {
     display: none; }
-  .elementor-button.elementor-button-success, .elementor-panel .elementor-button#elementor-panel-saver-publish {
+  .elementor-button.elementor-button-success {
     color: #fff; }
-    .elementor-button.elementor-button-success[disabled], .elementor-panel .elementor-button[disabled]#elementor-panel-saver-publish {
+    .elementor-button.elementor-button-success[disabled] {
       background-color: #c2cbd2; }
-    .elementor-button.elementor-button-success:not([disabled]), .elementor-panel .elementor-button#elementor-panel-saver-publish:not([disabled]) {
+    .elementor-button.elementor-button-success:not([disabled]) {
       background-color: #39b54a; }
-      .elementor-button.elementor-button-success:not([disabled]):hover, .elementor-panel .elementor-button#elementor-panel-saver-publish:not([disabled]):hover {
+      .elementor-button.elementor-button-success:not([disabled]):hover {
         opacity: 0.85;
         -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 2px rgba(0, 0, 0, 0.2);
                 box-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 2px rgba(0, 0, 0, 0.2); }
-      .elementor-button.elementor-button-success:not([disabled]):active, .elementor-panel .elementor-button#elementor-panel-saver-publish:not([disabled]):active {
+      .elementor-button.elementor-button-success:not([disabled]):active {
         -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1);
                 box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1); }
   .elementor-button.elementor-button-warning {
@@ -404,9 +408,6 @@ body {
     .elementor-button.elementor-button-warning:not([disabled]):active {
       -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1);
               box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1); }
-  .elementor-button.elementor-button-go-pro {
-    color: #fff;
-    background-color: #fcb92c; }
   .elementor-button.elementor-edit-template {
     display: inline-block;
     margin-top: 15px;
@@ -425,6 +426,9 @@ body {
               box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1); }
     .elementor-button.elementor-button-default:visited {
       color: #fff; }
+  .elementor-button.elementor-button-go-pro {
+    color: #fff;
+    background-color: #fcb92c; }
   .elementor-button i {
     margin-left: 10px; }
 
@@ -1241,7 +1245,7 @@ select {
     -webkit-box-shadow: -2px -5px 8px rgba(0, 0, 0, 0.1);
             box-shadow: -2px -5px 8px rgba(0, 0, 0, 0.1);
     cursor: default;
-    z-index: 4; }
+    z-index: 10000; }
   .elementor-panel .elementor-panel-footer-sub-menu {
     -webkit-border-radius: 5px;
             border-radius: 5px;
@@ -1288,7 +1292,9 @@ select {
     line-height: 40px; }
   .elementor-panel #elementor-panel-saver-publish {
     width: 80px; }
-    .elementor-panel #elementor-panel-saver-publish .elementor-button.elementor-button-state #elementor-panel-saver-button-publish-label {
+    .elementor-panel #elementor-panel-saver-publish .elementor-button-state i {
+      margin-left: 0; }
+    .elementor-panel #elementor-panel-saver-publish .elementor-button-state #elementor-panel-saver-button-publish-label {
       display: none; }
   .elementor-panel #elementor-panel-saver-save-options {
     width: 35px;
@@ -1342,15 +1348,30 @@ select {
     transition: all ease-in-out .3s; }
     .elementor-control a:hover {
       border-bottom-color: inherit; }
-  .elementor-control.elementor-control-separator-default:before {
+  .elementor-control.elementor-control-type-divider {
+    padding: 0;
+    margin-bottom: -1px;
+    z-index: 1;
+    background-color: transparent; }
+    .elementor-control.elementor-control-type-divider hr {
+      border-bottom-width: 0;
+      border-top-width: 1px;
+      border-color: #e6e9ec;
+      border-style: solid; }
+      .elementor-control.elementor-control-type-divider hr.elementor-divider-style--thick {
+        border-top-width: 3px; }
+      .elementor-control.elementor-control-type-divider hr.elementor-divider-style--default {
+        margin-right: 20px;
+        margin-left: 20px; }
+  .elementor-control.elementor-control-separator-default:not(.elementor-control-type-divider):before {
     content: '';
     height: 1px;
     display: block;
     margin-bottom: 15px;
     background-color: #e6e9ec; }
-  .elementor-control.elementor-control-separator-default.elementor-control-wp {
+  .elementor-control.elementor-control-separator-default:not(.elementor-control-type-divider).elementor-control-wp {
     margin-top: 15px; }
-    .elementor-control.elementor-control-separator-default.elementor-control-wp:before {
+    .elementor-control.elementor-control-separator-default:not(.elementor-control-type-divider).elementor-control-wp:before {
       background-color: transparent; }
   .elementor-control.elementor-control-separator-before {
     padding-top: 15px; }
@@ -1752,7 +1773,7 @@ select {
 .elementor-control-type-url .elementor-control-url-external-hide .elementor-control-url-more {
   display: none; }
 
-.elementor-control-type-url .elementor-control-url-external-show .elementor-input-style {
+.elementor-control-type-url .elementor-control-url-external-show .elementor-input {
   padding-right: 46px;
   height: 26px; }
 
@@ -1795,11 +1816,11 @@ select {
   padding: 5px;
   font-size: 12px; }
 
-.elementor-control-type-url input[type=url], .elementor-control-type-url .elementor-input-style {
+.elementor-control-type-url .elementor-input {
   direction: ltr; }
-  .elementor-control-type-url input[type=url]:not(:focus) + .elementor-control-url-more, .elementor-control-type-url .elementor-input-style:not(:focus) + .elementor-control-url-more {
+  .elementor-control-type-url .elementor-input:not(:focus) + .elementor-control-url-more {
     border-color: #d5dadf; }
-  .elementor-control-type-url input[type=url]:focus + .elementor-control-url-more, .elementor-control-type-url .elementor-input-style:focus + .elementor-control-url-more {
+  .elementor-control-type-url .elementor-input:focus + .elementor-control-url-more {
     border-color: #a4afb7; }
 
 .elementor-control-type-section {
@@ -2358,7 +2379,7 @@ select {
 
 .wp-picker-container.wp-picker-active {
   position: absolute;
-  z-index: 1;
+  z-index: 10000;
   top: 0;
   left: 7px;
   background-color: #fff;
@@ -3550,6 +3571,8 @@ body.elementor-editor-preview #elementor-mode-switcher {
   display: none;
   position: absolute;
   width: 260px;
+  max-height: 300px;
+  overflow: auto;
   padding-bottom: 5px;
   background-color: #fff;
   border: 1px solid #a4afb7;

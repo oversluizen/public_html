@@ -46,6 +46,8 @@ class Control_Repeater extends Base_Data_Control {
 	 */
 	protected function get_default_settings() {
 		return [
+			'fields' => [],
+			'title_field' => '',
 			'prevent_empty' => true,
 			'is_repeater' => true,
 		];
@@ -54,18 +56,18 @@ class Control_Repeater extends Base_Data_Control {
 	/**
 	 * Get repeater control value.
 	 *
-	 * Retrieve the value of the repeater control from a specific widget.
+	 * Retrieve the value of the repeater control from a specific Controls_Stack.
 	 *
 	 * @since 1.0.0
 	 * @access public
 	 *
-	 * @param array $control Control
-	 * @param array $widget  Widget
+	 * @param array $control  Control
+	 * @param array $settings Controls_Stack settings
 	 *
 	 * @return mixed Control values.
 	 */
-	public function get_value( $control, $widget ) {
-		$value = parent::get_value( $control, $widget );
+	public function get_value( $control, $settings ) {
+		$value = parent::get_value( $control, $settings );
 
 		if ( ! empty( $value ) ) {
 			foreach ( $value as &$item ) {
@@ -145,7 +147,7 @@ class Control_Repeater extends Base_Data_Control {
 		<div class="elementor-repeater-fields-wrapper"></div>
 		<div class="elementor-button-wrapper">
 			<button class="elementor-button elementor-button-default elementor-repeater-add" type="button">
-				<i class="eicon-plus" aria-hidden="true"></i><?php _e( 'Add Item', 'elementor' ); ?>
+				<i class="eicon-plus" aria-hidden="true"></i><?php echo __( 'Add Item', 'elementor' ); ?>
 			</button>
 		</div>
 		<?php

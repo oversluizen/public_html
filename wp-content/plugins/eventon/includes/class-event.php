@@ -11,18 +11,28 @@ class EVO_Event{
 	public $ri = 0;
 	private $pmv ='';
 
-	public function __construct($event_id, $event_pmv='', $ri = 0){
-		$this->event_id = $this->ID = (int)$event_id;
-		$this->set_event_data($event_pmv);
+	public function __construct($event_id, $event_pmv='', $ri = 0, $force_data_set = true){
+		$this->event_id = $this->ID = (int)$event_id;		
+		if($force_data_set) $this->set_event_data($event_pmv);		
 		$this->ri = $ri;
 	}
 
 	// permalinks
-		function get_permalink($ri=0){
+		function get_permalink($ri= '' , $l = 'L1'){
 			$event_link = get_the_permalink($this->event_id);
+
+			$ri = empty($ri)? 
+				( $ri == 0? 0: $this->ri): $ri;
+
 			if($ri==0) return $event_link;
 
-			return strpos($event_link, '?')=== false? $event_link.'?ri='.$ri: $event_link.'&ri='.$ri;
+			$append = 'ri-'. $ri.'.l-'. $l;
+
+			$event_link = strpos($event_link, '?')=== false? $event_link."/var/".$append: $event_link.'&var='.$append;
+
+			//$event_link = htmlentities($event_link, ENT_QUOTES | ENT_HTML5);
+
+			return $event_link;
 		}
 
 	// time and date related

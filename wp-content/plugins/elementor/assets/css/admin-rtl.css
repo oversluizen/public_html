@@ -1,4 +1,4 @@
-/*! elementor - v1.9.8 - 13-03-2018 */
+/*! elementor - v2.0.0 - 26-03-2018 */
 .elementor-screen-only,
 .screen-reader-text,
 .screen-reader-text span,
@@ -202,9 +202,6 @@
     .elementor-button.elementor-button-warning:not([disabled]):active {
       -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1);
               box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1); }
-  .elementor-button.elementor-button-go-pro {
-    color: #fff;
-    background-color: #fcb92c; }
   .elementor-button.elementor-edit-template {
     display: inline-block;
     margin-top: 15px;
@@ -223,6 +220,9 @@
               box-shadow: 0 5px 10px rgba(0, 0, 0, 0.19), 0 3px 3px rgba(0, 0, 0, 0.1); }
     .elementor-button.elementor-button-default:visited {
       color: #fff; }
+  .elementor-button.elementor-button-go-pro {
+    color: #fff;
+    background-color: #fcb92c; }
   .elementor-button i {
     margin-left: 10px; }
 
@@ -498,6 +498,29 @@ body.elementor-editor-inactive #elementor-editor {
 .elementor-button-spinner.success:before {
   content: "\f147";
   color: #46b450; }
+
+.elementor-blank_state {
+  padding: 5em 0;
+  margin: auto;
+  max-width: 520px;
+  text-align: center;
+  color: #6d7882; }
+  .elementor-blank_state i {
+    font-size: 50px;
+    color: #a4afb7; }
+  .elementor-blank_state h2 {
+    font-family: Roboto, Arial, Helvetica, Verdana, sans-serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: inherit;
+    margin: 50px 0 35px; }
+  .elementor-blank_state p {
+    font-size: 16px;
+    font-weight: normal;
+    color: #a4afb7;
+    margin-bottom: 40px; }
+  .elementor-blank_state .elementor-button {
+    display: inline-block; }
 
 #available-widgets [class*="elementor-template"] .widget-title:before {
   content: "\e801";
@@ -852,29 +875,6 @@ body.elementor-editor-inactive #elementor-editor {
   padding-top: 2em;
   margin-bottom: 2em; }
 
-.post-type-elementor_library .elementor-template_library-blank_state .blank_state-inner {
-  padding: 5em 0;
-  margin: auto;
-  max-width: 520px;
-  text-align: center;
-  color: #6d7882; }
-  .post-type-elementor_library .elementor-template_library-blank_state .blank_state-inner i {
-    font-size: 50px;
-    color: #a4afb7; }
-  .post-type-elementor_library .elementor-template_library-blank_state .blank_state-inner h2 {
-    font-family: Roboto, Arial, Helvetica, Verdana, sans-serif;
-    font-size: 32px;
-    font-weight: 300;
-    color: inherit;
-    margin: 50px 0 35px; }
-  .post-type-elementor_library .elementor-template_library-blank_state .blank_state-inner p {
-    font-size: 16px;
-    font-weight: normal;
-    color: #a4afb7;
-    margin-bottom: 50px; }
-  .post-type-elementor_library .elementor-template_library-blank_state .blank_state-inner .elementor-button {
-    display: inline-block; }
-
 #elementor-new-template-modal .dialog-message {
   display: -webkit-box;
   display: -webkit-flex;
@@ -990,4 +990,55 @@ body.elementor-editor-inactive #elementor-editor {
 @media (max-width: 767px) {
   #elementor-new-template__description {
     display: none; } }
+
+#elementor-role-manager {
+  max-width: 500px;
+  margin-top: 50px; }
+  #elementor-role-manager h3 {
+    color: #6d7882;
+    font-weight: normal;
+    font-size: 22px; }
+  #elementor-role-manager .elementor-settings-form-page {
+    padding: 0; }
+  #elementor-role-manager .elementor-role-row {
+    background: #ffffff;
+    color: #6d7882;
+    margin-bottom: 2px; }
+    #elementor-role-manager .elementor-role-row .elementor-role-label {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      padding: 15px 20px;
+      font-weight: 500;
+      cursor: pointer; }
+      #elementor-role-manager .elementor-role-row .elementor-role-label span.elementor-role-name {
+        padding-left: 20px; }
+      #elementor-role-manager .elementor-role-row .elementor-role-label span.elementor-role-toggle {
+        text-align: left;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+            -ms-flex-positive: 1;
+                flex-grow: 1; }
+      #elementor-role-manager .elementor-role-row .elementor-role-label span.elementor-role-excluded-indicator {
+        color: #a4afb7; }
+    #elementor-role-manager .elementor-role-row .elementor-role-controls {
+      background-color: #f7f7f7;
+      padding: 20px 20px 5px; }
+      #elementor-role-manager .elementor-role-row .elementor-role-controls > div {
+        margin-bottom: 15px; }
+      #elementor-role-manager .elementor-role-row .elementor-role-controls .elementor-role-go-pro {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex; }
+        #elementor-role-manager .elementor-role-row .elementor-role-controls .elementor-role-go-pro .elementor-role-go-pro__desc {
+          font-weight: 500;
+          font-style: italic; }
+        #elementor-role-manager .elementor-role-row .elementor-role-controls .elementor-role-go-pro .elementor-role-go-pro__link {
+          text-align: left;
+          -webkit-box-flex: 1;
+          -webkit-flex-grow: 1;
+              -ms-flex-positive: 1;
+                  flex-grow: 1; }
 /*# sourceMappingURL=admin-rtl.css.map */

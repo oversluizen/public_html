@@ -76,9 +76,9 @@ class Control_Image_Dimensions extends Control_Base_Multiple {
 	 * @access public
 	 */
 	public function content_template() {
-		if ( ! $this->_is_image_editor_supports() ) : ?>
+		if ( ! $this->is_image_editor_supports() ) : ?>
 			<div class="elementor-panel-alert elementor-panel-alert-danger">
-				<?php _e( 'The server does not have ImageMagick or GD installed and/or enabled! Any of these libraries are required for WordPress to be able to resize images. Please contact your server administrator to enable this before continuing.', 'elementor' ); ?>
+				<?php echo __( 'The server does not have ImageMagick or GD installed and/or enabled! Any of these libraries are required for WordPress to be able to resize images. Please contact your server administrator to enable this before continuing.', 'elementor' ); ?>
 			</div>
 		<?php
 			return;
@@ -93,15 +93,15 @@ class Control_Image_Dimensions extends Control_Base_Multiple {
 				<div class="elementor-image-dimensions-field">
 					<?php $control_uid = $this->get_control_uid( 'width' ); ?>
 					<input id="<?php echo $control_uid; ?>" type="text" data-setting="width" />
-					<label for="<?php echo $control_uid; ?>" class="elementor-image-dimensions-field-description"><?php _e( 'Width', 'elementor' ); ?></label>
+					<label for="<?php echo $control_uid; ?>" class="elementor-image-dimensions-field-description"><?php echo __( 'Width', 'elementor' ); ?></label>
 				</div>
 				<div class="elementor-image-dimensions-separator">x</div>
 				<div class="elementor-image-dimensions-field">
 					<?php $control_uid = $this->get_control_uid( 'height' ); ?>
 					<input id="<?php echo $control_uid; ?>" type="text" data-setting="height" />
-					<label for="<?php echo $control_uid; ?>" class="elementor-image-dimensions-field-description"><?php _e( 'Height', 'elementor' ); ?></label>
+					<label for="<?php echo $control_uid; ?>" class="elementor-image-dimensions-field-description"><?php echo __( 'Height', 'elementor' ); ?></label>
 				</div>
-				<button class="elementor-button elementor-button-success elementor-image-dimensions-apply-button"><?php _e( 'Apply', 'elementor' ); ?></button>
+				<button class="elementor-button elementor-button-success elementor-image-dimensions-apply-button"><?php echo __( 'Apply', 'elementor' ); ?></button>
 			</div>
 		</div>
 		<?php
@@ -117,7 +117,7 @@ class Control_Image_Dimensions extends Control_Base_Multiple {
 	 *
 	 * @return bool Whether the editor supports the given mime-type.
 	 */
-	private function _is_image_editor_supports() {
+	private function is_image_editor_supports() {
 		$arg = [
 			'mime_type' => 'image/jpeg',
 		];

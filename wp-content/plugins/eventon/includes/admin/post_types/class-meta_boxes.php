@@ -596,8 +596,9 @@ class evo_event_metaboxes{
 									
 									<!-- START TIME-->
 									<div class='evo_start_event evo_datetimes'>
+										<p class='evo_event_time_label' id='evcal_start_date_label'><?php _e('Event Start', 'eventon')?></p>
 										<div class='evo_date'>
-											<p id='evcal_start_date_label'><?php _e('Event Start Date', 'eventon')?></p>
+											
 											<input id='evo_dp_from' class='evcal_data_picker datapicker_on' type='text' id='evcal_start_date' name='evcal_start_date' value='<?php echo ($_START)?$_START[0]:null?>' placeholder='<?php echo $used_dateFormat;?>'/>					
 											<span><?php _e('Select a Date', 'eventon')?></span>
 										</div>					
@@ -612,7 +613,7 @@ class evo_event_metaboxes{
 														echo "<option value='$y'".(($start_time_h==$y)?'selected="selected"':'').">$y</option>";
 													}?>
 												</select>
-											</div><p style='display:inline; font-size:24px;padding:4px 2px'>:</p>
+											</div>
 											<div class='evcal_select'>						
 												<select id='evcal_start_time_min' class='evcal_date_select' name='evcal_start_time_min'>
 													<?php	
@@ -649,8 +650,8 @@ class evo_event_metaboxes{
 									?>
 									<div class='evo_end_event evo_datetimes switch_for_evsdate'>
 										<div class='evo_enddate_selection' style='<?php echo ($evo_hide_endtime=='yes')?'opacity:0.5':null;?>'>
-										<div class='evo_date'>
-											<p><?php _e('Event End Date','eventon')?></p>
+										<p class='evo_event_time_label'><?php _e('Event End','eventon')?></p>
+										<div class='evo_date'>											
 											<input id='evo_dp_to' class='evcal_data_picker datapicker_on' type='text' id='evcal_end_date' name='evcal_end_date' value='<?php echo ($_END)? $_END[0]:null; ?>' placeholder='<?php echo $used_dateFormat;?>'/>					
 											<span><?php _e('Select a Date','eventon')?></span>					
 										</div>
@@ -666,7 +667,7 @@ class evo_event_metaboxes{
 														}
 													?>
 												</select>
-											</div><p style='display:inline; font-size:24px;padding:4px'>:</p>
+											</div>
 											<div class='evcal_select'>
 												<select class='evcal_date_select' name='evcal_end_time_min'>
 													<?php	
@@ -899,8 +900,8 @@ class evo_event_metaboxes{
 													<p class='repeat_by evcalr_2_p evo_rep_month' style='display:<?php echo $__display_none_1;?>'>
 														<span class='evo_form_label'><?php _e('Repeat by','eventon');?>:</span>
 														<select id='evo_rep_by' class='repeat_mode_selection' name='evp_repeat_rb'>
-															<option value='dom' <?php echo ('dom'==$evp_repeat_rb)? 'selected="selected"':null;?>><?php _e('Day of the month','eventon');?></option>
-															<option value='dow' <?php echo ('dow'==$evp_repeat_rb)? 'selected="selected"':null;?>><?php _e('Days of the week','eventon');?></option>
+															<option value='dom' <?php echo ('dom'== $evp_repeat_rb)? 'selected="selected"':null;?>><?php _e('Day of the month','eventon');?></option>
+															<option value='dow' <?php echo ('dow'== $evp_repeat_rb)? 'selected="selected"':null;?>><?php _e('Days of the week','eventon');?></option>
 														</select>
 													</p>
 													<div class='repeat_modes repeat_monthly_modes' style='display:<?php echo $__display_none_2;?>'>
@@ -986,11 +987,12 @@ class evo_event_metaboxes{
 							break;
 
 							case 'ev_subtitle':
-								echo "<div class='evcal_data_block_style1'>
+								?><div class='evcal_data_block_style1'>
 									<div class='evcal_db_data'>
-										<input type='text' id='evcal_subtitle' name='evcal_subtitle' value=\"".evo_meta($ev_vals, 'evcal_subtitle', true)."\" style='width:100%'/>
+										<input type='text' id='evcal_subtitle' name='evcal_subtitle' value="<?php echo htmlentities(evo_meta($ev_vals, 'evcal_subtitle', true));?>" style='width:100%'/>
 									</div>
-								</div>";
+								</div>
+								<?php
 							break;
 						}
 
@@ -1229,6 +1231,11 @@ class evo_event_metaboxes{
 
 						$post_value = ( $_POST[$f_val]);
 						update_post_meta( $post_id, $f_val,$post_value);
+
+						// for subtitle field
+						if( $f_val == 'evcal_subtitle'){
+
+						}
 
 						// ux val for single events linking to event page	
 						if($f_val=='evcal_exlink' && $_POST['_evcal_exlink_option']=='4'){

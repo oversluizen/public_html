@@ -99,7 +99,7 @@ class Manager extends BaseManager {
 			$document = Plugin::$instance->documents->get_doc_for_frontend( $post_id );
 		}
 
-		$model = $this->get_model( $post_id );
+		$model = $this->get_model( $document->get_post()->ID );
 
 		if ( $document->is_autosave() ) {
 			$model->set_settings( 'post_status', $document->get_main_post()->post_status );
@@ -149,14 +149,15 @@ class Manager extends BaseManager {
 
 		wp_update_post( $post );
 
-		if ( DB::STATUS_PUBLISH === $post->post_status ) {
-			$autosave = Utils::get_post_autosave( $post->ID );
+		// Check updated status
+		if ( DB::STATUS_PUBLISH === get_post_status( $id ) ) {
+			$autosave = wp_get_post_autosave( $post->ID );
 			if ( $autosave ) {
 				wp_delete_post_revision( $autosave->ID );
 			}
 		}
 
-		if ( isset( $data['post_featured_image'] ) ) {
+		if ( isset( $data['post_featured_image'] ) && post_type_supports( $post->post_type, 'thumbnail' ) ) {
 			if ( empty( $data['post_featured_image']['id'] ) ) {
 				delete_post_thumbnail( $post->ID );
 			} else {
@@ -293,6 +294,7 @@ class Manager extends BaseManager {
 			'post_title',
 			'post_status',
 			'template',
+			'post_excerpt',
 			'post_featured_image',
 		];
 	}
@@ -300,9 +302,12 @@ class Manager extends BaseManager {
 	public function save_post_status( $post_id, $status ) {
 		$parent_id = wp_is_post_revision( $post_id );
 
-		if ( ! $parent_id ) {
-			$parent_id = $post_id;
+		if ( $parent_id ) {
+			// Don't update revisions post-status
+			return;
 		}
+
+		$parent_id = $post_id;
 
 		$post = get_post( $parent_id );
 

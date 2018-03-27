@@ -1,6 +1,9 @@
 <?php
 namespace Elementor;
 
+use Elementor\Core\Settings\General\Manager as General_Settings_Manager;
+use Elementor\Core\Settings\Manager;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -85,6 +88,15 @@ class Settings extends Settings_Page {
 	public function register_pro_menu() {
 		add_submenu_page(
 			self::PAGE_ID,
+			__( 'Custom Fonts', 'elementor' ),
+			__( 'Custom Fonts', 'elementor' ),
+			'manage_options',
+			'elementor_custom_fonts',
+			[ $this, 'elementor_custom_fonts' ]
+		);
+
+		add_submenu_page(
+			self::PAGE_ID,
 			'',
 			'<span class="dashicons dashicons-star-filled" style="font-size: 17px"></span> ' . __( 'Go Pro', 'elementor' ),
 			'manage_options',
@@ -108,6 +120,26 @@ class Settings extends Settings_Page {
 			wp_redirect( Utils::get_pro_link( 'https://elementor.com/pro/?utm_source=wp-menu&utm_campaign=gopro&utm_medium=wp-dash' ) );
 			die;
 		}
+	}
+
+	public function elementor_custom_fonts() {
+		?>
+        <div class="wrap">
+            <div class="elementor-blank_state">
+                <i class="eicon-nerd-chuckle"></i>
+                <h2><?php echo __( 'Add Your Custom Fonts', 'elementor' ); ?></h2>
+                <p><?php echo __( 'Custom Fonts allows you to add your self-hosted fonts and use them on your Elementor projects to create a unique brand language.', 'elementor' ); ?></p>
+                <a class="elementor-button elementor-button-default elementor-button-go-pro" target="_blank" href="#"><?php echo __( 'Go Pro', 'elementor' ); ?></a>
+            </div>
+        </div><!-- /.wrap -->
+		<?php
+	}
+
+	public function on_admin_init() {
+		$this->go_elementor_pro();
+
+		// Save general settings in one list for a future usage
+		$this->handle_general_settings_update();
 	}
 
 	/**
@@ -143,7 +175,7 @@ class Settings extends Settings_Page {
 	public function __construct() {
 		parent::__construct();
 
-		add_action( 'admin_init', [ $this, 'go_elementor_pro' ] );
+		add_action( 'admin_init', [ $this, 'on_admin_init' ] );
 		add_action( 'admin_menu', [ $this, 'register_admin_menu' ], 20 );
 		add_action( 'admin_menu', [ $this, 'admin_menu_change_name' ], 200 );
 		add_action( 'admin_menu', [ $this, 'register_pro_menu' ], self::MENU_PRIORITY_GO_PRO );
@@ -205,14 +237,6 @@ class Settings extends Settings_Page {
 								],
 								'setting_args' => [ $validations_class_name, 'checkbox_list' ],
 							],
-							'exclude_user_roles' => [
-								'label' => __( 'Exclude Roles', 'elementor' ),
-								'field_args' => [
-									'type' => 'checkbox_list_roles',
-									'exclude' => [ 'administrator' ],
-								],
-								'setting_args' => [ $validations_class_name, 'checkbox_list' ],
-							],
 							'disable_color_schemes' => [
 								'label' => __( 'Disable Default Colors', 'elementor' ),
 								'field_args' => [
@@ -240,7 +264,7 @@ class Settings extends Settings_Page {
 									'type' => 'checkbox',
 									'value' => 'yes',
 									'default' => '',
-									'sub_desc' => __( 'Opt-in to our anonymous plugin data collection and to updates. We guarantee no sensitive data is collected.', 'elementor' ) . sprintf( ' <a href="%s" target="_blank">%s</a>', 'https://go.elementor.com/usage-data-tracking/', __( 'Learn more.', 'elementor' ) ),
+									'sub_desc' => __( 'Opt-in to our anonymous plugin data collection and to updates. We guarantee no sensitive data is collected.', 'elementor' ) . sprintf( ' <a href="%1$s" target="_blank">%2$s</a>', 'https://go.elementor.com/usage-data-tracking/', __( 'Learn more.', 'elementor' ) ),
 								],
 								'setting_args' => [ __NAMESPACE__ . '\Tracker', 'check_for_settings_optin' ],
 							],
@@ -370,5 +394,29 @@ class Settings extends Settings_Page {
 	 */
 	protected function get_page_title() {
 		return __( 'Elementor', 'elementor' );
+	}
+
+	private function handle_general_settings_update() {
+		if ( ! empty( $_POST['option_page'] ) && self::PAGE_ID === $_POST['option_page'] && ! empty( $_POST['action'] ) && 'update' === $_POST['action']  ) {
+			check_admin_referer( 'elementor-options' );
+
+			$saved_general_settings = get_option( General_Settings_Manager::META_KEY );
+
+			if ( ! $saved_general_settings ) {
+				$saved_general_settings = [];
+			}
+
+			$general_settings = Manager::get_settings_managers( 'general' )->get_model()->get_settings();
+
+			foreach ( $general_settings as $setting_key => $setting ) {
+				if ( ! empty( $_POST[ $setting_key ] ) ) {
+					$pure_setting_key = str_replace( 'elementor_', '', $setting_key );
+
+					$saved_general_settings[ $pure_setting_key ] = $_POST[ $setting_key ];
+				}
+			}
+
+			update_option( General_Settings_Manager::META_KEY, $saved_general_settings );
+		}
 	}
 }

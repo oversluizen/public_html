@@ -198,8 +198,11 @@ abstract class Element_Base extends Controls_Stack {
 	 * @return array Element edit tools.
 	 */
 	final public static function get_edit_tools() {
+		if ( ! Plugin::instance()->role_manager->user_can( 'design' ) ) {
+			return [];
+		}
 		if ( null === static::$_edit_tools ) {
-			self::_init_edit_tools();
+			self::init_edit_tools();
 		}
 
 		return static::$_edit_tools;
@@ -228,13 +231,13 @@ abstract class Element_Base extends Controls_Stack {
 	 */
 	final public static function add_edit_tool( $tool_name, $tool_data, $after = null ) {
 		if ( null === static::$_edit_tools ) {
-			self::_init_edit_tools();
+			self::init_edit_tools();
 		}
 
 		// Adding the tool at specific position
 		// in the tools array if requested
 		if ( $after ) {
-			$after_index = array_search( $after, array_keys( static::$_edit_tools ) ) + 1;
+			$after_index = array_search( $after, array_keys( static::$_edit_tools ), true ) + 1;
 
 			static::$_edit_tools = array_slice( static::$_edit_tools, 0, $after_index, true ) +
 								   [
@@ -286,7 +289,7 @@ abstract class Element_Base extends Controls_Stack {
 	 * @access private
 	 * @static
 	 */
-	private static function _init_edit_tools() {
+	private static function init_edit_tools() {
 		static::$_edit_tools = static::get_default_edit_tools();
 	}
 
@@ -372,7 +375,7 @@ abstract class Element_Base extends Controls_Stack {
 	protected function print_template_content( $template_content ) {
 		$this->render_edit_tools();
 
-		echo $template_content;
+		echo $template_content; // XSS ok.
 	}
 
 	/**
@@ -387,7 +390,7 @@ abstract class Element_Base extends Controls_Stack {
 	 */
 	public function get_children() {
 		if ( null === $this->_children ) {
-			$this->_init_children();
+			$this->init_children();
 		}
 
 		return $this->_children;
@@ -416,7 +419,7 @@ abstract class Element_Base extends Controls_Stack {
 	 * Retrieve the element parent. Used to check which element it belongs to.
 	 *
 	 * @since 1.0.0
-	 * @deprecated
+	 * @deprecated 1.7.6
 	 * @access public
 	 *
 	 * @return Element_Base Parent element.
@@ -439,10 +442,10 @@ abstract class Element_Base extends Controls_Stack {
 	 */
 	public function add_child( array $child_data, array $child_args = [] ) {
 		if ( null === $this->_children ) {
-			$this->_init_children();
+			$this->init_children();
 		}
 
-		$child_type = $this->_get_child_type( $child_data );
+		$child_type = $this->get_child_type( $child_data );
 
 		if ( ! $child_type ) {
 			return false;
@@ -553,17 +556,21 @@ abstract class Element_Base extends Controls_Stack {
 		$attributes = [];
 
 		foreach ( $render_attributes as $attribute_key => $attribute_values ) {
-			$attributes[] = sprintf( '%s="%s"', $attribute_key, esc_attr( implode( ' ', $attribute_values ) ) );
+			$attributes[] = sprintf( '%1$s="%2$s"', $attribute_key, esc_attr( implode( ' ', $attribute_values ) ) );
 		}
 
 		return implode( ' ', $attributes );
+	}
+
+	public function print_render_attribute_string( $element ) {
+		echo $this->get_render_attribute_string( $element ); // XSS ok.
 	}
 
 	/**
 	 * Print element.
 	 *
 	 * Used to generate the element final HTML on the frontend and the editor.
- 	 *
+	 *
 	 * @since 1.0.0
 	 * @access public
 	 */
@@ -586,13 +593,10 @@ abstract class Element_Base extends Controls_Stack {
 		$this->_add_render_attributes();
 
 		$this->before_render();
-
 		$this->_print_content();
-
 		$this->after_render();
 
 		$this->enqueue_scripts();
-
 		$this->enqueue_styles();
 		/**
 		 * After frontend element render.
@@ -617,7 +621,7 @@ abstract class Element_Base extends Controls_Stack {
 	 * The data with the HTML used always to display the data, but the Elementor
 	 * editor uses the raw data without the HTML in order not to render the data
 	 * again.
- 	 *
+	 *
 	 * @since 1.0.0
 	 * @access public
 	 *
@@ -671,7 +675,7 @@ abstract class Element_Base extends Controls_Stack {
 	 * @access protected
 	 */
 	protected function _render_settings() {
-		_deprecated_function( sprintf( '%1$s::%2$s', get_called_class(), __FUNCTION__ ), '1.8.0', 'render_edit_tools()' );
+		_deprecated_function( esc_html( sprintf( '%1$s::%2$s', get_called_class(), __FUNCTION__ ) ), '1.8.0', 'render_edit_tools()' );
 
 		$this->render_edit_tools();
 	}
@@ -818,7 +822,7 @@ abstract class Element_Base extends Controls_Stack {
 	 *
 	 * @return Element_Base|false Child type or false if type not found.
 	 */
-	private function _get_child_type( $element_data ) {
+	private function get_child_type( $element_data ) {
 		$child_type = $this->_get_default_child_type( $element_data );
 
 		// If it's not a valid widget ( like a deactivated plugin )
@@ -850,7 +854,7 @@ abstract class Element_Base extends Controls_Stack {
 	 * @since 1.0.0
 	 * @access private
 	 */
-	private function _init_children() {
+	private function init_children() {
 		$this->_children = [];
 
 		$children_data = $this->get_data( 'elements' );

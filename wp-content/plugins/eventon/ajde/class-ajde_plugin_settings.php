@@ -72,7 +72,10 @@ class ajde_settings{
 			// custom fields
 			$_cmd_num = evo_calculate_cmd_count($this->tab_props);
 			for($x=1; $x<=$_cmd_num; $x++){
-				if( $this->get_prop('evcal_ec_f'.$x.'a1') && $this->get_prop('evcal_af_'.$x) && $this->get_prop('evcal_af_'.$x)=='yes'){
+				$val1 = $this->get_prop('evcal_ec_f'.$x.'a1');
+				$val2 = $this->get_prop('evcal_af_'.$x);
+				$val3 = $this->get_prop('evcal_af_'.$x);
+				if( $val1  && $val2 && $val3 =='yes'){
 					$rearrange_items['customfield'.$x] = array('customfield'.$x,$this->get_prop('evcal_ec_f'.$x.'a1') );
 				}
 			}
@@ -145,7 +148,10 @@ class ajde_settings{
 				// General settings page - write styles to head option
 				if($focus_tab=='evcal_1' && isset($_POST['evcal_css_head']) && $_POST['evcal_css_head']=='yes'){
 					EVO()->evo_admin->update_dynamic_styles();
-				}					
+				}		
+
+				// Hook
+					do_action('evo_before_settings_saved', $focus_tab, $current_section,  $evcal_options);			
 				
 				//language tab
 					if($focus_tab=='evcal_2'){						
@@ -184,8 +190,12 @@ class ajde_settings{
 					update_option('evcal_styles', strip_tags(stripslashes($_POST['evcal_styles'])) );
 
 				// PHP Codes
-				if( isset($_POST['evcal_php']) )
+				if( isset($_POST['evcal_php']) ){
 					update_option('evcal_php', strip_tags(stripslashes($_POST['evcal_php'])) );
+				}
+
+				// Hoook for when settings are saved
+					do_action('evo_after_settings_saved', $focus_tab, $current_section,  $evcal_options);
 				
 				$_POST['settings-updated']='true';			
 			

@@ -80,7 +80,7 @@ class evo_frontend {
 			//wp_enqueue_script('testgmap','https://maps.googleapis.com/maps/api/js'.$apikey);
 			//wp_enqueue_style( 'select2',AJDE_EVCAL_URL.'/assets/css/select2.css');
 			
-			//wp_register_script('evo_mobile',plugins_url(EVENTON_BASE . '/assets/js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
+			wp_register_script('evo_mobile',plugins_url(EVENTON_BASE) . '/assets/js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
 			wp_register_script('evo_mobile',$eventon->assets_path.'js/jquery.mobile.min.js', array('jquery'), $eventon->version, true ); // 2.2.17
 			wp_register_script('evcal_easing', $eventon->assets_path. 'js/jquery.easing.1.3.js', array('jquery'),'1.0',true );//2.2.24
 			wp_register_script('evo_mouse', $eventon->assets_path. 'js/jquery.mousewheel.min.js', array('jquery'),$eventon->version,true );//2.2.24

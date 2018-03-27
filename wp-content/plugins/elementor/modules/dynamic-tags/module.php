@@ -5,7 +5,9 @@ use Elementor\Core\Base\Module as BaseModule;
 use Elementor\Core\DynamicTags\Tag;
 use Elementor\Plugin;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class Module extends BaseModule {
 
@@ -38,7 +40,7 @@ class Module extends BaseModule {
 	public function get_groups() {
 		return [
 			self::BASE_GROUP => [
-				'title' => __( 'Base Tags', 'elementor' ),
+				'title' => 'Base Tags',
 			],
 		];
 	}

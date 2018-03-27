@@ -35,7 +35,7 @@ abstract class Control_Base_Multiple extends Base_Data_Control {
 	/**
 	 * Get multiple control value.
 	 *
-	 * Retrieve the value of the multiple control from a specific widget settings.
+	 * Retrieve the value of the multiple control from a specific Controls_Stack settings.
 	 *
 	 * @since 1.0.0
 	 * @access public
@@ -65,16 +65,6 @@ abstract class Control_Base_Multiple extends Base_Data_Control {
 			$control['default'],
 			$value
 		);
-	}
-
-	public function parse_tags( $value, $dynamic_settings ) {
-		$parsed_value = parent::parse_tags( $value, $dynamic_settings );
-
-		if ( ! $parsed_value ) {
-			$parsed_value = $this->get_default_value();
-		}
-
-		return $parsed_value;
 	}
 
 	/**

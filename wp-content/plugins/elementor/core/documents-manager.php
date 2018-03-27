@@ -11,21 +11,84 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+/**
+ * Elementor documents manager class.
+ *
+ * Elementor documents manager handler class is responsible for registering and
+ * managing Elementor documents.
+ *
+ * @since 2.0.0
+ */
 class Documents_Manager {
 
+	/**
+	 * Registered document groups.
+	 *
+	 * Holds the list of all the registered document groups.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
+	 * @var array
+	 */
 	protected $groups = [];
 
+	/**
+	 * Registered types.
+	 *
+	 * Holds the list of all the registered types.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
+	 * @var array
+	 */
 	protected $types = [];
 
 	/**
+	 * Registered documents.
+	 *
+	 * Holds the list of all the registered documents.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
 	 * @var Document[]
 	 */
 	protected $documents = [];
 
+	/**
+	 * Current document.
+	 *
+	 * Holds the current document.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
+	 * @var Document
+	 */
 	protected $current_doc;
 
+	/**
+	 * Switched data.
+	 *
+	 * Holds the current document when changing to the requested post.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
+	 * @var Document
+	 */
 	protected $switched_data = [];
 
+	/**
+	 * Documents manager constructor.
+	 *
+	 * Initializing the Elementor documents manager.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 */
 	public function __construct() {
 		$this->register_default_types();
 
@@ -33,16 +96,30 @@ class Documents_Manager {
 	}
 
 	/**
+	 * Register ajax actions.
+	 *
+	 * Process ajax action handles when saving data and discarding changes.
+	 *
+	 * Fired by `elementor/ajax/register_actions` action.
+	 *
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param Ajax_Manager $ajax_manager
+	 * @param Ajax_Manager $ajax_manager An instance of the ajax manager.
 	 */
 	public function register_ajax_actions( $ajax_manager ) {
 		$ajax_manager->register_ajax_action( 'save_builder', [ $this, 'ajax_save' ] );
 		$ajax_manager->register_ajax_action( 'discard_changes', [ $this, 'ajax_discard_changes' ] );
 	}
 
+	/**
+	 * Register default types.
+	 *
+	 * Registers the default document types.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 */
 	public function register_default_types() {
 		$default_types = [
 			'post' => Post::get_class_full_name(),
@@ -52,19 +129,45 @@ class Documents_Manager {
 			$this->register_document_type( $type, $class );
 		}
 
+		/**
+		 * Register Elementor documents.
+		 *
+		 * Fires after Elementor registers the default document types.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param Documents_Manager $this The document manager instance.
+		 */
 		do_action( 'elementor/documents/register', $this );
 	}
 
+	/**
+	 * Register document type.
+	 *
+	 * Registers a single document.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return Documents_Manager The updated document manager instance.
+	 */
 	public function register_document_type( $type, $class ) {
 		$this->types[ $type ] = $class;
 		return $this;
 	}
 
 	/**
-	 * @param int  $post_id
-	 * @param bool $from_cache
+	 * Get document.
 	 *
-	 * @return Document|false
+	 * Retrieve the document data based on a post ID.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param int  $post_id    Post ID.
+	 * @param bool $from_cache Optional. Whether to retrieve cached data. Default is true.
+	 *
+	 * @return false|Document Document data or false if post ID was not entered.
 	 */
 	public function get( $post_id, $from_cache = true ) {
 		if ( ! $post_id ) {
@@ -86,6 +189,7 @@ class Documents_Manager {
 		if ( ! $id ) {
 			$id = get_the_ID();
 		}
+
 		$document = $this->get( $id );
 		if ( $document && $document->get_autosave_id( $user_id ) ) {
 			$document = $document->get_autosave( $user_id );
@@ -95,6 +199,11 @@ class Documents_Manager {
 	}
 
 	public function get_doc_for_frontend( $post_id = 0 ) {
+		// TODO: remove on release 2.0.0.
+		if ( 0 === $post_id ) {
+			$post_id = get_the_ID();
+		}
+
 		if ( is_preview() || Plugin::$instance->preview->is_preview_mode() ) {
 			$document = $this->get_doc_or_auto_save( $post_id, get_current_user_id() );
 		} else {
@@ -124,8 +233,7 @@ class Documents_Manager {
 	 */
 	public function create( $type, $post_data = [], $meta_data = [] ) {
 		if ( ! isset( $this->types[ $type ] ) ) {
-			/* translators: %s: document type name */
-			wp_die( sprintf( __( 'Type %s does not exist.', 'elementor' ), $type ) );
+			wp_die( sprintf( 'Type %s does not exist.', $type ) );
 		}
 
 		if ( empty( $post_data['post_title'] ) ) {
@@ -172,12 +280,8 @@ class Documents_Manager {
 	 * @return array
 	 * @throws \Exception If current user don't have permissions to edit the post or the post is not using Elementor.
 	 */
-	public function	ajax_save( $request ) {
-		if ( empty( $request['post_id'] ) ) {
-			throw new \Exception( 'Missing post id.' );
-		}
-
-		$document = $this->get( $request['post_id'] );
+	public function ajax_save( $request ) {
+		$document = $this->get( $request['editor_post_id'] );
 
 		if ( ! $document->is_built_with_elementor() || ! $document->is_editable_by_current_user() ) {
 			throw new \Exception( 'Access denied.' );
@@ -228,7 +332,8 @@ class Documents_Manager {
 		 *
 		 * @since 2.0.0
 		 *
-		 * @param array $return_data The returned data. Default is an empty array.
+		 * @param array    $return_data The returned data. Default is an empty array.
+		 * @param Document $document    The document instance.
 		 */
 		$return_data = apply_filters( 'elementor/documents/ajax_save/return_data', $return_data, $document );
 
@@ -236,11 +341,7 @@ class Documents_Manager {
 	}
 
 	public function ajax_discard_changes( $request ) {
-		if ( empty( $request['post_id'] ) ) {
-			throw new \Exception( 'Missing post id.', Exceptions::BAD_REQUEST );
-		}
-
-		$document = $this->get( $request['post_id'] );
+		$document = $this->get( $request['editor_post_id'] );
 
 		$autosave = $document->get_autosave();
 
@@ -256,14 +357,13 @@ class Documents_Manager {
 	/**
 	 * Switch to document.
 	 *
-	 * Change the current document to the requested post.
+	 * Change the document to a new document type.
 	 *
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param Document $document
+	 * @param Document $document The document to switch to.
 	 */
-
 	public function switch_to_document( $document ) {
 		// If is already switched, or is the same post, return.
 		if ( $this->current_doc === $document ) {
@@ -280,11 +380,11 @@ class Documents_Manager {
 	}
 
 	/**
-	 * Restore current post.
+	 * Restore document.
 	 *
-	 * Rollback to the previous global post, rolling back from `DB::switch_to_post()`.
+	 * Rollback to the original document.
 	 *
-	 * @since 1.5.0
+	 * @since 2.0.0
 	 * @access public
 	 */
 	public function restore_document() {
@@ -298,15 +398,48 @@ class Documents_Manager {
 		$this->current_doc = $data['original_doc'];
 	}
 
+	/**
+	 * Get current document.
+	 *
+	 * Retrieve the current document.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return Document The current document.
+	 */
 	public function get_current() {
 		return $this->current_doc;
 	}
 
+	/**
+	 * Register group.
+	 *
+	 * Registers a single document group.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @param string $id   Group ID.
+	 * @param array  $args Group data.
+	 *
+	 * @return Documents_Manager The updated document manager instance.
+	 */
 	public function register_group( $id, $args ) {
 		$this->groups[ $id ] = $args;
 		return $this;
 	}
 
+	/**
+	 * Get groups.
+	 *
+	 * Retrieve the list of all the registered document groups.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return array list of all the registered document groups.
+	 */
 	public function get_groups() {
 		return $this->groups;
 	}

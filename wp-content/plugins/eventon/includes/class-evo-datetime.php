@@ -34,7 +34,10 @@ class evo_datetime{
 					}
 					
 				}else{
-					return ($time=='start')? $post_meta['evcal_srow'][0]:$post_meta['evcal_erow'][0];
+					// return raw start val else end val else 0
+					if( isset( $post_meta['evcal_srow'] )) return $post_meta['evcal_srow'][0];
+					if( isset( $post_meta['evcal_erow'] )) return $post_meta['evcal_erow'][0];
+					return 0;
 				}
 			}
 		// return just UNIX timestamps corrected for repeat intervals

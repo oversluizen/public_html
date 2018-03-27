@@ -6,6 +6,10 @@
 
 class evo_cron{
 
+	public function __construct(){
+
+	}
+
 	// return the cron data for a cron hook
 		function get_cron_data($cron_hook){
 			$crons = get_option('cron');
@@ -34,6 +38,26 @@ class evo_cron{
 			}
 
 			return $cron_job;
+	 	}
+
+	 // get cron hooks
+	 // @added 2.6.6
+	 	function get_all_cron_hooks(){
+	 		$crons = get_option('cron');
+	 		if(!is_array($crons)) return false;
+
+	 		$cron_hooks = array();
+
+	 		foreach($crons as $time=>$cron){
+				if(!is_array($cron)) continue;
+				foreach ( $cron as $hook => $dings ) {
+
+					$cron_hooks[$hook] = $dings;
+
+				}
+			}
+
+	 		return $cron_hooks;
 	 	}
 
 	// next_run

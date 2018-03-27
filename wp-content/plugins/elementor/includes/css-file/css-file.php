@@ -1,6 +1,7 @@
 <?php
 namespace Elementor;
 
+use Elementor\Core\DynamicTags\Manager;
 use Elementor\Core\DynamicTags\Tag;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -253,7 +254,7 @@ abstract class CSS_File {
 			$dep = $this->get_inline_dependency();
 			// If the dependency has already been printed ( like a template in footer )
 			if ( wp_styles()->query( $dep, 'done' ) ) {
-				printf( '<style id="%s">%s</style>', $this->get_file_handle_id(), $meta['css'] ); // XSS ok.
+				printf( '<style id="%1$s">%2$s</style>', $this->get_file_handle_id(), $meta['css'] ); // XSS ok.
 			} else {
 				wp_add_inline_style( $dep , $meta['css'] );
 			}
@@ -300,8 +301,17 @@ abstract class CSS_File {
 		do_action( "elementor/css-file/{$name}/enqueue", $this );
 	}
 
+	/**
+	 * Print CSS.
+	 *
+	 * Output the final CSS inside the `<style>` tags and all the frontend fonts in
+	 * use.
+	 *
+	 * @since 1.9.5
+	 * @access public
+	 */
 	public function print_css() {
-		echo '<style>' . $this->get_css() . '</style>';
+		echo '<style>' . $this->get_css() . '</style>'; // XSS ok.
 		Plugin::$instance->frontend->print_fonts_links();
 	}
 
@@ -333,7 +343,6 @@ abstract class CSS_File {
 				$output_css_property = preg_replace_callback(
 					'/\{\{(?:([^.}]+)\.)?([^}]*)}}/', function( $matches ) use ( $control, $value_callback, $controls_stack, $value, $css_property ) {
 						$parser_control = $control;
-
 						$value_to_insert = $value;
 
 						if ( ! empty( $matches[1] ) ) {
@@ -342,7 +351,6 @@ abstract class CSS_File {
 							}
 
 							$parser_control = $controls_stack[ $matches[1] ];
-
 							$value_to_insert = call_user_func( $value_callback, $parser_control );
 						}
 
@@ -352,7 +360,6 @@ abstract class CSS_File {
 
 						/** @var Base_Data_Control $control_obj */
 						$control_obj = Plugin::$instance->controls_manager->get_control( $parser_control['type'] );
-
 						$parsed_value = $control_obj->get_style_value( strtolower( $matches[2] ), $value_to_insert );
 
 						if ( '' === $parsed_value ) {
@@ -514,8 +521,8 @@ abstract class CSS_File {
 				$this->add_repeater_control_style_rules( $controls_stack, $control['style_fields'], $values[ $control['name'] ], $placeholders, $replacements );
 			}
 
-			if ( ! empty( $control['dynamic'] ) ) {
-				$this->add_dynamic_control_style_rules( $control, $values[ $control['name'] ] );
+			if ( ! empty( $control[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] ) ) {
+				$this->add_dynamic_control_style_rules( $control, $control[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
 			}
 
 			if ( empty( $control['selectors'] ) ) {
@@ -689,7 +696,6 @@ abstract class CSS_File {
 		$relative_path = sprintf( self::FILE_NAME_PATTERN, self::FILE_BASE_DIR, $this->get_file_name() );
 
 		$this->path = $wp_upload_dir['basedir'] . $relative_path;
-
 		$this->url = set_url_scheme( $wp_upload_dir['baseurl'] . $relative_path );
 	}
 
@@ -765,6 +771,20 @@ abstract class CSS_File {
 			->add_device( 'desktop', $breakpoints['lg'] );
 	}
 
+	/**
+	 * Add repeater control style rules.
+	 *
+	 * Register new style rules for the repeater control.
+	 *
+	 * @since 2.0.0
+	 * @access private
+	 *
+	 * @param Controls_Stack $controls_stack    The control stack.
+	 * @param array          $repeater_controls The repeater controls.
+	 * @param array          $repeater_values   Repeater values array.
+	 * @param array          $placeholders      Placeholders.
+	 * @param array          $replacements      Replacements.
+	 */
 	private function add_repeater_control_style_rules( Controls_Stack $controls_stack, array $repeater_controls, array $repeater_values, array $placeholders, array $replacements ) {
 		$placeholders = array_merge( $placeholders, [ '{{CURRENT_ITEM}}' ] );
 
@@ -779,6 +799,17 @@ abstract class CSS_File {
 		}
 	}
 
+	/**
+	 * Add dynamic control style rules.
+	 *
+	 * Register new style rules for the dynamic control.
+	 *
+	 * @since 2.0.0
+	 * @access private
+	 *
+	 * @param array  $control The control.
+	 * @param string $value   The value.
+	 */
 	private function add_dynamic_control_style_rules( array $control, $value ) {
 		Plugin::$instance->dynamic_tags->parse_tags_text( $value, $control, function( $id, $name, $settings ) {
 			$tag = Plugin::$instance->dynamic_tags->create_tag( $id, $name, $settings );

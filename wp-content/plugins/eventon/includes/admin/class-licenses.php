@@ -247,7 +247,7 @@ class EVO_Product_lic extends EVO_Product{
 		}
 
 		function subscription_api_url($data){
-			$instance = md5(get_site_url());				
+			$instance = base64_encode(get_site_url());				
 			return $this->subscription_api_url_base() . 'request=' . $data['request'] .'&key='. $data['key'] .'&instance=' . $instance ;
 		}
 		function subscription_api_url_base(){
@@ -299,7 +299,7 @@ class EVO_Product_lic extends EVO_Product{
 					$api_username = 'ashanjay';
 					$url = 'http://marketplace.envato.com/api/edge/'.$api_username.'/'.$api_key.'/verify-purchase:'.$args['key'].'.json';				
 				}else{
-					$instance = md5(get_site_url());					
+					$instance = base64_encode(get_site_url());					
 					$url= $this->api_url_base(). 'request=activation&email='.$args['email'].'&licence_key='.$args['key'].'&product_id='.$args['product_id'].'&instance='.$instance;
 				}
 				return $url;

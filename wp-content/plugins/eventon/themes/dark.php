@@ -40,8 +40,8 @@ $theme = apply_filters('evo_color_theme_dark', array(
 	'evcal__bc1_rgb'=>'40,40,40',
 	'evcal__bc1H'=>'3A3A3A',
 	'evcal__evcbrb'=>'4F4F4F',
-	'evcal__fc4'=>'A9A9A9',// section titles
-	'evcal__fc5'=>'8C8C8C',// section titles
+	'evcal__fc4'=>'d6d6d6',// section titles
+	'evcal__fc5'=>'d9d9d9',// section titles
 	'evcal_closebtn'=>'303030',// close button
 	'evcal_closebtnx'=>'4F4E4E',// close button H
 

@@ -80,7 +80,7 @@ abstract class Document extends Controls_Stack {
 
 	public function get_wp_preview_url() {
 		$main_post_id = $this->get_main_id();
-		$wp_preview_url = get_preview_post_link(
+		$url = get_preview_post_link(
 			$main_post_id,
 			[
 				'preview_nonce' => wp_create_nonce( 'post_preview_' . $main_post_id ),
@@ -88,30 +88,36 @@ abstract class Document extends Controls_Stack {
 		);
 
 		/**
-		 * Filters the Wordpress preview URL.
+		 * Document "WordPress preview" URL.
+		 *
+		 * Filters the WordPress preview URL.
 		 *
 		 * @since 2.0.0
 		 *
-		 * @param string $wp_preview_url URL with chosen scheme.
-		 * @param Document $this Document.
+		 * @param string   $url  WordPress preview URL.
+		 * @param Document $this The document instance.
 		 */
-		return apply_filters( 'elementor/document/wp_preview_url', $wp_preview_url, $this );
+		$url = apply_filters( 'elementor/document/urls/wp_preview', $url, $this );
+
+		return $url;
 	}
 
 	public function get_exit_to_dashboard_url() {
-		$exit_url = get_edit_post_link( $this->get_main_id(), 'raw' );
+		$url = get_edit_post_link( $this->get_main_id(), 'raw' );
 
 		/**
-		 * Filters the Exit To Dashboard URL.
+		 * Document "exit to dashboard" URL.
+		 *
+		 * Filters the "Exit To Dashboard" URL.
 		 *
 		 * @since 2.0.0
 		 *
-		 * @param string $exit_url Default exit URL.
-		 * @param Document $this Document.
+		 * @param string   $url  The exit URL
+		 * @param Document $this The document instance.
 		 */
-		$exit_url = apply_filters( 'elementor/document/urls/exit_to_dashboard', $exit_url, $this );
+		$url = apply_filters( 'elementor/document/urls/exit_to_dashboard', $url, $this );
 
-		return $exit_url;
+		return $url;
 	}
 
 	/**
@@ -188,7 +194,7 @@ abstract class Document extends Controls_Stack {
 			'type' => $this->get_name(),
 			'last_edited' => $this->get_last_edited(),
 			'messages' => [
-				/* translators: %s = the document title. */
+				/* translators: %s: the document title. */
 				'publish_notification' => sprintf( __( 'Hurray! Your %s is live.', 'elementor' ), $this::get_title() ),
 			],
 			'urls' => [
@@ -211,6 +217,10 @@ abstract class Document extends Controls_Stack {
 	 */
 	protected function init_controls() {
 		parent::init_controls();
+
+		if ( ! Plugin::$instance->role_manager->user_can( 'design' ) ) {
+			return;
+		}
 
 		$this->start_controls_section(
 			'advanced_settings',
@@ -238,7 +248,7 @@ abstract class Document extends Controls_Stack {
 		$this->start_controls_section(
 			'document_settings',
 			[
-				'label' => __( 'Document Settings', 'elementor' ),
+				'label' => __( 'General Settings', 'elementor' ),
 				'tab' => Controls_Manager::TAB_SETTINGS,
 			]
 		);
@@ -274,6 +284,15 @@ abstract class Document extends Controls_Stack {
 
 		$this->end_controls_section();
 
+		/**
+		 * Register document controls.
+		 *
+		 * Fires after Elementor registers the document controls.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param Document $this The document instance.
+		 */
 		do_action( 'elementor/documents/register_controls', $this );
 	}
 
@@ -282,7 +301,7 @@ abstract class Document extends Controls_Stack {
 			return false;
 		}
 
-		if ( DB::STATUS_AUTOSAVE === $this->post->post_status ) {
+		if ( DB::STATUS_AUTOSAVE === $data['settings']['post_status'] ) {
 			if ( ! defined( 'DOING_AUTOSAVE' ) ) {
 				define( 'DOING_AUTOSAVE', true );
 			}
@@ -328,7 +347,7 @@ abstract class Document extends Controls_Stack {
 	 * @return mixed
 	 */
 	public function get_edit_url() {
-		$edit_link = add_query_arg(
+		$url = add_query_arg(
 			[
 				'post' => $this->get_main_id(),
 				'action' => 'elementor',
@@ -336,7 +355,19 @@ abstract class Document extends Controls_Stack {
 			admin_url( 'post.php' )
 		);
 
-		return apply_filters( 'elementor/document/get_edit_link', $edit_link, $this );
+		/**
+		 * Document edit url.
+		 *
+		 * Filters the document edit url.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string   $url  The edit url.
+		 * @param Document $this The document instance.
+		 */
+		$url = apply_filters( 'elementor/document/urls/edit ', $url, $this );
+
+		return $url;
 	}
 
 	/**
@@ -356,7 +387,17 @@ abstract class Document extends Controls_Stack {
 				'ver' => time(),
 			] , $this->get_permalink() ) );
 
-			$url = apply_filters( 'elementor/document/preview_url', $url, $this );
+			/**
+			 * Document preview URL.
+			 *
+			 * Filters the document preview URL.
+			 *
+			 * @since 2.0.0
+			 *
+			 * @param string   $url  The preview URL.
+			 * @param Document $this The document instance.
+			 */
+			$url = apply_filters( 'elementor/document/urls/preview', $url, $this );
 		}
 
 		return $url;
@@ -491,6 +532,8 @@ abstract class Document extends Controls_Stack {
 		$is_meta_updated = update_metadata( 'post', $this->post->ID, '_elementor_data', $json_value );
 
 		/**
+		 * Before saving data.
+		 *
 		 * Fires before Elementor saves data to the database.
 		 *
 		 * @since 1.0.0
@@ -505,6 +548,8 @@ abstract class Document extends Controls_Stack {
 		update_metadata( 'post', $this->post->ID, '_elementor_version', DB::DB_VERSION );
 
 		/**
+		 * After saving data.
+		 *
 		 * Fires after Elementor saves data to the database.
 		 *
 		 * @since 1.0.0
@@ -516,6 +561,10 @@ abstract class Document extends Controls_Stack {
 	}
 
 	public function get_autosave_id( $user_id = 0 ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
 		$autosave = Utils::get_post_autosave( $this->post->ID, $user_id );
 		if ( $autosave ) {
 			return $autosave->ID;
@@ -571,7 +620,7 @@ abstract class Document extends Controls_Stack {
 				$this->post = get_post( $data['post_id'] );
 
 				if ( ! $this->post ) {
-					throw new \Exception( 'Post ID #' . $data['post_id'] . ' is not exist.', Exceptions::NOT_FOUND );
+					throw new \Exception( sprintf( 'Post ID #%s is not exist.', $data['post_id'] ), Exceptions::NOT_FOUND );
 				}
 			}
 

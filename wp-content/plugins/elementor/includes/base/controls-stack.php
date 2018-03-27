@@ -1,6 +1,8 @@
 <?php
 namespace Elementor;
 
+use Elementor\Core\DynamicTags\Manager;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -665,7 +667,7 @@ abstract class Controls_Stack {
 		$group = Plugin::$instance->controls_manager->get_control_groups( $group_name );
 
 		if ( ! $group ) {
-			wp_die( sprintf( '%1$s::%2$s: Group `%3$s` not found.', get_called_class(), __FUNCTION__, $group_name ) );
+			wp_die( sprintf( '%1$s::%2$s: Group "%3$s" not found.', get_called_class(), __FUNCTION__, $group_name ) );
 		}
 
 		$group->add_controls( $this, $args, $options );
@@ -1042,10 +1044,7 @@ abstract class Controls_Stack {
 		}
 
 		foreach ( $controls as $control ) {
-			if ( ! isset( $settings[ $control['name'] ] ) || null === $settings[ $control['name'] ] ) {
-				continue;
-			}
-
+			$control_name = $control['name'];
 			$control_obj = Plugin::$instance->controls_manager->get_control( $control['type'] );
 
 			if ( ! $control_obj instanceof Base_Data_Control ) {
@@ -1053,15 +1052,29 @@ abstract class Controls_Stack {
 			}
 
 			if ( 'repeater' === $control_obj->get_type() ) {
-				foreach ( $settings[ $control['name'] ] as & $field ) {
+				foreach ( $settings[ $control_name ] as & $field ) {
 					$field = $this->parse_dynamic_settings( $field, $control['fields'], $field );
 				}
 
 				continue;
 			}
 
-			if ( ! empty( $control['dynamic']['active'] ) && isset( $all_settings[ Plugin::$instance->dynamic_tags->get_static_setting_key( $control['name'] ) ] ) ) {
-				$settings[ $control['name'] ] = $control_obj->parse_tags( $settings[ $control['name'] ], $control['dynamic'] );
+			if ( empty( $control['dynamic'] ) || ! isset( $all_settings[ Manager::DYNAMIC_SETTING_KEY ][ $control_name ] ) ) {
+				continue;
+			}
+
+			$dynamic_settings = array_merge( $control_obj->get_settings( 'dynamic' ), $control['dynamic'] );
+
+			if ( ! empty( $dynamic_settings['active'] ) && ! empty( $all_settings[ Manager::DYNAMIC_SETTING_KEY ][ $control_name ] ) ) {
+				$parsed_value = $control_obj->parse_tags( $all_settings[ Manager::DYNAMIC_SETTING_KEY ][ $control_name ], $dynamic_settings );
+
+				$dynamic_property = ! empty( $dynamic_settings['property'] ) ? $dynamic_settings['property'] : null;
+
+				if ( $dynamic_property ) {
+					$settings[ $control_name ][ $dynamic_property ] = $parsed_value;
+				} else {
+					$settings[ $control_name ] = $parsed_value;
+				}
 			}
 		}
 
@@ -1250,7 +1263,7 @@ abstract class Controls_Stack {
 		$this->add_control( $section_id, $args );
 
 		if ( null !== $this->_current_section ) {
-			wp_die( sprintf( 'Elementor: You can\'t start a section before the end of the previous section: `%s`', $this->_current_section['section'] ) ); // XSS ok.
+			wp_die( sprintf( 'Elementor: You can\'t start a section before the end of the previous section "%s".', $this->_current_section['section'] ) ); // XSS ok.
 		}
 
 		$this->_current_section = $this->get_section_args( $section_id );
@@ -1382,7 +1395,7 @@ abstract class Controls_Stack {
 	 */
 	public function start_controls_tabs( $tabs_id ) {
 		if ( null !== $this->_current_tab ) {
-			wp_die( sprintf( 'Elementor: You can\'t start tabs before the end of the previous tabs: `%s`', $this->_current_tab['tabs_wrapper'] ) ); // XSS ok.
+			wp_die( sprintf( 'Elementor: You can\'t start tabs before the end of the previous tabs "%s".', $this->_current_tab['tabs_wrapper'] ) ); // XSS ok.
 		}
 
 		$this->add_control(
@@ -1434,7 +1447,7 @@ abstract class Controls_Stack {
 	 */
 	public function start_controls_tab( $tab_id, $args ) {
 		if ( ! empty( $this->_current_tab['inner_tab'] ) ) {
-			wp_die( sprintf( 'Elementor: You can\'t start a tab before the end of the previous tab: `%s`', $this->_current_tab['inner_tab'] ) ); // XSS ok.
+			wp_die( sprintf( 'Elementor: You can\'t start a tab before the end of the previous tab "%s".', $this->_current_tab['inner_tab'] ) ); // XSS ok.
 		}
 
 		$args['type'] = Controls_Manager::TAB;
@@ -1520,15 +1533,21 @@ abstract class Controls_Stack {
 
 		$template_content = ob_get_clean();
 
+		$element_type = $this->get_type();
+
 		/**
-		 * Filters the controls stack template before it's printed in the editor.
+		 * Template content.
+		 *
+		 * Filters the controls stack template content before it's printed in the editor.
+		 *
+		 * The dynamic portion of the hook name, `$element_type`, refers to the element type.
 		 *
 		 * @since 1.0.0
 		 *
 		 * @param string         $content_template The controls stack template in the editor.
 		 * @param Controls_Stack $this             The controls stack.
 		 */
-		$template_content = apply_filters( 'elementor/' . $this->get_type() . '/print_template', $template_content, $this );
+		$template_content = apply_filters( "elementor/{$element_type}/print_template", $template_content, $this );
 
 		if ( empty( $template_content ) ) {
 			return;
@@ -1683,64 +1702,44 @@ abstract class Controls_Stack {
 
 			$control = array_merge_recursive( $control_obj->get_settings(), $control );
 
-			$is_dynamic_value = isset( $settings[ $control['name'] ] ) && isset( $settings[ Plugin::$instance->dynamic_tags->get_static_setting_key( $control['name'] ) ] );
-
-			$is_value_not_controlled =  $is_dynamic_value && ! empty( $control['dynamic']['returnType'] ) && 'object' === $control['dynamic']['returnType'];
-
-			if ( $is_value_not_controlled ) {
-				continue;
-			}
-
 			$settings[ $control['name'] ] = $control_obj->get_value( $control, $settings );
 		}
 
 		return $settings;
 	}
 
-	protected function sanitize_initial_data( $data ) {
+	protected function sanitize_initial_data( $data, array $controls = [] ) {
+		if ( ! $controls ) {
+			$controls = $this->get_controls();
+		}
+
 		$settings = $data['settings'];
 
-		foreach ( $this->get_controls() as $control ) {
-			$static_setting_key = Plugin::$instance->dynamic_tags->get_static_setting_key( $control['name'] );
+		foreach ( $controls as $control ) {
+			if ( 'repeater' === $control['type'] ) {
+				foreach ( $settings[ $control['name'] ] as $index => $repeater_row_data ) {
+					$sanitized_row_data = $this->sanitize_initial_data( [
+						'settings' => $repeater_row_data,
+					], $control['fields'] );
 
-			$has_dynamic_property = isset( $settings[ $static_setting_key ] );
+					$settings[ $control['name'] ][ $index ] = $sanitized_row_data['settings'];
+				}
 
-			if ( ! $has_dynamic_property ) {
 				continue;
 			}
 
-			$is_correct_dynamic_value = true;
+			$is_dynamic = isset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
 
-			if ( ! empty( $settings[ $control['name'] ] ) ) {
-				$prototype_control = Plugin::$instance->controls_manager->get_control( $control['type'] );
-
-				$value_to_check =  $settings[ $control['name'] ];
-
-				$dynamic_settings = $prototype_control->get_settings( 'dynamic' );
-
-				if ( ! empty( $dynamic_settings['property'] ) ) {
-					$value_to_check = $value_to_check[ $dynamic_settings['property'] ];
-				}
-
-				if ( ! is_string( $value_to_check ) ) {
-					$is_correct_dynamic_value = false;
-				}
-
-				if ( $is_correct_dynamic_value ) {
-					$tag_text_data = Plugin::$instance->dynamic_tags->get_tag_text_data( $value_to_check );
-
-					if ( ! $tag_text_data || ! Plugin::$instance->dynamic_tags->get_tag_info( $tag_text_data['name'] ) ) {
-						$is_correct_dynamic_value = false;
-					}
-				}
-			} else {
-				$is_correct_dynamic_value = false;
+			if ( ! $is_dynamic ) {
+				continue;
 			}
 
-			if ( ! $is_correct_dynamic_value ) {
-				$settings[ $control['name'] ] = $settings[ $static_setting_key ];
+			$value_to_check =  $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ];
 
-				unset( $settings[ $static_setting_key ] );
+			$tag_text_data = Plugin::$instance->dynamic_tags->tag_text_to_tag_data( $value_to_check );
+
+			if ( ! Plugin::$instance->dynamic_tags->get_tag_info( $tag_text_data['name'] ) ) {
+				unset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
 			}
 		}
 
@@ -1838,7 +1837,9 @@ abstract class Controls_Stack {
 	 * @access protected
 	 */
 	protected function _init( $data ) {
-		$this->_data = $this->sanitize_initial_data( array_merge( $this->get_default_data(), $data ) );
+		$this->_data = array_merge( $this->get_default_data(), $data );
+
+		$this->_data = $this->sanitize_initial_data( $this->_data );
 
 		$this->_id = $data['id'];
 

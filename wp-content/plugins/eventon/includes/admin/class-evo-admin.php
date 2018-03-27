@@ -32,6 +32,9 @@ class evo_admin {
 
 		add_filter('display_post_states', array($this,'post_state'),10,2);
 
+		$tt = strtotime( 'first day of 2 months ago');
+		//echo date('y-m-d', $tt);
+
 		//add_action( 'admin_enqueue_scripts', array($this,'eventon_admin_scripts') );
 		//add_action( 'admin_enqueue_scripts', array($this,'eventon_all_backend_files') );
 	}

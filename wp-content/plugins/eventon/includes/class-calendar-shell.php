@@ -121,7 +121,7 @@ class evo_cal_shell {
 				's'=>'',		// keywords to search
 				'hide_arrows'=>'no',	// hide calendar arrows
 				'members_only'=>'no',	// only visible for loggedin user
-				'ics'=>'no'			// download all events as ICS
+				'ics'=>'no'	,		// download all events as ICS
 			);
 
 			// each event type category
@@ -170,6 +170,8 @@ class evo_cal_shell {
 				'ux_val'=>((!empty($arg['ux_val']))? $arg['ux_val']:'0'),
 				'show_limit_ajax'	=>(!empty($arg['show_limit_ajax'])? $arg['show_limit_ajax']:'no'),
 				'show_limit_paged'	=>(!empty($arg['show_limit_paged'])?$arg['show_limit_paged']:0),
+				'hide_mult_occur'	=>(!empty($arg['hide_mult_occur'])?$arg['hide_mult_occur']:'no'),
+				'show_repeats'	=>(!empty($arg['show_repeats'])?$arg['show_repeats']:'no'),
 			), $arg);
 
 			foreach ($cdata as $f=>$v){

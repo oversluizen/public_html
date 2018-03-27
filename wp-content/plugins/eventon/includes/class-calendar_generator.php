@@ -3,7 +3,7 @@
  * EVO_generator class.
  *
  * @class 		EVO_generator
- * @version		2.5
+ * @version		2.6.6
  * @package		EventON/Classes
  * @category	Class
  * @author 		AJDE
@@ -618,7 +618,8 @@ class EVO_generator {
 					$months_event_array = $this->move_ft_to_top($months_event_array, $ecv);
 
 					// FILTER past and future events
-					$months_event_array = $this->order_past_future_events($months_event_array, $ecv['filters']);
+					$filters = isset($ecv['filters'])? $ecv['filters']: '';
+					$months_event_array = $this->order_past_future_events($months_event_array, $filters);
 
 					if($ecv['event_count']==0 ){
 						foreach($months_event_array as $event){
@@ -1483,7 +1484,7 @@ class EVO_generator {
 			// all day event check
 				if($_is_allday){
 					$data_array['start']['time'] = 'allday';
-					$data_array['end'] = '';
+					//$data_array['end'] = '';
 				}else{
 					$dv_time = $this->generate_time($date_args);
 					$data_array['start']['time'] = $dv_time['start'];
@@ -1526,6 +1527,7 @@ class EVO_generator {
 
 				// user interavtion for the calendar
 					$calendar_ux_val = !empty($__shortC_arg['ux_val'])? $__shortC_arg['ux_val']: '0';
+					$cal_lang = (!empty($__shortC_arg['lang']) )?$__shortC_arg['lang']: 'L1';
 
 				// schema data
 					$show_schema = (evo_settings_check_yn($this->evopt1,'evo_schema'))? false: true;
@@ -1563,8 +1565,11 @@ class EVO_generator {
 			if(is_array($event_list_array) ){
 			foreach($event_list_array as $event_):
 
-				//$event = new EVO_Event($event_['event_id']);
-				//$thisevent->set_global();
+				// GET: repeat interval for this event
+					$__repeatInterval = $this->helper->get_ri_for_event($event_);
+					$is_recurring_event = evo_check_yn(  $event_['event_pmv'] , 'evcal_repeat');
+
+				$EVO_Event = new EVO_Event($event_['event_id'], $event_['event_pmv'] , $__repeatInterval, false);
 
 				//print_r($event_);
 				
@@ -1585,11 +1590,14 @@ class EVO_generator {
 
 				// set how a single event would interact
 					$event_ux_val = (!empty($ev_vals['_evcal_exlink_option']) )?$ev_vals['_evcal_exlink_option'][0]:1;
-					$event_permalink = get_permalink($event_id);
+					
+					$event_permalink = $EVO_Event->get_permalink( '' , $cal_lang );
 
-					// if UX set to external link and link is not empty set event link to external link
-						if($event_ux_val==2 && !empty($ev_vals['evcal_exlink']))
+
+					// if UX set to external link and link is not empty & set event link to external link
+						if($event_ux_val==2 && !empty($ev_vals['evcal_exlink'])){
 							$event_permalink = $ev_vals['evcal_exlink'][0];
+						}
 
 					// calendar UX val will override individual event ux val
 					$event_ux_val = ($calendar_ux_val !='0')? $calendar_ux_val:
@@ -1629,11 +1637,7 @@ class EVO_generator {
 					$_eventInClasses['_completed'] = $this->helper->evo_meta('_completed', $ev_vals,'tf');
 					$_eventInClasses['_cancel'] = $this->helper->evo_meta('_cancel', $ev_vals,'tf');
 
-				// GET: repeat interval for this event
-					$__repeatInterval = $this->helper->get_ri_for_event($event_);
-					$is_recurring_event = evo_check_yn($ev_vals, 'evcal_repeat');
-					//print_r($__repeatInterval);
-
+				
 				// Unique ID generation
 					$unique_varied_id = 'evc'.$event_start_unix.(uniqid()).$event_id;
 					$unique_id = 'evc_'.$event_start_unix.$event_id;
@@ -1972,43 +1976,16 @@ class EVO_generator {
 						// remove additional '#' in the hex code
 							$event_color = '#'.str_replace('#', '', $event_color);
 							
-					// if UX to be open in new window then use link to single event or that link
-						$link_append = array(); $_link_text  ='';
-						if(!empty($__shortC_arg['lang']) && $__shortC_arg['lang']!='L1'){
-							$link_append['l'] = $__shortC_arg['lang'];
-						}
-
-						// append repeat interval value to event link
-						$link_append['ri']= $__repeatInterval;
-
-						if(!empty($link_append)){
-							foreach($link_append as $lp=>$lpk){
-								if($lp=='ri' && $lpk=='0') continue;
-								$_link_text .= $lp.'='.$lpk.'&';
-							}
-						}
-
-						// passing URL variables values
-						$_link_text_append =  (strpos($event_permalink, '?')=== false)?'?':'&';
-						$_link_text = (!empty($_link_text))?
-							htmlentities($_link_text_append.$_link_text, ENT_QUOTES | ENT_HTML5): null;
-
-						// filter external link for https
-							$external_link = '';
-							if(!empty($ev_vals['evcal_exlink']) && $event_ux_val =='4' ){
-								$external_link = str_replace(array('http:','https:'), '',$external_link);
-							}
-						
-						// if no external link
+					// if UX to be open in new window then use link to single event or that link						
 						$_rest_href = '';
-						if(!empty($external_link) && !empty($_link_text)){
-							$_rest_href = 'href="'.$external_link.$_link_text.'"';
+						if(!empty($ev_vals['evcal_exlink']) && $event_ux_val =='4'){
+							$_rest_href = 'href="'.$event_permalink.'"';
 						}
 						$_eventInAttr['rest'][] = (!empty($ev_vals['evcal_exlink']) && $event_ux_val!='1' )?
 							'data-exlk="1" '.$_rest_href	:'data-exlk="0"';
 
-					// target
-					$_eventInAttr['rest'][] = (!empty($ev_vals['_evcal_exlink_target'])  && $ev_vals['_evcal_exlink_target'][0]=='yes')? 'target="_blank"':null;
+					// Event link target
+						$_eventInAttr['rest'][] = (!empty($ev_vals['_evcal_exlink_target'])  && $ev_vals['_evcal_exlink_target'][0]=='yes')? 'target="_blank"':null;
 
 					// EVENT LOCATION
 						// location status
@@ -2143,9 +2120,7 @@ class EVO_generator {
 				
 
 				// SCHEME SEO
-					// conditional schema data
-					$event_permalink = $event_permalink.$_link_text;
-					
+					// conditional schema data					
 					$__scheme_data ='<div class="evo_event_schema" style="display:none" >';
 
 					// If no schema data

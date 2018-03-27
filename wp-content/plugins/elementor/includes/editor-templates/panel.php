@@ -144,6 +144,9 @@ $document = Plugin::$instance->documents->get( $this->get_post_id() );
 <script type="text/template" id="tmpl-editor-content">
 	<div class="elementor-panel-navigation">
 		<# _.each( elementData.tabs_controls, function( tabTitle, tabSlug ) {
+			if ( 'content' !== tabSlug && ! elementor.userCan( 'design' ) ) {
+			return;
+		}
 			#>
 			<div class="elementor-panel-navigation-tab elementor-tab-control-{{ tabSlug }}" data-tab="{{ tabSlug }}">
 				<a href="#">{{{ tabTitle }}}</a>
@@ -251,9 +254,11 @@ $document = Plugin::$instance->documents->get( $this->get_post_id() );
 		</div>
 	<# } #>
 	<div class="elementor-dynamic-cover__title" title="{{{ title + ' ' + content }}}">{{{ title + ' ' + content }}}</div>
-	<div class="elementor-dynamic-cover__remove">
-		<i class="fa fa-times-circle"></i>
-	</div>
+	<# if ( isRemovable ) { #>
+		<div class="elementor-dynamic-cover__remove">
+			<i class="fa fa-times-circle"></i>
+		</div>
+	<# } #>
 </script>
 
 <script type="text/template" id="tmpl-elementor-panel-page-settings">

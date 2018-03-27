@@ -120,9 +120,8 @@ class Elements_Manager {
 	 *
 	 * @param string $category_name       Category name.
 	 * @param array  $category_properties Category properties.
-	 * @param int    $deprecated          Deprecated parameter.
 	 */
-	public function add_category( $category_name, $category_properties, $deprecated = null ) {
+	public function add_category( $category_name, $category_properties ) {
 		if ( null === $this->categories ) {
 			$this->get_categories();
 		}
@@ -183,12 +182,12 @@ class Elements_Manager {
 	 *
 	 * @param string $element_name Optional. Element name. Default is null.
 	 *
-	 * @return null|Element_Base[] Element types, or a list of all the element
+	 * @return null|Element_Base|Element_Base[] Element types, or a list of all the element
 	 *                             types, or null if element does not exist.
 	 */
 	public function get_element_types( $element_name = null ) {
 		if ( is_null( $this->_element_types ) ) {
-			$this->_init_elements();
+			$this->init_elements();
 		}
 
 		if ( null !== $element_name ) {
@@ -286,7 +285,7 @@ class Elements_Manager {
 		 *
 		 * @param array $return_data The returned data. Default is an empty array.
 		 */
-		$return_data = Utils::apply_filters_deprecated( 'elementor/ajax_save_builder/return_data', [ $return_data, $request['post_id'] ], '2.0.0', 'elementor/documents/ajax_save/return_data' );
+		$return_data = Utils::apply_filters_deprecated( 'elementor/ajax_save_builder/return_data', [ $return_data, $request['editor_post_id'] ], '2.0.0', 'elementor/documents/ajax_save/return_data' );
 
 		return $return_data;
 	}
@@ -300,7 +299,7 @@ class Elements_Manager {
 	 * @since 1.0.0
 	 * @access private
 	 */
-	private function _init_elements() {
+	private function init_elements() {
 		$this->_element_types = [];
 
 		foreach ( [ 'section', 'column' ] as $element_name ) {

@@ -4,6 +4,8 @@ namespace Elementor\Modules\PageTemplates;
 use Elementor\Controls_Manager;
 use Elementor\Core\Base\Document;
 use Elementor\Core\Base\Module as BaseModule;
+use Elementor\Core\DocumentTypes\Post as PostDocument;
+use Elementor\Modules\Library\Documents\Page as PageDocument;
 use Elementor\Plugin;
 use Elementor\Utils;
 
@@ -49,11 +51,13 @@ class Module extends BaseModule {
 	 */
 	public function template_include( $template ) {
 		if ( is_singular() ) {
-			$document = Plugin::$instance->documents->get_doc_or_auto_save();
+			$document = Plugin::$instance->documents->get_doc_for_frontend( get_the_ID() );
 
-			$template_path = $this->get_template_path( $document->get_meta( '_wp_page_template' ) );
-			if ( $template_path ) {
-				$template = $template_path;
+			if ( $document ) {
+				$template_path = $this->get_template_path( $document->get_meta( '_wp_page_template' ) );
+				if ( $template_path ) {
+					$template = $template_path;
+				}
 			}
 		}
 
@@ -87,7 +91,7 @@ class Module extends BaseModule {
 	public function add_page_templates( $page_templates ) {
 		$page_templates = [
 			self::TEMPLATE_CANVAS => __( 'Elementor', 'elementor' ) . ' ' . __( 'Canvas', 'elementor' ),
-			self::TEMPLATE_HEADER_FOOTER => __( 'Elementor', 'elementor' ) . ' ' . __( 'Header & Footer', 'elementor' ),
+			self::TEMPLATE_HEADER_FOOTER => __( 'Elementor', 'elementor' ) . ' ' . __( 'Full Width', 'elementor' ),
 		] + $page_templates;
 
 		return $page_templates;
@@ -130,7 +134,7 @@ class Module extends BaseModule {
 	 * @param Document $document
 	 */
 	public function action_register_template_control( $document ) {
-		if ( $document instanceof \Elementor\Core\DocumentTypes\Post || $document instanceof \Elementor\Modules\Library\Documents\Page ) {
+		if ( $document instanceof PostDocument || $document instanceof PageDocument ) {
 			$this->register_template_control( $document );
 		}
 	}
@@ -140,31 +144,84 @@ class Module extends BaseModule {
 	 * @param string $control_id
 	 */
 	public function register_template_control( $document, $control_id = 'template' ) {
+		if ( ! Utils::is_cpt_custom_templates_supported() ) {
+			return;
+		}
+
+		require_once ABSPATH . '/wp-admin/includes/template.php';
+
+		$options = [
+			'default' => __( 'Default', 'elementor' ),
+		];
+
+		$options += array_flip( get_page_templates( null, $document->get_main_post()->post_type ) );
+
 		$document->start_injection( [
 			'of' => 'post_status',
 		] );
 
-		if ( Utils::is_cpt_custom_templates_supported() ) {
-			require_once ABSPATH . '/wp-admin/includes/template.php';
+		$document->add_control(
+			$control_id,
+			[
+				'label' => __( 'Page Layout', 'elementor' ),
+				'type' => Controls_Manager::SELECT,
+				'default' => 'default',
+				'options' => $options,
+			]
+		);
 
-			$options = [
-				'default' => __( 'Default', 'elementor' ),
-			];
+		$document->add_control(
+			$control_id . '_default_description',
+			[
+				'type' => Controls_Manager::RAW_HTML,
+				'raw' => __( 'Default Page Template from your theme', 'elementor' ),
+				'separator' => 'none',
+				'content_classes' => 'elementor-descriptor',
+				'condition' => [
+					$control_id => 'default',
+				],
+			]
+		);
 
-			$options += array_flip( get_page_templates( null, $document->get_main_post()->post_type ) );
+		$document->add_control(
+			$control_id . '_canvas_description',
+			[
+				'type' => Controls_Manager::RAW_HTML,
+				'raw' => __( 'No header, no footer, just Elementor', 'elementor' ),
+				'separator' => 'none',
+				'content_classes' => 'elementor-descriptor',
+				'condition' => [
+					$control_id => self::TEMPLATE_CANVAS,
+				],
+			]
+		);
 
-			$document->add_control(
-				$control_id,
-				[
-					'label' => __( 'Template', 'elementor' ),
-					'type' => Controls_Manager::SELECT,
-					'default' => 'default',
-					'options' => $options,
-				]
-			);
-		}
+		$document->add_control(
+			$control_id . '_header_footer_description',
+			[
+				'type' => Controls_Manager::RAW_HTML,
+				'raw' => __( 'This template includes the header, full-width content and footer', 'elementor' ),
+				'separator' => 'none',
+				'content_classes' => 'elementor-descriptor',
+				'condition' => [
+					$control_id => self::TEMPLATE_HEADER_FOOTER,
+				],
+			]
+		);
 
 		$document->end_injection();
+	}
+
+	public function filter_update_meta( $value, $object_id, $meta_key ) {
+		// Don't allow WP to update the parent page template.
+		// (during `wp_update_post` from page-settings or save_plain_text).
+		$is_elementor_action = isset( $_POST['action'] ) && 'elementor_ajax' === $_POST['action'];
+
+		if ( $is_elementor_action && '_wp_page_template' === $meta_key && ! wp_is_post_autosave( $object_id ) ) {
+			$value = false;
+		}
+
+		return $value;
 	}
 
 	public function __construct() {
@@ -173,5 +230,9 @@ class Module extends BaseModule {
 		add_filter( 'template_include', [ $this, 'template_include' ] );
 
 		add_action( 'elementor/documents/register_controls', [ $this, 'action_register_template_control' ] );
+
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			add_filter( 'update_post_metadata', [ $this, 'filter_update_meta' ], 10, 3 );
+		}
 	}
 }

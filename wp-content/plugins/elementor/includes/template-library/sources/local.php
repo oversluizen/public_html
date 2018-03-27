@@ -10,6 +10,7 @@ use Elementor\Editor;
 use Elementor\Plugin;
 use Elementor\Settings;
 use Elementor\User;
+use Elementor\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -195,6 +196,16 @@ class Source_Local extends Source_Base {
 			}
 		}
 
+		/**
+		 * Create new template library dialog types.
+		 *
+		 * Filters the dialog types when printing new template dialog.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array    $types          Types data.
+		 * @param Document $document_types Document types.
+		 */
 		$types = apply_filters( 'elementor/template-library/create_new_dialog_types', $types, $document_types );
 		?>
 		<div id="elementor-new-template-dialog" style="display: none">
@@ -242,7 +253,16 @@ class Source_Local extends Source_Base {
 							</select>
 						</div>
 					</div>
-					<?php do_action( 'elementor/template-library/create_new_dialog_fields' ); ?>
+					<?php
+					/**
+					 * Template library dialog fields.
+					 *
+					 * Fires after Elementor template library dialog fields are displayed.
+					 *
+					 * @since 2.0.0
+					 */
+					do_action( 'elementor/template-library/create_new_dialog_fields' );
+					?>
 
 					<div id="elementor-new-template__form__post-title__wrapper" class="elementor-form-field">
 						<label for="elementor-new-template__form__post-title" class="elementor-form-field__label">
@@ -252,7 +272,7 @@ class Source_Local extends Source_Base {
 							<input type="text" placeholder="<?php echo esc_attr( __( 'Enter template name (optional)', 'elementor' ) );?>" id="elementor-new-template__form__post-title" class="elementor-form-field__text" name="post_data[post_title]">
 						</div>
 					</div>
-					<button id="elementor-new-template__form__submit" class="elementor-button elementor-button-success"><?php echo __( 'Create Template', 'elementor' ); ?></button>		
+					<button id="elementor-new-template__form__submit" class="elementor-button elementor-button-success"><?php echo __( 'Create Template', 'elementor' ); ?></button>
 				</form>
 			</div>
 		</div>
@@ -432,7 +452,7 @@ class Source_Local extends Source_Base {
 	 */
 	public function save_item( $template_data ) {
 		if ( ! isset( self::$_template_types[ $template_data['type'] ] ) ) {
-			return new \WP_Error( 'save_error', sprintf( 'Invalid template type `%s`.', $template_data['type'] ) );
+			return new \WP_Error( 'save_error', sprintf( 'Invalid template type "%s".', $template_data['type'] ) );
 		}
 
 		if ( ! current_user_can( $this->post_type_object->cap->edit_posts ) ) {
@@ -552,7 +572,7 @@ class Source_Local extends Source_Base {
 			'author' => $user->display_name,
 			'hasPageSettings' => ! empty( $page_settings ),
 			'tags' => [],
-			'export_link' => $this->_get_export_link( $template_id ),
+			'export_link' => $this->get_export_link( $template_id ),
 			'url' => get_permalink( $post->ID ),
 		];
 
@@ -696,7 +716,7 @@ class Source_Local extends Source_Base {
 			$put_contents = file_put_contents( $complete_path, $file_data['content'] );
 
 			if ( ! $put_contents ) {
-				return new \WP_Error( '404', sprintf( 'Cannot create file %s.', $file_data['name'] ) );
+				return new \WP_Error( '404', sprintf( 'Cannot create file "%s".', $file_data['name'] ) );
 			}
 
 			$files[] = [
@@ -809,7 +829,7 @@ class Source_Local extends Source_Base {
 	public function post_row_actions( $actions, \WP_Post $post ) {
 		if ( self::is_base_templates_screen() ) {
 			if ( $this->is_template_supports_export( $post->ID ) ) {
-				$actions['export-template'] = sprintf( '<a href="%s">%s</a>', $this->_get_export_link( $post->ID ), __( 'Export Template', 'elementor' ) );
+				$actions['export-template'] = sprintf( '<a href="%1$s">%2$s</a>', $this->get_export_link( $post->ID ), __( 'Export Template', 'elementor' ) );
 			}
 
 			unset( $actions['inline hide-if-no-js'] );
@@ -841,6 +861,7 @@ class Source_Local extends Source_Base {
 				<div id="elementor-import-template-title"><?php echo __( 'Choose an Elementor template JSON file or a .zip archive of Elementor templates, and add them to the list of templates available in your library.', 'elementor' ); ?></div>
 				<form id="elementor-import-template-form" method="post" action="<?php echo admin_url( 'admin-ajax.php' ); ?>" enctype="multipart/form-data">
 					<input type="hidden" name="action" value="elementor_import_template">
+					<input type="hidden" name="editor_post_id" value="<?php the_ID(); ?>">
 					<input type="hidden" name="_nonce" value="<?php echo Plugin::$instance->editor->create_nonce( self::CPT ); ?>">
 					<fieldset id="elementor-import-template-form-inputs">
 						<input type="file" name="file" accept=".json,application/json,.zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" required>
@@ -941,12 +962,13 @@ class Source_Local extends Source_Base {
 	 *
 	 * @return string Template export URL.
 	 */
-	private function _get_export_link( $template_id ) {
+	private function get_export_link( $template_id ) {
 		return add_query_arg(
 			[
 				'action' => 'elementor_export_template',
 				'source' => $this->get_id(),
 				'_nonce' => Plugin::$instance->editor->create_nonce( self::CPT ),
+				'editor_post_id' => get_the_ID(),
 				'template_id' => $template_id,
 			],
 			admin_url( 'admin-ajax.php' )
@@ -1095,8 +1117,7 @@ class Source_Local extends Source_Base {
 				}
 
 				$type_url = add_query_arg( self::TAXONOMY_TYPE_SLUG, $template_type, $baseurl );
-
-				$type_label = ucwords( str_replace( '_', ' ', $template_type ) );
+				$type_label = $this->get_template_label_by_type( $template_type );
 
 				echo "<a class='nav-tab{$active_class}' href='{$type_url}'>{$type_label}</a>";
 			endforeach;
@@ -1144,15 +1165,15 @@ class Source_Local extends Source_Base {
 			$inline_style .= '#elementor-template-library-tabs-wrapper {display: none;}';
 		}
 
-		$current_type_label = ucwords( $current_type );
+		$current_type_label = $this->get_template_label_by_type( $current_type );
 		?>
 		<style type="text/css"><?php echo $inline_style; ?></style>
 		<div class="elementor-template_library-blank_state">
-			<div class="blank_state-inner">
+			<div class="elementor-blank_state">
 				<i class="eicon-folder"></i>
-				<h2>Create Your First <?php echo esc_html( $current_type_label ); ?></h2>
-				<p>Add templates and reuse them across your website. Easily export and import them to any other project, for an optimised workflow.</p>
-				<a id="elementor-template-library-add-new" class="elementor-button elementor-button-success" href="#">Add New <?php echo esc_html( $current_type_label ); ?></a>
+				<h2><?php printf( __( 'Create Your First %s', 'elementor' ), esc_html( $current_type_label ) ); ?></h2>
+				<p><?php echo __( 'Add templates and reuse them across your website. Easily export and import them to any other project, for an optimised workflow.', 'elementor' ); ?></p>
+				<a id="elementor-template-library-add-new" class="elementor-button elementor-button-success" href="<?php esc_attr( Utils::get_pro_link( 'https://elementor.com/pro/?utm_source=wp-custom-fonts&utm_campaign=gopro&utm_medium=wp-dash' ) ); ?>"><?php echo __( 'Add New', 'elementor' ); ?> <?php echo esc_html( $current_type_label ); ?></a>
 			</div>
 		</div>
 		<?php
@@ -1178,12 +1199,7 @@ class Source_Local extends Source_Base {
 			return new \WP_Error( 'file_error', 'Invalid File.' );
 		}
 
-		// TODO: since 1.5.0 to content container named `content` instead of `data`.
-		if ( ! empty( $data['data'] ) ) {
-			$content = $data['data'];
-		} else {
-			$content = $data['content'];
-		}
+		$content = $data['content'];
 
 		if ( ! is_array( $content ) ) {
 			return new \WP_Error( 'file_error', 'Invalid File.' );
@@ -1287,6 +1303,18 @@ class Source_Local extends Source_Base {
 		header( 'Cache-Control: must-revalidate' );
 		header( 'Pragma: public' );
 		header( 'Content-Length: ' . $file_size );
+	}
+
+	private function get_template_label_by_type( $template_type ) {
+		$template_label = ucwords( str_replace( '_', ' ', $template_type ) );
+
+		if ( 'page' === $template_type ) {
+			$template_label = 'Content';
+		}
+
+		$template_label = apply_filters( 'elementor/template-library/get_template_label_by_type', $template_label, $template_type );
+
+		return $template_label;
 	}
 
 	/**

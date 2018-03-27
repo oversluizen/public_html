@@ -60,6 +60,9 @@ class Preview {
 
 		add_filter( 'the_content', [ $this, 'builder_wrapper' ], 999999 );
 
+		// Enqueue Style, Scripts & Fonts for external templates
+		add_action( 'wp_footer', [ Plugin::$instance->frontend, 'wp_footer' ] );
+
 		// Tell to WP Cache plugins do not cache this request.
 		Utils::do_not_cache();
 
@@ -135,6 +138,7 @@ class Preview {
 		if ( get_the_ID() === $this->post_id ) {
 			$content = '<div id="elementor" class="elementor elementor-edit-mode"></div>';
 		}
+
 		return $content;
 	}
 

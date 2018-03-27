@@ -1,6 +1,6 @@
 /**
  * Javascript code that is associated with the front end of the calendar
- * version: 2.5.4
+ * version: 2.6.6
  */
 
 jQuery(document).ready(function($){
@@ -267,7 +267,11 @@ jQuery(document).ready(function($){
 		$('.evo_j_dates').on('click','a',function(){
 			var val = $(this).attr('data-val'),
 				type = $(this).parent().parent().attr('data-val'),
-				container = $(this).closest('.evo_j_container');
+				container = $(this).closest('.evo_j_container'),
+				calOBJ = $(this).closest('.ajde_evcal_calendar');
+
+			// resets 
+				cal_resets(calOBJ);
 
 			if(type=='m'){
 				container.attr({'data-m':val});
@@ -281,7 +285,7 @@ jQuery(document).ready(function($){
 
 			if(container.attr('data-m')!==undefined && container.attr('data-y')!==undefined){
 				
-				var calid = container.closest('.ajde_evcal_calendar').attr('id');
+				var calid = calOBJ.attr('id');
 				var evo_data = $('#'+calid).find('.evo-data');
 				evo_data.attr({
 					'data-cmonth':container.attr('data-m'),
@@ -308,6 +312,13 @@ jQuery(document).ready(function($){
 			// correct month
 			ej_container.find('.evo_j_months p.legend a').removeClass('set').parent().find('a[data-val='+new_month+']').addClass('set');
 			ej_container.find('.evo_j_years p.legend a').removeClass('set').parent().find('a[data-val='+new_year+']').addClass('set');
+		}
+
+
+	// RESET general calendar
+		function cal_resets(calOBJ){
+			calargs = $(calOBJ).find('.cal_arguments');
+			calargs.attr('data-show_limit_paged', 1 );
 		}
 	
 	// close event card
@@ -369,9 +380,7 @@ jQuery(document).ready(function($){
 				if(allEvents > currentShowing && allEvents<=  (currentShowing+event_count)){
 					$(this).fadeOut();
 				}
-			}
-			
-			
+			}		
 
 		});
 	
@@ -517,7 +526,10 @@ jQuery(document).ready(function($){
 					CAL = $(this).closest('.ajde_evcal_calendar');	
 					var evodata = CAL.find('.evo-data');
 					CAL_ARG = CAL.find('.cal_arguments');
-					CAL_ARG.attr('data-show_limit_paged',0);
+
+					PAGED = parseInt(CAL_ARG.attr('data-show_limit_paged'));
+					PAGED = PAGED>1? 1: PAGED;
+					CAL_ARG.attr('data-show_limit_paged',  PAGED);
 					var cmonth = parseInt( evodata.attr('data-cmonth'));
 					var cyear = parseInt( evodata.attr('data-cyear'));	
 					var sort_by = evodata.attr('data-sort_by');

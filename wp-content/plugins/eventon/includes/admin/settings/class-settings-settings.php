@@ -64,8 +64,8 @@ class evo_settings_settings{
 
 					array('id'=>'evo_donot_delete',
 						'type'=>'yesno',
-						'name'=>__('Do not delete eventon settings when I delete EventON plugin','eventon'), 
-						'legend'=>__('Activating this will not delete the saved settings for eventon when you delete eventon plugin. By Default it will delete saved data.','eventon')),
+						'name'=>__('Do not delete eventon settings & data when EventON is uninstalled','eventon'), 
+						'legend'=>__('Setting this will retain your eventON settings and event post data when you uninstall eventON from this website. When eventON is reinstalled and activated all the eventON settings and event data will stay as it was before.','eventon')),
 					
 					array('id'=>'evo_rtl',
 						'type'=>'yesno',

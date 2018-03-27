@@ -48,6 +48,8 @@ class Controls_Manager {
 	const TAB = 'tab';
 	/** This control is documented in includes/controls/tabs.php */
 	const TABS = 'tabs';
+	/** This control is documented in includes/controls/divider.php */
+	const DIVIDER = 'divider';
 
 	/** This control is documented in includes/controls/color.php */
 	const COLOR = 'color';
@@ -93,13 +95,11 @@ class Controls_Manager {
 	const ANIMATION = 'animation';
 	/** This control is documented in includes/controls/hover-animation.php */
 	const HOVER_ANIMATION = 'hover_animation';
-	/** This control is documented in includes/controls/order.php */
-	const ORDER = 'order';
 
 	/**
-	 * @deprecated 1.5.4 Use `SWITCHER` const instead.
+	 * @deprecated 2.0.0
 	 */
-	const CHECKBOX = 'checkbox';
+	const ORDER = 'order';
 
 	/**
 	 * Controls.
@@ -245,6 +245,7 @@ class Controls_Manager {
 			self::SECTION,
 			self::TAB,
 			self::TABS,
+			self::DIVIDER,
 
 			self::COLOR,
 			self::MEDIA,
@@ -269,9 +270,8 @@ class Controls_Manager {
 			self::TEXT_SHADOW,
 			self::ANIMATION,
 			self::HOVER_ANIMATION,
-			self::ORDER,
 
-			self::CHECKBOX,
+			self::ORDER,
 		];
 
 		foreach ( $available_controls as $control_id ) {
@@ -742,13 +742,14 @@ class Controls_Manager {
 	 * @access public
 	 *
 	 * @param Element_Base $element The element.
+	 * @param string $tab The panel tab.
 	 */
-	public function add_custom_css_controls( $element ) {
+	public function add_custom_css_controls( $element, $tab = Controls_Manager::TAB_ADVANCED ) {
 		$element->start_controls_section(
 			'section_custom_css_pro',
 			[
 				'label' => __( 'Custom CSS', 'elementor' ),
-				'tab'   => Controls_Manager::TAB_ADVANCED,
+				'tab' => $tab,
 			]
 		);
 

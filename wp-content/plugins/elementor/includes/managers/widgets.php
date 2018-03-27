@@ -2,6 +2,7 @@
 namespace Elementor;
 
 use Elementor\Core\Ajax_Manager;
+use Elementor\Core\Utils\Exceptions;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -38,7 +39,7 @@ class Widgets_Manager {
 	 * @since 1.0.0
 	 * @access private
 	*/
-	private function _init_widgets() {
+	private function init_widgets() {
 		$build_widgets_filename = [
 			'common',
 			'heading',
@@ -82,7 +83,7 @@ class Widgets_Manager {
 			$this->register_widget_type( new $class_name() );
 		}
 
-		$this->_register_wp_widgets();
+		$this->register_wp_widgets();
 
 		/**
 		 * After widgets registered.
@@ -107,7 +108,7 @@ class Widgets_Manager {
 	 * @since 1.0.0
 	 * @access private
 	*/
-	private function _register_wp_widgets() {
+	private function register_wp_widgets() {
 		global $wp_widget_factory;
 
 		// Skip Pojo widgets.
@@ -167,7 +168,7 @@ class Widgets_Manager {
 	 * @since 1.0.0
 	 * @access private
 	*/
-	private function _require_files() {
+	private function require_files() {
 		require ELEMENTOR_PATH . 'includes/base/widget-base.php';
 	}
 
@@ -185,7 +186,7 @@ class Widgets_Manager {
 	*/
 	public function register_widget_type( Widget_Base $widget ) {
 		if ( is_null( $this->_widget_types ) ) {
-			$this->_init_widgets();
+			$this->init_widgets();
 		}
 
 		$this->_widget_types[ $widget->get_name() ] = $widget;
@@ -229,7 +230,7 @@ class Widgets_Manager {
 	*/
 	public function get_widget_types( $widget_name = null ) {
 		if ( is_null( $this->_widget_types ) ) {
-			$this->_init_widgets();
+			$this->init_widgets();
 		}
 
 		if ( null !== $widget_name ) {
@@ -287,20 +288,16 @@ class Widgets_Manager {
 	 * @throws \Exception
 	 */
 	public function ajax_render_widget( $request ) {
-		if ( empty( $request['post_id'] ) ) {
-			throw new \Exception( 'Missing post id.' );
-		}
-
-		$document = Plugin::$instance->documents->get( $request['post_id'] );
+		$document = Plugin::$instance->documents->get( $request['editor_post_id'] );
 
 		if ( ! $document->is_editable_by_current_user() ) {
-			throw new \Exception( 'Access denied.' );
+			throw new \Exception( 'Access denied.', Exceptions::FORBIDDEN );
 		}
 
 		// Override the global $post for the render.
 		query_posts(
 			[
-				'p' => $request['post_id'],
+				'p' => $request['editor_post_id'],
 				'post_type' => 'any',
 			]
 		);
@@ -309,7 +306,7 @@ class Widgets_Manager {
 		$is_edit_mode = $editor->is_edit_mode();
 		$editor->set_edit_mode( true );
 
-		Plugin::$instance->db->switch_to_post( $request['post_id'] );
+		Plugin::$instance->documents->switch_to_document( $document );
 
 		$render_html = $document->render_element( $request['data'] );
 
@@ -483,7 +480,7 @@ class Widgets_Manager {
 	 * @access public
 	*/
 	public function __construct() {
-		$this->_require_files();
+		$this->require_files();
 
 		add_action( 'elementor/ajax/register_actions', [ $this, 'register_ajax_actions' ] );
 	}

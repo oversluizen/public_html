@@ -17,6 +17,9 @@ $body_classes = [
 if ( is_rtl() ) {
 	$body_classes[] = 'rtl';
 }
+if ( ! Plugin::$instance->role_manager->user_can( 'design' ) ) {
+	$body_classes[] = 'elementor-editor-content-only';
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -41,7 +44,7 @@ if ( is_rtl() ) {
 					<div class="elementor-loader-box"></div>
 					<div class="elementor-loader-box"></div>
 				</div>
-				<div class="elementor-loading-title"><?php _e( 'Loading', 'elementor' ); ?></div>
+				<div class="elementor-loading-title"><?php echo __( 'Loading', 'elementor' ); ?></div>
 			</div>
 		</div>
 		<div id="elementor-preview-responsive-wrapper" class="elementor-device-desktop elementor-device-rotate-portrait">

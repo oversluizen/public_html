@@ -1,4 +1,4 @@
-/*! elementor - v1.9.8 - 13-03-2018 */
+/*! elementor - v2.0.0 - 26-03-2018 */
 .dialog-widget-content {
   background-color: #fff;
   position: absolute;
@@ -1317,10 +1317,10 @@
           justify-content: flex-end; }
 
 .elementor-widget.elementor-align-right .elementor-icon-list-item, .elementor-widget.elementor-align-right .elementor-icon-list-item a {
-  -webkit-box-pack: end;
-  -webkit-justify-content: flex-end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
+  -webkit-box-pack: start;
+  -webkit-justify-content: flex-start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
   text-align: left; }
 
 .elementor-widget.elementor-align-right .elementor-grid {

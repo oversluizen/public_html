@@ -3,9 +3,10 @@ namespace Elementor\Core\DynamicTags;
 
 use Elementor\Plugin;
 use Elementor\User;
-use Elementor\Utils;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 class Manager {
 
@@ -14,6 +15,8 @@ class Manager {
 	const MODE_RENDER = 'render';
 
 	const MODE_REMOVE = 'remove';
+
+	const DYNAMIC_SETTING_KEY = '__dynamic__';
 
 	private $tags_groups = [];
 
@@ -39,7 +42,7 @@ class Manager {
 	}
 
 	public function parse_tag_text( $tag_text, array $settings, $parse_callback ) {
-		$tag_data = $this->get_tag_text_data( $tag_text );
+		$tag_data = $this->tag_text_to_tag_data( $tag_text );
 
 		if ( ! $tag_data ) {
 			if ( ! empty( $settings['returnType'] ) && 'object' === $settings['returnType'] ) {
@@ -52,12 +55,10 @@ class Manager {
 		return call_user_func_array( $parse_callback, $tag_data );
 	}
 
-	public function get_tag_text_data( $tag_text ) {
-		preg_match( '/id="(.+?(?="))"/', $tag_text, $tag_id_match );
-
-		preg_match( '/name="(.+?(?="))"/', $tag_text, $tag_name_match );
-
-		preg_match( '/settings="(.+?(?="]))/', $tag_text, $tag_settings_match );
+	public function tag_text_to_tag_data( $tag_text ) {
+		preg_match( '/id="(.*?(?="))"/', $tag_text, $tag_id_match );
+		preg_match( '/name="(.*?(?="))"/', $tag_text, $tag_name_match );
+		preg_match( '/settings="(.*?(?="]))/', $tag_text, $tag_settings_match );
 
 		if ( ! $tag_id_match || ! $tag_name_match || ! $tag_settings_match ) {
 			return null;
@@ -66,17 +67,17 @@ class Manager {
 		return [
 			'id' => $tag_id_match[1],
 			'name' => $tag_name_match[1],
-			'settings' => json_decode( $tag_settings_match[1], true ),
+			'settings' => json_decode( urldecode( $tag_settings_match[1] ), true ),
 		];
 	}
 
 	/**
-	 * @param Tag $tag
+	 * @param Base_Tag $tag
 	 *
 	 * @return string
 	 */
-	public function tag_to_text( Tag $tag ) {
-		return sprintf( '[%1$s id="%2$s" name="%3$s" settings="%4$s"]', self::TAG_LABEL, $tag->get_id(), $tag->get_name(), wp_json_encode( $tag->get_settings(), JSON_FORCE_OBJECT ) );
+	public function tag_to_text( Base_Tag $tag ) {
+		return sprintf( '[%1$s id="%2$s" name="%3$s" settings="%4$s"]', self::TAG_LABEL, $tag->get_id(), $tag->get_name(), urlencode( wp_json_encode( $tag->get_settings(), JSON_FORCE_OBJECT ) ) );
 	}
 
 	/**
@@ -209,27 +210,33 @@ class Manager {
 		];
 	}
 
-	public function get_static_setting_key( $key ) {
-		return $key . '__static__';
-	}
-
 	public function ajax_render_tags() {
 		Plugin::$instance->editor->verify_ajax_nonce();
 
-		if ( empty( $_POST['post_id'] ) ) {
+		$posted = $_POST; // WPCS: CSRF OK.
+
+		if ( empty( $posted['post_id'] ) ) {
 			throw new \Exception( 'Missing post id.' );
 		}
 
-		if ( ! User::is_current_user_can_edit( $_POST['post_id'] ) ) {
+		if ( ! User::is_current_user_can_edit( $posted['post_id'] ) ) {
 			throw new \Exception( 'Access denied.' );
 		}
 
-		Plugin::$instance->db->switch_to_post( $_POST['post_id'] );
+		Plugin::$instance->db->switch_to_post( $posted['post_id'] );
+
+		/**
+		 * Before dynamic tags rendered.
+		 *
+		 * Fires before Elementor renders the dynamic tags.
+		 *
+		 * @since 2.0.0
+		 */
 		do_action( 'elementor/dynamic_tags/before_render' );
 
 		$tags_data = [];
 
-		foreach ( $_POST['tags'] as $tag_key ) {
+		foreach ( $posted['tags'] as $tag_key ) {
 			$tag_key_parts = explode( '-', $tag_key );
 
 			$tag_name = base64_decode( $tag_key_parts[0] );
@@ -241,6 +248,13 @@ class Manager {
 			$tags_data[ $tag_key ] = $tag->get_content();
 		}
 
+		/**
+		 * After dynamic tags rendered.
+		 *
+		 * Fires after Elementor renders the dynamic tags.
+		 *
+		 * @since 2.0.0
+		 */
 		do_action( 'elementor/dynamic_tags/after_render' );
 
 		wp_send_json_success( $tags_data );

@@ -75,9 +75,10 @@ class Upgrades {
 		$elementor_upgrades = get_option( 'elementor_upgrades', [] );
 
 		$upgrades = [
-			'0.3.2'  => '_upgrade_v032',
-			'0.9.2'  => '_upgrade_v092',
-			'0.11.0' => '_upgrade_v0110',
+			'0.3.2'  => 'upgrade_v032',
+			'0.9.2'  => 'upgrade_v092',
+			'0.11.0' => 'upgrade_v0110',
+			'2.0.0' => 'upgrade_v200',
 		];
 
 		foreach ( $upgrades as $version => $function ) {
@@ -98,7 +99,7 @@ class Upgrades {
 	 * @since 1.0.0
 	 * @access private
 	 */
-	private static function _upgrade_v032() {
+	private static function upgrade_v032() {
 		global $wpdb;
 
 		$post_ids = $wpdb->get_col(
@@ -145,7 +146,7 @@ class Upgrades {
 	 * @since 1.0.0
 	 * @access private
 	 */
-	private static function _upgrade_v092() {
+	private static function upgrade_v092() {
 		global $wpdb;
 
 		// Fix Icon/Icon Box Widgets padding.
@@ -198,7 +199,7 @@ class Upgrades {
 	 * @since 1.0.0
 	 * @access private
 	 */
-	private static function _upgrade_v0110() {
+	private static function upgrade_v0110() {
 		global $wpdb;
 
 		// Fix Button widget to new sizes options.
@@ -247,6 +248,38 @@ class Upgrades {
 			Plugin::$instance->db->save_editor( $post_id, $data );
 		}
 	}
-}
 
-Upgrades::add_actions();
+	/**
+	 * Upgrade Elementor 2.0.0
+	 *
+	 * Fix post titles for old autosave drafts that saved with the format 'Auto Save 2018-03-18 17:24'.
+	 *
+	 * @static
+	 * @since 2.0.0
+	 * @access private
+	 */
+	private static function upgrade_v200() {
+		global $wpdb;
+
+		// Fix Button widget to new sizes options.
+		$posts = $wpdb->get_results(
+			'SELECT `ID`, `post_title`, `post_parent`
+					FROM `' . $wpdb->posts . '` p
+					LEFT JOIN `' . $wpdb->postmeta . '` m ON p.ID = m.post_id
+					WHERE `post_status` = \'inherit\'
+					AND `post_title` = CONCAT(\'Auto Save \', DATE_FORMAT(post_date, "%Y-%m-%d %H:%i"))
+					AND  m.`meta_key` = \'_elementor_data\';'
+		);
+
+		if ( empty( $posts ) ) {
+			return;
+		}
+
+		foreach ( $posts as $post ) {
+			wp_update_post( [
+				'ID' => $post->ID,
+				'post_title' => get_the_title( $post->post_parent ),
+			] );
+		}
+	}
+}

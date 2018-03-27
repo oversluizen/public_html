@@ -4,8 +4,8 @@ Plugin Name: EventON
 Author URI: http://ashanjay.com/
 Tags: calendar, event calendar, event posts
 Requires at least: 4.0
-Tested up to: 4.9.1
-Stable tag: 2.6.5
+Tested up to: 4.9.4
+Stable tag: 2.6.6
 Initial Release: 2011-12-21
 
 Event calendar plugin for wordpress that utilizes WP's custom post type.  
@@ -20,6 +20,18 @@ Event calendar plugin for wordpress that utilizes WP's custom post type. This pl
 1. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+= 2.6.6 (2018-2-7) =
+FIXED: AJAX based load more events not working correct
+FIXED: addon details actionuser plus ID correction
+FIXED: Shortcode generator tooltips not showing
+FIXED: All day events on multi days not showing end date
+FIXED: datetime object get_int_correct_event_time return error
+FIXED: Event inclusion in search results breaking bbpress forums
+FIXED: load more events via ajax not reseting paged val
+FIXED: subtitle with double quotes not saving correct
+UPDAETD: Better URL structure for passing repeat event information
+UPDATED: event edit meta box colors to a lighter colors
+
 = 2.6.5 (2017-12-11) =
 ADDED: Option to disable auto generated og: meta tags
 ADDED: Notice for interchangeable shortcode usage
