@@ -1,7 +1,9 @@
 <?php
 namespace Elementor;
 
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
 
 /**
  * Elementor controls manager class.
@@ -199,8 +201,11 @@ class Controls_Manager {
 	 * @since 1.6.0
 	 * @access public
 	 * @static
+	 *
+	 * @param string $tab_name  Tab name.
+	 * @param string $tab_label Tab label.
 	 */
-	public static function add_tab( $tab_name, $tab_title ) {
+	public static function add_tab( $tab_name, $tab_label ) {
 		if ( ! self::$tabs ) {
 			self::init_tabs();
 		}
@@ -209,7 +214,7 @@ class Controls_Manager {
 			return;
 		}
 
-		self::$tabs[ $tab_name ] = $tab_title;
+		self::$tabs[ $tab_name ] = $tab_label;
 	}
 
 	/**
@@ -393,7 +398,7 @@ class Controls_Manager {
 	 *    Control data.
 	 *
 	 *    @type array $name Control data.
- 	 * }
+	 * }
 	 */
 	public function get_controls_data() {
 		$controls_data = [];
@@ -604,7 +609,7 @@ class Controls_Manager {
 	 * @param string $stack_id   Stack ID.
 	 * @param string $control_id The ID of the control to remove.
 	 *
-	 * @return bool True if the stack was removed, False otherwise.
+	 * @return bool|\WP_Error True if the stack was removed, False otherwise.
 	 */
 	public function remove_control_from_stack( $stack_id, $control_id ) {
 		if ( is_array( $control_id ) ) {
@@ -678,7 +683,9 @@ class Controls_Manager {
 			$control_data = array_merge( $old_control_data, $control_data );
 		}
 
-		return $this->add_control_to_stack( $element, $control_id, $control_data, [ 'overwrite' => true ] );
+		return $this->add_control_to_stack( $element, $control_id, $control_data, [
+			'overwrite' => true,
+		] );
 	}
 
 	/**
@@ -744,7 +751,7 @@ class Controls_Manager {
 	 * @param Element_Base $element The element.
 	 * @param string $tab The panel tab.
 	 */
-	public function add_custom_css_controls( $element, $tab = Controls_Manager::TAB_ADVANCED ) {
+	public function add_custom_css_controls( $element, $tab = self::TAB_ADVANCED ) {
 		$element->start_controls_section(
 			'section_custom_css_pro',
 			[
@@ -756,9 +763,9 @@ class Controls_Manager {
 		$element->add_control(
 			'custom_css_pro',
 			[
-				'type' => Controls_Manager::RAW_HTML,
-				'raw' => '<div class="elementor-panel-nerd-box">
-						<i class="elementor-panel-nerd-box-icon eicon-hypster" aria-hidden="true"></i>
+				'type' => self::RAW_HTML,
+				'raw' => '<div class="elementor-panel-nerd-box">' .
+						'<i class="elementor-panel-nerd-box-icon eicon-hypster" aria-hidden="true"></i>
 						<div class="elementor-panel-nerd-box-title">' .
 							__( 'Meet Our Custom CSS', 'elementor' ) .
 						'</div>

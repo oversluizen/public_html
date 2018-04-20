@@ -1,5 +1,5 @@
-/*! elementor - v2.0.0 - 26-03-2018 */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! elementor - v2.0.4 - 09-04-2018 */
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var TagPanelView = require( 'elementor-dynamic-tags/tag-panel-view' );
 
 module.exports = Marionette.Behavior.extend( {
@@ -5133,6 +5133,8 @@ Marionette.TemplateCache.prototype.compileTemplate = function( rawTemplate, opti
 };
 
 App = Marionette.Application.extend( {
+	previewLoadedOnce: false,
+
 	helpers: require( 'elementor-editor-utils/helpers' ),
 	heartbeat: require( 'elementor-editor-utils/heartbeat' ),
 	imagesManager: require( 'elementor-editor-utils/images-manager' ),
@@ -5430,9 +5432,7 @@ App = Marionette.Application.extend( {
 			this.$previewResponsiveWrapper.append( this.$preview );
 		}
 
-		this.$preview
-			.on( 'load', this.onPreviewLoaded.bind( this ) )
-			.one( 'load', this.checkPageStatus.bind( this ) );
+		this.$preview.on( 'load', this.onPreviewLoaded.bind( this ) );
 	},
 
 	initFrontend: function() {
@@ -5745,8 +5745,6 @@ App = Marionette.Application.extend( {
 		this.initElements();
 		this.initHotKeys();
 
-		this.heartbeat.init();
-
 		var iframeRegion = new Marionette.Region( {
 			// Make sure you get the DOM object out of the jQuery object
 			el: $previewElementorEl[0]
@@ -5759,19 +5757,21 @@ App = Marionette.Application.extend( {
 
 		this.addBackgroundClickArea( elementorFrontend.getElements( '$document' )[0] );
 
-		var Preview = require( 'elementor-views/preview' ),
-			PanelLayoutView = require( 'elementor-layouts/panel/panel' );
+		if ( this.previewLoadedOnce ) {
+			this.getPanelView().setPage( 'elements' );
+		} else {
+			this.onFirstPreviewLoaded();
+		}
 
 		this.addRegions( {
-			sections: iframeRegion,
-			panel: '#elementor-panel'
+			sections: iframeRegion
 		} );
+
+		var Preview = require( 'elementor-views/preview' );
 
 		this.getRegion( 'sections' ).show( new Preview( {
 			collection: this.elements
 		} ) );
-
-		this.getRegion( 'panel' ).show( new PanelLayoutView() );
 
 		this.$previewContents.children().addClass( 'elementor-html' );
 
@@ -5781,7 +5781,6 @@ App = Marionette.Application.extend( {
 			elementorFrontend.getElements( '$body' ).addClass( 'elementor-editor-content-only' );
 		}
 
-		this.setResizablePanel();
 		this.changeDeviceMode( this._defaultDeviceMode );
 
 		jQuery( '#elementor-loading, #elementor-preview-loading' ).fadeOut( 600 );
@@ -5791,10 +5790,26 @@ App = Marionette.Application.extend( {
 		} );
 
 		this.enqueueTypographyFonts();
+
 		this.onEditModeSwitched();
-		this.openLibraryOnStart();
 
 		this.trigger( 'preview:loaded' );
+	},
+
+	onFirstPreviewLoaded: function() {
+		this.addRegions( {
+			panel: '#elementor-panel'
+		} );
+
+		var PanelLayoutView = require( 'elementor-layouts/panel/panel' );
+		this.panel.show( new PanelLayoutView() );
+
+		this.setResizablePanel();
+		this.heartbeat.init();
+		this.checkPageStatus();
+		this.openLibraryOnStart();
+
+		this.previewLoadedOnce = true;
 	},
 
 	onEditModeSwitched: function() {
@@ -5834,13 +5849,21 @@ App = Marionette.Application.extend( {
 	},
 
 	onPreviewElNotFound: function() {
-		this.showFatalErrorDialog( {
-			headerMessage: this.translate( 'preview_el_not_found_header' ),
-			message: this.translate( 'preview_el_not_found_message' ),
-			onConfirm: function() {
-				open( elementor.config.help_the_content_url, '_blank' );
-			}
-		} );
+		var args = this.$preview[0].contentWindow.elementorPreviewErrorArgs;
+
+		if ( ! args ) {
+			args = {
+				headerMessage: this.translate( 'preview_el_not_found_header' ),
+				message: this.translate( 'preview_el_not_found_message' ),
+				confirmURL: elementor.config.help_the_content_url
+			};
+		}
+
+		args.onConfirm = function() {
+			open( args.confirmURL, '_blank' );
+		};
+
+		this.showFatalErrorDialog( args );
 	},
 
 	onBackgroundClick: function( event ) {
@@ -5976,7 +5999,18 @@ App = Marionette.Application.extend( {
 		}
 
 		if ( templateArgs ) {
+			// TODO: bc since 2.0.4
 			string = string.replace( /{(\d+)}/g, function( match, number ) {
+				return undefined !== templateArgs[ number ] ? templateArgs[ number ] : match;
+			} );
+
+			string = string.replace( /%(?:(\d+)\$)?s/g, function( match, number ) {
+				if ( ! number ) {
+					number = 1;
+				}
+
+				number--;
+
 				return undefined !== templateArgs[ number ] ? templateArgs[ number ] : match;
 			} );
 		}
@@ -6035,12 +6069,14 @@ App = Marionette.Application.extend( {
 		} else {
 			text += '%c00';
 
-			style = 'line-height: 1.6; font-size: 20px; background-image: url("' + elementor.config.assets_url + 'images/logo-icon.png"); color: transparent; background-repeat: no-repeat; background-size: cover';
+			style = 'font-size: 22px; background-image: url("' + elementor.config.assets_url + 'images/logo-icon.png"); color: transparent; background-repeat: no-repeat';
 		}
 
-		text += '%c\nLove using Elementor? Join our growing community of Elementor developers: %chttps://github.com/pojome/elementor';
+		setTimeout( console.log.bind( console, text, style ) );
 
-		setTimeout( console.log.bind( console, text, style, 'color: #9B0A46', '' ) );
+		text = '%cLove using Elementor? Join our growing community of Elementor developers: %chttps://github.com/pojome/elementor';
+
+		setTimeout( console.log.bind( console, text, 'color: #9B0A46', '' ) );
 	}
 } );
 
@@ -6361,7 +6397,8 @@ BaseSettingsModel = Backbone.Model.extend( {
 				var control = controls[ key ];
 
 				if ( control ) {
-					if ( ( 'text' === control.type || 'textarea' === control.type ) && data[ key ] ) {
+					// TODO: use `save_default` in text|textarea controls.
+					if ( control.save_default || ( ( 'text' === control.type || 'textarea' === control.type ) && data[ key ] ) ) {
 						return;
 					}
 
@@ -8816,6 +8853,14 @@ EditorView = ControlsStack.extend( {
 
 	scrollToEditedElement: function() {
 		elementor.helpers.scrollToView( this.getOption( 'editedElementView' ) );
+	},
+
+	getControlView: function( name ) {
+		return this.children.findByModelCid( this.getControlModel( name ).cid );
+	},
+
+	getControlModel: function( name ) {
+		return this.collection.findWhere( { name: name } );
 	},
 
 	onDestroy: function() {

@@ -1085,6 +1085,7 @@ function add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $func
 	$admin_page_hooks[$menu_slug] = sanitize_title( $menu_title );
 
 	$hookname = get_plugin_page_hookname( $menu_slug, '' );
+	
 
 	if ( !empty( $function ) && !empty( $hookname ) && current_user_can( $capability ) )
 		add_action( $hookname, $function );

@@ -31,6 +31,18 @@ class Ajax_Manager {
 	protected $ajax_actions = [];
 
 	/**
+	 * Ajax requests.
+	 *
+	 * Holds all the register ajax requests.
+	 *
+	 * @since 2.0.0
+	 * @access protected
+	 *
+	 * @var array
+	 */
+	protected $requests = [];
+
+	/**
 	 * Ajax response data.
 	 *
 	 * Holds all the response data for all the ajax requests.
@@ -43,9 +55,9 @@ class Ajax_Manager {
 	protected $response_data = [];
 
 	/**
-	 * Current action ID.
+	 * Current ajax action ID.
 	 *
-	 * Holds all the ID for the current action.
+	 * Holds all the ID for the current ajax action.
 	 *
 	 * @since 2.0.0
 	 * @access protected
@@ -55,12 +67,12 @@ class Ajax_Manager {
 	protected $current_action_id = null;
 
 	/**
-	 * Send ajax request.
+	 * Ajax success response.
 	 *
 	 * Send a JSON response data back to the ajax request, indicating success.
 	 *
-	 * @since  2.0.0
-	 * @access public
+	 * @since 2.0.0
+	 * @access protected
 	 */
 	protected function send_success() {
 		wp_send_json_success( [
@@ -69,12 +81,12 @@ class Ajax_Manager {
 	}
 
 	/**
-	 * Send ajax request.
+	 * Ajax failure response.
 	 *
-	 * Send a JSON response data back to the ajax request, indicating success.
+	 * Send a JSON response data back to the ajax request, indicating failure.
 	 *
-	 * @since  2.0.0
-	 * @access public
+	 * @since 2.0.0
+	 * @access protected
 	 *
 	 * @param null $code
 	 */
@@ -147,9 +159,9 @@ class Ajax_Manager {
 		 */
 		do_action( 'elementor/ajax/register_actions', $this );
 
-		$requests = json_decode( stripslashes( $_REQUEST['actions'] ), true );
+		$this->requests = json_decode( stripslashes( $_REQUEST['actions'] ), true );
 
-		foreach ( $requests as $id => $action_data ) {
+		foreach ( $this->requests as $id => $action_data ) {
 			$this->current_action_id = $id;
 			if ( ! isset( $this->ajax_actions[ $action_data['action'] ] ) ) {
 				$this->add_response_data( false, __( 'Action not found.', 'elementor' ), Exceptions::BAD_REQUEST );
@@ -178,11 +190,29 @@ class Ajax_Manager {
 	}
 
 	/**
+	 * Get current action data.
+	 *
+	 * Retrieve the data for the current ajax request.
+	 *
+	 * @since 2.0.0
+	 * @access public
+	 *
+	 * @return bool|mixed Ajax request data if action exist, False otherwise.
+	 */
+	public function get_current_action_data() {
+		if ( ! $this->current_action_id ) {
+			return false;
+		}
+
+		return $this->requests[ $this->current_action_id ];
+	}
+
+	/**
 	 * Add response data.
 	 *
 	 * Add new response data to the array of all the ajax requests.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access protected
 	 *
 	 * @param bool  $success True if the requests returned successfully, False

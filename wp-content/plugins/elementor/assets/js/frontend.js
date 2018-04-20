@@ -1,5 +1,5 @@
-/*! elementor - v2.0.0 - 26-03-2018 */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*! elementor - v2.0.4 - 09-04-2018 */
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var ElementsHandler;
 
 ElementsHandler = function( $ ) {
@@ -885,25 +885,23 @@ var StretchedSection = HandlerModule.extend( {
 	stretchElement: null,
 
 	bindEvents: function() {
-		elementorFrontend.addListenerOnce( this.$element.data( 'model-cid' ), 'resize', this.stretchSection );
+		elementorFrontend.addListenerOnce( this.$element.data( 'model-cid' ), 'resize', this.stretch );
 	},
 
 	initStretch: function() {
 		this.stretchElement = new elementorFrontend.modules.StretchElement( { element: this.$element } );
 	},
 
-	stretchSection: function() {
+	stretch: function() {
 		var isStretched = this.$element.hasClass( 'elementor-section-stretched' );
 
-		if ( elementorFrontend.isEditMode() || isStretched ) {
-			this.stretchElement.reset();
+		if ( ! isStretched ) {
+			return;
 		}
 
-		if ( isStretched ) {
-			this.stretchElement.setSettings( 'selectors.container', elementorFrontend.getGeneralSettings( 'elementor_stretched_section_container' ) || window );
+		this.stretchElement.setSettings( 'selectors.container', elementorFrontend.getGeneralSettings( 'elementor_stretched_section_container' ) || window );
 
-			this.stretchElement.stretch();
-		}
+		this.stretchElement.stretch();
 	},
 
 	onInit: function() {
@@ -911,12 +909,18 @@ var StretchedSection = HandlerModule.extend( {
 
 		this.initStretch();
 
-		this.stretchSection();
+		var isStretched = this.$element.hasClass( 'elementor-section-stretched' );
+
+		if ( elementorFrontend.isEditMode() || isStretched ) {
+			this.stretchElement.reset();
+		}
+
+		this.stretch();
 	},
 
 	onGeneralSettingsChange: function( changed ) {
 		if ( 'elementor_stretched_section_container' in changed ) {
-			this.stretchSection();
+			this.stretch();
 		}
 	}
 } );
@@ -1011,7 +1015,7 @@ module.exports = function( $scope ) {
 	}
 
 	if ( elementorFrontend.isEditMode() ) {
-		new Shapes( { $element:  $scope } );
+		new Shapes( { $element: $scope } );
 	}
 
 	new BackgroundVideo( { $element: $scope } );
@@ -1310,9 +1314,9 @@ module.exports = ViewModule.extend( {
 	reset: function() {
 		var css = {};
 
-		css.width = 'auto';
+		css.width = '';
 
-		css[ this.getSettings( 'direction' ) ] = 0;
+		css[ this.getSettings( 'direction' ) ] = '';
 
 		this.elements.$element.css( css );
 	}
