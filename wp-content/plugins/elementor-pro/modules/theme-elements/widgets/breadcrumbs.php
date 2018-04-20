@@ -48,7 +48,7 @@ class Breadcrumbs extends Base {
 			$this->add_control(
 				'html_disabled_alert',
 				[
-					'raw' => __( 'Breadcrumbs are disabled in the Yoast SEO', 'elementor-pro' ) . ' ' . sprintf( '<a href="%s" target="_blank">%s</a>', admin_url( 'admin.php?page=wpseo_advanced&tab=breadcrumbs' ), __( 'Breadcrumbs Panel', 'elementor-pro' ) ),
+					'raw' => __( 'Breadcrumbs are disabled in the Yoast SEO', 'elementor-pro' ) . ' ' . sprintf( '<a href="%s" target="_blank">%s</a>', admin_url( 'admin.php?page=wpseo_titles#top#breadcrumbs' ), __( 'Breadcrumbs Panel', 'elementor-pro' ) ),
 					'type' => Controls_Manager::RAW_HTML,
 					'content_classes' => 'elementor-panel-alert elementor-panel-alert-danger',
 				]
@@ -97,7 +97,7 @@ class Breadcrumbs extends Base {
 		$this->add_control(
 			'html_description',
 			[
-				'raw' => __( 'Additional settings are available in the Yoast SEO', 'elementor-pro' ) . ' ' . sprintf( '<a href="%s" target="_blank">%s</a>', admin_url( 'admin.php?page=wpseo_advanced&tab=breadcrumbs' ), __( 'Breadcrumbs Panel', 'elementor-pro' ) ),
+				'raw' => __( 'Additional settings are available in the Yoast SEO', 'elementor-pro' ) . ' ' . sprintf( '<a href="%s" target="_blank">%s</a>', admin_url( 'admin.php?page=wpseo_titles#top#breadcrumbs' ), __( 'Breadcrumbs Panel', 'elementor-pro' ) ),
 				'type' => Controls_Manager::RAW_HTML,
 				'content_classes' => 'elementor-descriptor',
 			]

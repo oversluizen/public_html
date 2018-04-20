@@ -1,4 +1,4 @@
-/*! elementor - v2.0.4 - 09-04-2018 */
+/*! elementor - v2.0.7 - 18-04-2018 */
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var TagPanelView = require( 'elementor-dynamic-tags/tag-panel-view' );
 
@@ -5732,10 +5732,9 @@ App = Marionette.Application.extend( {
 		}
 
 		this.$previewContents = this.$preview.contents();
+		this.$previewElementorEl = this.$previewContents.find( '#elementor' );
 
-		var $previewElementorEl = this.$previewContents.find( '#elementor' );
-
-		if ( ! $previewElementorEl.length ) {
+		if ( ! this.$previewElementorEl.length ) {
 			this.onPreviewElNotFound();
 
 			return;
@@ -5747,7 +5746,7 @@ App = Marionette.Application.extend( {
 
 		var iframeRegion = new Marionette.Region( {
 			// Make sure you get the DOM object out of the jQuery object
-			el: $previewElementorEl[0]
+			el: this.$previewElementorEl[0]
 		} );
 
 		this.schemes.init();
@@ -5924,6 +5923,10 @@ App = Marionette.Application.extend( {
 			.removeClass( 'elementor-editor-active' )
 			.addClass( 'elementor-editor-preview' );
 
+		this.$previewElementorEl
+			.removeClass( 'elementor-edit-area-active' )
+			.addClass( 'elementor-edit-area-preview' );
+
 		if ( hidePanel ) {
 			// Handle panel resize
 			this.$previewWrapper.css( this.config.is_rtl ? 'right' : 'left', '' );
@@ -5936,6 +5939,10 @@ App = Marionette.Application.extend( {
 		elementorFrontend.getElements( '$body' ).add( this.$body )
 			.removeClass( 'elementor-editor-preview' )
 			.addClass( 'elementor-editor-active' );
+
+		this.$previewElementorEl
+			.removeClass( 'elementor-edit-area-preview' )
+			.addClass( 'elementor-edit-area-active' );
 	},
 
 	changeEditMode: function( newMode ) {

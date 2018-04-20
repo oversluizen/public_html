@@ -1,4 +1,4 @@
-=== Ultimate Member - User Profile & Membership Plugin ===
+﻿=== Ultimate Member - User Profile & Membership Plugin ===
 Author URI: https://ultimatemember.com/
 Plugin URI: https://ultimatemember.com/
 Contributors: ultimatemember, champsupertramp, nsinelnikov
@@ -6,7 +6,7 @@ Donate link:
 Tags: community, member, membership, user-profile, user-registration
 Requires at least: 4.1
 Tested up to: 4.9
-Stable tag: 2.0.4
+Stable tag: 2.0.10
 License: GNU Version 2 or Any Later Version
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -129,6 +129,51 @@ The plugin works with popular caching plugins by automatically excluding Ultimat
 
 == Changelog ==
 
+= Important: UM2.0+ is a significant update to the code base from 1.3.88. Please make sure you take a full-site backup with restore point before updating the plugin =
+
+= 2.0.11: April 19, 2018 =
+
+* Bugfixes:
+  - Fixed profile form JS
+
+= 2.0.10: April 17, 2018 =
+
+* Bugfixes:
+  - Fixed Profile Form field privacy
+  - Fixed conditional menu logic for 2 different nav menu hooks
+  - Fixed registration form preview on wp-admin screen
+  - Restored old CSS settings to "um_old_settings.css"
+  - Clean user's cache
+
+= 2.0.9: April 15, 2018 =
+
+* Bugfixes:
+  - Fixed registration form role
+
+= 2.0.8: April 13, 2018 =
+
+* Bugfixes:
+  - Fixed license activation
+
+= 2.0.7: April 13, 2018 =
+
+* Bugfixes:
+  - Fixed add rewrite rules for UM pages
+  - Fixed Profile Form, Registration Form use custom settings and role
+  - Fixed save settings security
+
+= 2.0.6: April 12, 2018 =
+
+* Bugfixes:
+  - Fixed nav-menu content restriction issues for Administrator role
+
+= 2.0.5: April 12, 2018 =
+
+* Bugfixes:
+  - Fixed old pre2.0 extensions notices
+  - Fixed nav-menu content restriction issues
+  - Fixed lost password URL in UM Login Form
+  - Fixed restriction message on taxonomy page, which is restricted
 
 = 2.0.4: April 10, 2018 =
 

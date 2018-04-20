@@ -1286,8 +1286,11 @@ if ( ! class_exists( 'um\admin\core\Admin_Settings' ) ) {
 					);
 					?>
 
+
 					<p class="submit">
 						<input type="submit" name="submit" id="submit" class="button button-primary" value="<?php _e( 'Save Changes', 'ultimate-member' ) ?>" />
+						<?php $um_settings_nonce = wp_create_nonce( 'um-settings-nonce' ); ?>
+						<input type="hidden" name="__umnonce" value="<?php echo $um_settings_nonce; ?>" />
 					</p>
 				</form>
 
@@ -1397,7 +1400,16 @@ if ( ! class_exists( 'um\admin\core\Admin_Settings' ) ) {
 		 *
 		 */
 		function save_settings_handler() {
+
 			if ( isset( $_POST['um-settings-action'] ) && 'save' == $_POST['um-settings-action'] && ! empty( $_POST['um_options'] ) ) {
+
+				$nonce = ! empty( $_POST['__umnonce'] ) ? $_POST['__umnonce'] : '';
+
+				if ( ( ! wp_verify_nonce( $nonce, 'um-settings-nonce' ) || empty( $nonce ) ) || ! current_user_can('manage_options') ) {
+					// This nonce is not valid.
+					wp_die( 'Security Check' );
+				}
+
 				/**
 				 * UM hook
 				 *
@@ -1756,6 +1768,8 @@ if ( ! class_exists( 'um\admin\core\Admin_Settings' ) ) {
 
 			<div class="wrap-licenses">
 				<input type="hidden" id="licenses_settings" name="licenses_settings" value="1">
+				<?php $um_settings_nonce = wp_create_nonce( 'um-settings-nonce' ); ?>
+				<input type="hidden" name="__umnonce" value="<?php echo $um_settings_nonce; ?>" />
 				<table class="form-table um-settings-section">
 					<tbody>
 					<?php foreach ( $section_fields as $field_data ) {
@@ -2007,6 +2021,8 @@ if ( ! class_exists( 'um\admin\core\Admin_Settings' ) ) {
 								<form method="post" action="" name="um-settings-form" class="um-settings-form">
 									<input type="hidden" value="save" name="um-settings-action" />
 									<input type="hidden" name="licenses_settings" value="1" />
+									<?php $um_settings_nonce = wp_create_nonce( 'um-settings-nonce' ); ?>
+									<input type="hidden" name="__umnonce" value="<?php echo $um_settings_nonce; ?>" />
 									<input type="text" id="um_options_<?php echo $field_data['id'] ?>" name="um_options[<?php echo $field_data['id'] ?>]" value="<?php echo $value ?>" class="um-option-field um-long-field" data-field_id="<?php echo $field_data['id'] ?>" />
 									<?php if ( ! empty( $field_data['description'] ) ) { ?>
 										<div class="description"><?php echo $field_data['description'] ?></div>

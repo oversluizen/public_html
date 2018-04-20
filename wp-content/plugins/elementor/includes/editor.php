@@ -208,6 +208,10 @@ class Editor {
 			return $this->_is_edit_mode;
 		}
 
+		if ( empty( $post_id ) ) {
+			$post_id = $this->_post_id;
+		}
+
 		if ( ! User::is_current_user_can_edit( $post_id ) ) {
 			return false;
 		}
@@ -742,7 +746,7 @@ class Editor {
 			'elementor-icons',
 			ELEMENTOR_ASSETS_URL . 'lib/eicons/css/elementor-icons' . $suffix . '.css',
 			[],
-			'3.2.0'
+			'3.2.1'
 		);
 
 		wp_register_style(

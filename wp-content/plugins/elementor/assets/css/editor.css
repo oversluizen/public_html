@@ -1,4 +1,4 @@
-/*! elementor - v2.0.4 - 09-04-2018 */
+/*! elementor - v2.0.7 - 18-04-2018 */
 @charset "UTF-8";
 .dialog-widget-content {
   background-color: #fff;
@@ -1335,6 +1335,18 @@ select {
   .elementor-panel #elementor-panel-saver-menu-save-draft.elementor-saver-disabled .elementor-title {
     color: #6d7882; }
 
+.media-modal.wp-core-ui input {
+  width: auto; }
+
+.media-modal.wp-core-ui fieldset {
+  padding: 0;
+  border: 0; }
+
+.media-modal.wp-core-ui .wp-clearfix::after {
+  content: '';
+  display: table;
+  clear: both; }
+
 .elementor-control {
   background-color: #fff;
   position: relative;
@@ -1768,7 +1780,8 @@ select {
 .elementor-control-type-url .elementor-control-url-external-hide .elementor-control-url-more {
   display: none; }
 
-.elementor-control-type-url .elementor-control-url-external-show .elementor-input {
+.elementor-control-type-url .elementor-control-url-external-show .elementor-input,
+.elementor-control-type-url .elementor-control-url-external-show .elementor-input-style {
   padding-right: 46px;
   height: 26px; }
 
@@ -1781,7 +1794,7 @@ select {
   right: 0;
   height: 26px;
   width: 40px;
-  border-left: 1px solid;
+  border-left: 1px solid #d5dadf;
   cursor: pointer;
   font-size: 10px;
   -webkit-border-radius: 0 3px 3px 0;

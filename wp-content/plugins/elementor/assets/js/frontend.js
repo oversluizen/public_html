@@ -1,4 +1,4 @@
-/*! elementor - v2.0.4 - 09-04-2018 */
+/*! elementor - v2.0.7 - 18-04-2018 */
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 var ElementsHandler;
 
@@ -129,6 +129,8 @@ module.exports = ElementsHandler;
 			elements.$body = $( 'body' );
 
 			elements.$elementor = elements.$document.find( '.elementor' );
+
+			elements.$wpAdminBar = elements.$document.find( '#wpadminbar' );
 		};
 
 		var bindEvents = function() {
@@ -1333,8 +1335,7 @@ module.exports = ViewModule.extend( {
 			selectors: {
 				links: 'a[href*="#"]',
 				targets: '.elementor-element, .elementor-menu-anchor',
-				scrollable: 'html, body',
-				wpAdminBar: '#wpadminbar'
+				scrollable: 'html, body'
 			}
 		};
 	},
@@ -1344,8 +1345,7 @@ module.exports = ViewModule.extend( {
 			selectors = this.getSettings( 'selectors' );
 
 		return {
-			$scrollable: $( selectors.scrollable ),
-			$wpAdminBar: $( selectors.wpAdminBar )
+			$scrollable: $( selectors.scrollable )
 		};
 	},
 
@@ -1368,10 +1368,10 @@ module.exports = ViewModule.extend( {
 			return;
 		}
 
-		var hasAdminBar = ( 1 <= this.elements.$wpAdminBar.length ),
-			scrollTop = $anchor.offset().top;
+		var scrollTop = $anchor.offset().top,
+			$wpAdminBar = elementorFrontend.getElements( '$wpAdminBar' );
 
-		if ( hasAdminBar ) {
+		if ( $wpAdminBar.length > 0 ) {
 			scrollTop -= this.elements.$wpAdminBar.height();
 		}
 

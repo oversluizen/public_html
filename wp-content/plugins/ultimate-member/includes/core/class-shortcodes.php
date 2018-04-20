@@ -161,7 +161,7 @@ if ( ! class_exists( 'um\core\Shortcodes' ) ) {
 
 					if ( ! empty( $role ) && ! empty( $role["status"] ) ) {
 						$message_key = $role["status"] . '_message';
-						$this->custom_message = ! empty( $role[ $message_key ] ) ? $role[ $message_key ] : '';
+						$this->custom_message = ! empty( $role[ $message_key ] ) ? stripslashes( $role[ $message_key ] ) : '';
 					}
 				}
 
@@ -510,15 +510,21 @@ if ( ! class_exists( 'um\core\Shortcodes' ) ) {
 
 			extract($args, EXTR_SKIP);
 
-			if ( 'register' == $mode && is_user_logged_in() ) {
-				return __( 'You are already registered', 'ultimate-member' );
+			//not display on admin preview
+			if ( empty( $_POST['act_id'] ) || $_POST['act_id'] != 'um_admin_preview_form' ) {
+				if ( 'register' == $mode && is_user_logged_in() ) {
+					return __( 'You are already registered', 'ultimate-member' );
+				}
 			}
 
 			// for profiles only
 			if ( $mode == 'profile' && um_profile_id() ) {
-				$current_user_roles = UM()->roles()->get_all_user_roles( um_profile_id() );
-				if ( ! empty( $args['role'] ) && ! in_array( $args['role'], $current_user_roles ) ) {
-					return '';
+				$use_custom = get_post_meta( $this->form_id, "_um_{$mode}_use_custom_settings", true );
+				if ( $use_custom ) { // Custom Form settings
+					$current_user_roles = UM()->roles()->get_all_user_roles( um_profile_id() );
+					if ( ! empty( $args['role'] ) && ! in_array( $args['role'], $current_user_roles ) ) {
+						return '';
+					}
 				}
 			}
 
