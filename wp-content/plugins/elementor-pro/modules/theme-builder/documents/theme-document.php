@@ -117,7 +117,6 @@ abstract class Theme_Document extends Library_Document {
 				'type' => Controls_Manager::SELECT,
 				'default' => $this::get_preview_as_default(),
 				'groups' => $this::get_preview_as_options(),
-				'export' => false,
 			]
 		);
 
@@ -129,7 +128,6 @@ abstract class Theme_Document extends Library_Document {
 				'multiple' => false,
 				'filter_type' => '',
 				'object_type' => '',
-				'export' => false,
 				'condition' => [
 					'preview_type!' => [
 						'',
@@ -143,7 +141,6 @@ abstract class Theme_Document extends Library_Document {
 			'preview_search_term',
 			[
 				'label' => __( 'Search Term', 'elementor-pro' ),
-				'export' => false,
 				'condition' => [
 					'preview_type' => 'search',
 				],
@@ -258,18 +255,7 @@ abstract class Theme_Document extends Library_Document {
 
 		$preview_url = set_url_scheme( add_query_arg( $query_args, $preview_url ) );
 
-		/**
-		 * Document "WordPress preview" URL.
-		 *
-		 * Filters the WordPress preview URL.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param Theme_Document $this The theme document instance.
-		 */
-		$preview_url = apply_filters( 'elementor/document/wp_preview_url', $preview_url, $this );
-
-		return $preview_url;
+		return apply_filters( 'elementor/document/wp_preview_url', $preview_url, $this );
 	}
 
 	public function get_preview_as_query_args() {

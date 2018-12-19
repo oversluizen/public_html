@@ -51,7 +51,6 @@ class Server_Reporter extends Base_Reporter {
 			'php_max_input_vars' => 'PHP Max Input Vars',
 			'php_max_post_size' => 'PHP Max Post Size',
 			'gd_installed' => 'GD Installed',
-			'zip_installed' => 'ZIP Installed',
 			'write_permissions' => 'Write Permissions',
 			'elementor_library' => 'Elementor Library',
 		];
@@ -192,30 +191,6 @@ class Server_Reporter extends Base_Reporter {
 	}
 
 	/**
-	 * Get ZIP installed.
-	 *
-	 * Whether the ZIP extension is installed.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @return array {
-	 *    Report data.
-	 *
-	 *    @type string $value   Yes if the ZIP extension is installed, No otherwise.
-	 *    @type bool   $warning Whether to display a warning. True if the ZIP extension is installed, False otherwise.
-	 * }
-	 */
-	public function get_zip_installed() {
-		$zip_installed = extension_loaded( 'zip' );
-
-		return [
-			'value' => $zip_installed ? 'Yes' : 'No',
-			'warning' => ! $zip_installed,
-		];
-	}
-
-	/**
 	 * Get MySQL version.
 	 *
 	 * Retrieve the MySQL version.
@@ -232,10 +207,8 @@ class Server_Reporter extends Base_Reporter {
 	public function get_mysql_version() {
 		global $wpdb;
 
-		$db_server_version = $wpdb->get_results( "SHOW VARIABLES WHERE `Variable_name` IN ( 'version_comment', 'innodb_version' )", OBJECT_K );
-
 		return [
-			'value' => $db_server_version['version_comment']->Value . ' v' . $db_server_version['innodb_version']->Value,
+			'value' => $wpdb->db_version(),
 		];
 	}
 

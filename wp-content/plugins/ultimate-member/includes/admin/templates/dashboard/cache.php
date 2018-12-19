@@ -1,10 +1,11 @@
-<?php global $wpdb;
+<?php $all_options = wp_load_alloptions();
 
-$count = $wpdb->get_var(
-	"SELECT COUNT( option_id ) 
-	FROM {$wpdb->options} 
-	WHERE option_name LIKE 'um_cache_userdata_%'"
-); ?>
+$count = 0;
+foreach ( $all_options as $k => $v ) {
+	if ( strstr( $k, 'um_cache_userdata_' ) !== false ) {
+		$count++;
+	}
+} ?>
 
 <p><?php _e( 'Run this task from time to time to keep your DB clean.', 'ultimate-member' ) ?></p>
 <p>

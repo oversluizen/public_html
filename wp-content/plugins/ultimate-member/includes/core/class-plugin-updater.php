@@ -63,6 +63,10 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 					'key'   => 'instagram',
 					'title' => 'Instagram',
 				),
+				'um-invitations/um-invitations.php'                     => array(
+					'key'   => 'invitations',
+					'title' => 'Invitations',
+				),
 				'um-mailchimp/um-mailchimp.php'                         => array(
 					'key'   => 'mailchimp',
 					'title' => 'MailChimp',
@@ -111,60 +115,20 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 					'key'   => 'woocommerce',
 					'title' => 'Woocommerce',
 				),
-				'um-user-photos/um-user-photos.php'                     => array(
-					'key'   => 'user_photos',
-					'title' => 'User Photos',
-				),
-				'um-private-content/um-private-content.php'             => array(
-					'key'   => 'private_content',
-					'title' => 'Private Content',
-				),
 			);
 
+			$the_plugs = get_option( 'active_plugins' );
 			$active_um_plugins = array();
-			if ( is_multisite() ) {
-				// Per site activated
-				$sites = get_sites();
+			foreach ( $the_plugs as $key => $value ) {
 
-				$sitewide_plugins = get_site_option( 'active_sitewide_plugins' );
-				$sitewide_plugins = array_keys( $sitewide_plugins );
+				if ( in_array( $value, array_keys( $paid_extensions ) ) ) {
+					$license = UM()->options()->get( "um_{$paid_extensions[ $value ]['key']}_license_key" );
 
-				foreach ( $sites as $site ) {
-					switch_to_blog( $site->blog_id );
+					if ( empty( $license ) )
+						continue;
 
-					$the_plugs = get_option( 'active_plugins' );
-					$the_plugs = array_merge( $the_plugs, $sitewide_plugins );
-
-					foreach ( $the_plugs as $key => $value ) {
-
-						if ( in_array( $value, array_keys( $paid_extensions ) ) ) {
-							$license = UM()->options()->get( "um_{$paid_extensions[ $value ]['key']}_license_key" );
-
-							if ( empty( $license ) ) {
-								continue;
-							}
-
-							$active_um_plugins[ $value ] = $paid_extensions[ $value ];
-							$active_um_plugins[ $value ]['license'] = $license;
-						}
-					}
-
-					restore_current_blog();
-				}
-
-			} else {
-				$the_plugs = get_option( 'active_plugins' );
-				foreach ( $the_plugs as $key => $value ) {
-
-					if ( in_array( $value, array_keys( $paid_extensions ) ) ) {
-						$license = UM()->options()->get( "um_{$paid_extensions[ $value ]['key']}_license_key" );
-
-						if ( empty( $license ) )
-							continue;
-
-						$active_um_plugins[ $value ] = $paid_extensions[ $value ];
-						$active_um_plugins[ $value ]['license'] = $license;
-					}
+					$active_um_plugins[ $value ] = $paid_extensions[ $value ];
+					$active_um_plugins[ $value ]['license'] = $license;
 				}
 			}
 
@@ -199,7 +163,7 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 
 			$api_params['active_extensions'] = array();
 			foreach ( $exts as $slug => $data ) {
-				$plugin_data = get_plugin_data( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $slug );
+				$plugin_data = get_plugin_data( ABSPATH . "wp-content/plugins/{$slug}" );
 
 				$api_params['active_extensions'][$slug] = array(
 					'slug'      => $slug,
@@ -212,7 +176,7 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 			$request = wp_remote_post(
 				'https://ultimatemember.com/',
 				array(
-					'timeout'   => 45,
+					'timeout'   => 15,
 					'sslverify' => false,
 					'body'      => $api_params
 				)
@@ -280,7 +244,7 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 			$exts = $this->um_get_active_plugins();
 			foreach ( $exts as $slug => $data ) {
 
-				$plugin_data = get_plugin_data( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $slug );
+				$plugin_data = get_plugin_data( ABSPATH . "wp-content/plugins/{$slug}" );
 
 				//if response for current product isn't empty check for override
 				if ( ! empty( $_transient_data->response ) && ! empty( $_transient_data->response[ $slug ] ) )
@@ -367,7 +331,7 @@ if ( ! class_exists( 'um\core\Plugin_Updater' ) ) {
 			$url = get_site_url( get_current_blog_id() );
 			$domain  = strtolower( urlencode( rtrim( $url, '/' ) ) );
 
-			$plugin_data = get_plugin_data( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR . $slug );
+			$plugin_data = get_plugin_data( ABSPATH . "wp-content/plugins/{$slug}" );
 
 			$api_params = array(
 				'action'        => 'get_last_version',

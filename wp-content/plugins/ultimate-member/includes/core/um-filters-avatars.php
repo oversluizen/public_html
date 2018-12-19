@@ -27,6 +27,7 @@ add_filter( 'avatar_defaults', 'um_avatar_defaults', 99999 );
  * @return string returns avatar in image html elements
  */
 function um_get_avatar( $avatar = '', $id_or_email='', $size = '96', $avatar_class = '', $default = '', $alt = '' ) {
+
 	if ( is_numeric($id_or_email) )
 		$user_id = (int) $id_or_email;
 	elseif ( is_string( $id_or_email ) && ( $user = get_user_by( 'email', $id_or_email ) ) )
@@ -38,35 +39,66 @@ function um_get_avatar( $avatar = '', $id_or_email='', $size = '96', $avatar_cla
 
 	um_fetch_user( $user_id );
 
-	$avatar = um_user( 'profile_photo', $size );
+	$avatar = um_user('profile_photo', $size);
+
+	/**
+	 * UM hook
+	 *
+	 * @type filter
+	 * @title um_avatar_image_alternate_text
+	 * @description Change avatar image alt
+	 * @input_vars
+	 * [{"var":"$avatar_alt","type":"string","desc":"Image alternate text. Display name by default"}]
+	 * @change_log
+	 * ["Since: 2.0"]
+	 * @usage
+	 * <?php add_filter( 'um_avatar_image_alternate_text', 'function_name', 10, 1 ); ?>
+	 * @example
+	 * <?php
+	 * add_filter( 'um_avatar_image_alternate_text', 'my_avatar_image_alternate_text', 10, 1 );
+	 * function my_avatar_image_alternate_text( $avatar_alt ) {
+	 *     // your code here
+	 *     return $avatar_alt;
+	 * }
+	 * ?>
+	 */
+	$image_alt = apply_filters( "um_avatar_image_alternate_text",  um_user("display_name") );
+
+	if ( ! $avatar && UM()->options()->get( 'use_gravatars' ) ) {
+
+		$default = get_option( 'avatar_default', 'mystery' );
+		if ( $default == 'gravatar_default' ) {
+			$default = '';
+		}
+
+		$rating = get_option('avatar_rating');
+		if ( !empty( $rating ) ) {
+			$rating = "&amp;r={$rating}";
+		}
+
+		if ( UM()->options()->get('use_gravatars') && ! um_user('synced_profile_photo') && ! $has_profile_photo ){
+			$avatar_url  = um_get_domain_protocol().'gravatar.com/avatar/'.um_user('synced_gravatar_hashed_id');
+			$avatar_url = add_query_arg('s',400, $avatar_url);
+			$gravatar_type = UM()->options()->get( 'use_um_gravatar_default_builtin_image' );
+						
+			if ( $gravatar_type == 'default' ) {
+				if ( UM()->options()->get( 'use_um_gravatar_default_image' ) ) {
+					$avatar_url = add_query_arg('d', um_get_default_avatar_uri(), $avatar_url  );
+				}
+			} else {
+				$avatar_url = add_query_arg('d', $gravatar_type, $avatar_url  );
+			}
+						
+		}
+			
+		$avatar = '<img src="' .$avatar_url .'?d='. $default . '&amp;s=' . $size . $rating .'" class="func-um_get_avatar gravatar avatar avatar-'.$size.' um-avatar" width="'.$size.'" height="'.$size.'" alt="'.$image_alt.'" />';
+			
+	}else if( empty( $avatar ) ){
+		$default_avatar_uri = um_get_default_avatar_uri();
+
+		$avatar = '<img src="' .$default_avatar_uri  .'" class="gravatar avatar avatar-'.$size.' um-avatar" width="'.$size.'" height="'.$size.'" alt="'.$image_alt.'" />';
+	}
 
 	return $avatar;
 }
 add_filter( 'get_avatar', 'um_get_avatar', 99999, 5 );
-
-
-if ( ! function_exists( 'um_filter_get_avatar_url' ) ) {
-
-	/**
-	 * Replace Gravatar image URL to Ultimate member profile image URL if setting "Use Gravatars?" disabled
-	 *
-	 * @param string $url
-	 * @param int $id_or_email
-	 * @param array $args
-	 * @return string
-	 */
-	function um_filter_get_avatar_url( $url, $id_or_email, $args ) {
-
-		if ( is_numeric( $id_or_email ) && ! UM()->options()->get( 'use_gravatars' ) && preg_match( '/gravatar/i', $url ) ) {
-			$data = um_get_user_avatar_data( $id_or_email, $args['size'] );
-			if ( ! empty( $data['url'] ) ) {
-				$url = $data['url'];
-			}
-		}
-
-		return $url;
-	}
-
-	// hooked in the get_avatar_data function
-	add_filter( 'get_avatar_url', 'um_filter_get_avatar_url', 20, 3 );
-}

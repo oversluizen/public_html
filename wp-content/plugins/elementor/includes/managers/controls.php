@@ -16,214 +16,89 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class Controls_Manager {
 
-	/**
-	 * Content tab.
-	 */
 	const TAB_CONTENT = 'content';
-
-	/**
-	 * Style tab.
-	 */
 	const TAB_STYLE = 'style';
-
-	/**
-	 * Advanced tab.
-	 */
 	const TAB_ADVANCED = 'advanced';
-
-	/**
-	 * Responsive tab.
-	 */
 	const TAB_RESPONSIVE = 'responsive';
-
-	/**
-	 * Layout tab.
-	 */
 	const TAB_LAYOUT = 'layout';
-
-	/**
-	 * Settings tab.
-	 */
 	const TAB_SETTINGS = 'settings';
 
-	/**
-	 * Text control.
-	 */
+	/** This control is documented in includes/controls/text.php */
 	const TEXT = 'text';
-
-	/**
-	 * Number control.
-	 */
+	/** This control is documented in includes/controls/number.php */
 	const NUMBER = 'number';
-
-	/**
-	 * Textarea control.
-	 */
+	/** This control is documented in includes/controls/textarea.php */
 	const TEXTAREA = 'textarea';
-
-	/**
-	 * Select control.
-	 */
+	/** This control is documented in includes/controls/select.php */
 	const SELECT = 'select';
-
-	/**
-	 * Switcher control.
-	 */
+	/** This control is documented in includes/controls/switcher.php */
 	const SWITCHER = 'switcher';
 
-	/**
-	 * Button control.
-	 */
+	/** This control is documented in includes/controls/button.php */
 	const BUTTON = 'button';
-
-	/**
-	 * Hidden control.
-	 */
+	/** This control is documented in includes/controls/hidden.php */
 	const HIDDEN = 'hidden';
-
-	/**
-	 * Heading control.
-	 */
+	/** This control is documented in includes/controls/heading.php */
 	const HEADING = 'heading';
-
-	/**
-	 * Raw HTML control.
-	 */
+	/** This control is documented in includes/controls/raw-html.php */
 	const RAW_HTML = 'raw_html';
-
-	/**
-	 * Popover Toggle control.
-	 */
+	/** This control is documented in includes/controls/popover-toggle.php */
 	const POPOVER_TOGGLE = 'popover_toggle';
-
-	/**
-	 * Section control.
-	 */
+	/** This control is documented in includes/controls/section.php */
 	const SECTION = 'section';
-
-	/**
-	 * Tab control.
-	 */
+	/** This control is documented in includes/controls/tab.php */
 	const TAB = 'tab';
-
-	/**
-	 * Tabs control.
-	 */
+	/** This control is documented in includes/controls/tabs.php */
 	const TABS = 'tabs';
-
-	/**
-	 * Divider control.
-	 */
+	/** This control is documented in includes/controls/divider.php */
 	const DIVIDER = 'divider';
 
-	/**
-	 * Color control.
-	 */
+	/** This control is documented in includes/controls/color.php */
 	const COLOR = 'color';
-
-	/**
-	 * Media control.
-	 */
+	/** This control is documented in includes/controls/media.php */
 	const MEDIA = 'media';
-
-	/**
-	 * Slider control.
-	 */
+	/** This control is documented in includes/controls/slider.php */
 	const SLIDER = 'slider';
-
-	/**
-	 * Dimensions control.
-	 */
+	/** This control is documented in includes/controls/dimensions.php */
 	const DIMENSIONS = 'dimensions';
-
-	/**
-	 * Choose control.
-	 */
+	/** This control is documented in includes/controls/choose.php */
 	const CHOOSE = 'choose';
-
-	/**
-	 * WYSIWYG control.
-	 */
+	/** This control is documented in includes/controls/wysiwyg.php */
 	const WYSIWYG = 'wysiwyg';
-
-	/**
-	 * Code control.
-	 */
+	/** This control is documented in includes/controls/code.php */
 	const CODE = 'code';
-
-	/**
-	 * Font control.
-	 */
+	/** This control is documented in includes/controls/font.php */
 	const FONT = 'font';
-
-	/**
-	 * Image dimensions control.
-	 */
+	/** This control is documented in includes/controls/image-dimensions.php */
 	const IMAGE_DIMENSIONS = 'image_dimensions';
 
-	/**
-	 * WordPress widget control.
-	 */
+	/** This control is documented in includes/controls/wp-widget.php */
 	const WP_WIDGET = 'wp_widget';
 
-	/**
-	 * URL control.
-	 */
+	/** This control is documented in includes/controls/url.php */
 	const URL = 'url';
-
-	/**
-	 * Repeater control.
-	 */
+	/** This control is documented in includes/controls/repeater.php */
 	const REPEATER = 'repeater';
-
-	/**
-	 * Icon control.
-	 */
+	/** This control is documented in includes/controls/icon.php */
 	const ICON = 'icon';
-
-	/**
-	 * Gallery control.
-	 */
+	/** This control is documented in includes/controls/gallery.php */
 	const GALLERY = 'gallery';
-
-	/**
-	 * Structure control.
-	 */
+	/** This control is documented in includes/controls/structure.php */
 	const STRUCTURE = 'structure';
-
-	/**
-	 * Select2 control.
-	 */
+	/** This control is documented in includes/controls/select2.php */
 	const SELECT2 = 'select2';
-
-	/**
-	 * Date/Time control.
-	 */
+	/** This control is documented in includes/controls/date-time.php */
 	const DATE_TIME = 'date_time';
-
-	/**
-	 * Box shadow control.
-	 */
+	/** This control is documented in includes/controls/box-shadow.php */
 	const BOX_SHADOW = 'box_shadow';
-
-	/**
-	 * Text shadow control.
-	 */
+	/** This control is documented in includes/controls/text-shadow.php */
 	const TEXT_SHADOW = 'text_shadow';
-
-	/**
-	 * Entrance animation control.
-	 */
+	/** This control is documented in includes/controls/animation.php */
 	const ANIMATION = 'animation';
-
-	/**
-	 * Hover animation control.
-	 */
+	/** This control is documented in includes/controls/hover-animation.php */
 	const HOVER_ANIMATION = 'hover_animation';
 
 	/**
-	 * Order control.
-	 *
 	 * @deprecated 2.0.0
 	 */
 	const ORDER = 'order';
@@ -295,6 +170,8 @@ class Controls_Manager {
 			self::TAB_LAYOUT => __( 'Layout', 'elementor' ),
 			self::TAB_SETTINGS => __( 'Settings', 'elementor' ),
 		];
+
+		self::$tabs = Utils::apply_filters_deprecated( 'elementor/controls/get_available_tabs_controls', [ self::$tabs ], '1.6.0', '`' . __CLASS__ . '::add_tab( $tab_name, $tab_title )`' );
 	}
 
 	/**
@@ -420,7 +297,6 @@ class Controls_Manager {
 		$this->control_groups['typography'] = new Group_Control_Typography();
 		$this->control_groups['image-size'] = new Group_Control_Image_Size();
 		$this->control_groups['box-shadow'] = new Group_Control_Box_Shadow();
-		$this->control_groups['css-filter'] = new Group_Control_Css_Filter();
 		$this->control_groups['text-shadow'] = new Group_Control_Text_Shadow();
 
 		/**
@@ -529,6 +405,10 @@ class Controls_Manager {
 
 		foreach ( $this->get_controls() as $name => $control ) {
 			$controls_data[ $name ] = $control->get_settings();
+
+			if ( $control instanceof Base_Data_Control ) {
+				$controls_data[ $name ]['default_value'] = $control->get_default_value();
+			}
 		}
 
 		return $controls_data;
@@ -868,39 +748,40 @@ class Controls_Manager {
 	 * @since 1.0.0
 	 * @access public
 	 *
-	 * @param Controls_Stack $controls_stack.
+	 * @param Element_Base $element The element.
+	 * @param string $tab The panel tab.
 	 */
-	public function add_custom_css_controls( Controls_Stack $controls_stack ) {
-		$controls_stack->start_controls_section(
+	public function add_custom_css_controls( $element, $tab = self::TAB_ADVANCED ) {
+		$element->start_controls_section(
 			'section_custom_css_pro',
 			[
 				'label' => __( 'Custom CSS', 'elementor' ),
-				'tab' => self::TAB_ADVANCED,
+				'tab' => $tab,
 			]
 		);
 
-		$controls_stack->add_control(
+		$element->add_control(
 			'custom_css_pro',
 			[
 				'type' => self::RAW_HTML,
-				'raw' => '<div class="elementor-nerd-box">' .
-						'<i class="elementor-nerd-box-icon eicon-hypster" aria-hidden="true"></i>
-						<div class="elementor-nerd-box-title">' .
+				'raw' => '<div class="elementor-panel-nerd-box">' .
+						'<i class="elementor-panel-nerd-box-icon eicon-hypster" aria-hidden="true"></i>
+						<div class="elementor-panel-nerd-box-title">' .
 							__( 'Meet Our Custom CSS', 'elementor' ) .
 						'</div>
-						<div class="elementor-nerd-box-message">' .
+						<div class="elementor-panel-nerd-box-message">' .
 							__( 'Custom CSS lets you add CSS code to any widget, and see it render live right in the editor.', 'elementor' ) .
 						'</div>
-						<div class="elementor-nerd-box-message">' .
+						<div class="elementor-panel-nerd-box-message">' .
 							__( 'This feature is only available on Elementor Pro.', 'elementor' ) .
 						'</div>
-						<a class="elementor-nerd-box-link elementor-button elementor-button-default elementor-go-pro" href="' . Utils::get_pro_link( 'https://elementor.com/pro/?utm_source=panel-custom-css&utm_campaign=gopro&utm_medium=wp-dash' ) . '" target="_blank">' .
+						<a class="elementor-panel-nerd-box-link elementor-button elementor-button-default elementor-go-pro" href="' . Utils::get_pro_link( 'https://elementor.com/pro/?utm_source=panel-custom-css&utm_campaign=gopro&utm_medium=wp-dash' ) . '" target="_blank">' .
 							__( 'Go Pro', 'elementor' ) .
 						'</a>
 						</div>',
 			]
 		);
 
-		$controls_stack->end_controls_section();
+		$element->end_controls_section();
 	}
 }

@@ -49,7 +49,7 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 		 */
 		public static function get_instance() {
 			if ( ! isset( self::$instance ) ) {
-				self::$instance = new self();
+				self::$instance = new self;
 			}
 			return self::$instance;
 		}
@@ -70,7 +70,6 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			add_action( 'astra_entry_content_404_page', array( $this, 'do_template_part_404' ), 0 );
 
-			add_filter( 'post_class', array( $this, 'render_post_class' ), 99 );
 			// Override post meta.
 			add_action( 'wp', array( $this, 'override_meta' ), 0 );
 		}
@@ -111,10 +110,9 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 			// IS Single?
 			$did_location = Module::instance()->get_locations_manager()->do_location( 'single' );
 			if ( $did_location ) {
-				remove_action( 'astra_page_template_parts_content', array( \Astra_Loop::get_instance(), 'template_parts_page' ) );
+				remove_action( 'astra_template_parts_content', array( \Astra_Loop::get_instance(), 'template_parts_page' ) );
 				remove_action( 'astra_template_parts_content', array( \Astra_Loop::get_instance(), 'template_parts_post' ) );
 				remove_action( 'astra_template_parts_content', array( \Astra_Loop::get_instance(), 'template_parts_comments' ), 15 );
-				remove_action( 'astra_page_template_parts_content', array( \Astra_Loop::get_instance(), 'template_parts_comments' ), 15 );
 			}
 		}
 
@@ -142,12 +140,6 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 		 * @return void
 		 */
 		function override_meta() {
-
-			// don't override meta for `elementor_library` post type.
-			if ( 'elementor_library' == get_post_type() ) {
-				return;
-			}
-
 			// Override post meta for single pages.
 			$documents_single = Module::instance()->get_conditions_manager()->get_documents_for_location( 'single' );
 			if ( $documents_single ) {
@@ -187,14 +179,9 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			// Override! Sidebar.
 			$sidebar = get_post_meta( $post_id, 'site-sidebar-layout', true );
-			if ( '' === $sidebar ) {
-				$sidebar = 'default';
-			}
-
 			if ( 'default' !== $sidebar ) {
 				add_filter(
-					'astra_page_layout',
-					function( $page_layout ) use ( $sidebar ) {
+					'astra_page_layout', function( $page_layout ) use ( $sidebar ) {
 						return $sidebar;
 					}
 				);
@@ -202,14 +189,9 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			// Override! Content Layout.
 			$content_layout = get_post_meta( $post_id, 'site-content-layout', true );
-			if ( '' === $content_layout ) {
-				$content_layout = 'default';
-			}
-
 			if ( 'default' !== $content_layout ) {
 				add_filter(
-					'astra_get_content_layout',
-					function( $layout ) use ( $content_layout ) {
+					'astra_get_content_layout', function( $layout ) use ( $content_layout ) {
 						return $content_layout;
 					}
 				);
@@ -217,14 +199,9 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			// Override! Footer Bar.
 			$footer_layout = get_post_meta( $post_id, 'footer-sml-layout', true );
-			if ( '' === $footer_layout ) {
-				$footer_layout = 'default';
-			}
-
 			if ( 'disabled' === $footer_layout ) {
 				add_filter(
-					'ast_footer_sml_layout',
-					function( $is_footer ) {
+					'ast_footer_sml_layout', function( $is_footer ) {
 						return 'disabled';
 					}
 				);
@@ -232,14 +209,9 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			// Override! Footer Widgets.
 			$footer_widgets = get_post_meta( $post_id, 'footer-adv-display', true );
-			if ( '' === $footer_widgets ) {
-				$footer_widgets = 'default';
-			}
-
 			if ( 'disabled' === $footer_widgets ) {
 				add_filter(
-					'astra_advanced_footer_disable',
-					function() {
+					'astra_advanced_footer_disable', function() {
 						return true;
 					}
 				);
@@ -247,15 +219,10 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 
 			// Override! Header.
 			$main_header_display = get_post_meta( $post_id, 'ast-main-header-display', true );
-			if ( '' === $main_header_display ) {
-				$main_header_display = 'default';
-			}
-
 			if ( 'disabled' === $main_header_display ) {
 				remove_action( 'astra_masthead', 'astra_masthead_primary_template' );
 				add_filter(
-					'ast_main_header_display',
-					function( $display_header ) {
+					'ast_main_header_display', function( $display_header ) {
 						return 'disabled';
 					}
 				);
@@ -288,67 +255,6 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 			}
 		}
 
-		/**
-		 * Remove theme post's default classes when Elementor's template builder is activated.
-		 *
-		 * @param  array $classes Post Classes.
-		 * @return array
-		 * @since  1.4.9
-		 */
-		function render_post_class( $classes ) {
-			$post_class = array( 'elementor-post elementor-grid-item', 'elementor-portfolio-item' );
-			$result     = array_intersect( $classes, $post_class );
-
-			if ( count( $result ) > 0 ) {
-				$classes = array_diff(
-					$classes,
-					array(
-						// Astra common grid.
-						'ast-col-sm-12',
-						'ast-col-md-8',
-						'ast-col-md-6',
-						'ast-col-md-12',
-
-						// Astra Blog / Single Post.
-						'ast-article-post',
-						'ast-article-single',
-						'ast-separate-posts',
-						'remove-featured-img-padding',
-						'ast-featured-post',
-
-						// Astra Woocommerce.
-						'ast-product-gallery-layout-vertical',
-						'ast-product-gallery-layout-horizontal',
-						'ast-product-gallery-with-no-image',
-
-						'ast-product-tabs-layout-vertical',
-						'ast-product-tabs-layout-horizontal',
-
-						'ast-qv-disabled',
-						'ast-qv-on-image',
-						'ast-qv-on-image-click',
-						'ast-qv-after-summary',
-
-						'astra-woo-hover-swap',
-
-						'box-shadow-0',
-						'box-shadow-0-hover',
-						'box-shadow-1',
-						'box-shadow-1-hover',
-						'box-shadow-2',
-						'box-shadow-2-hover',
-						'box-shadow-3',
-						'box-shadow-3-hover',
-						'box-shadow-4',
-						'box-shadow-4-hover',
-						'box-shadow-5',
-						'box-shadow-5-hover',
-					)
-				);
-			}
-			return $classes;
-		}
-
 	}
 
 	/**
@@ -357,3 +263,4 @@ if ( ! class_exists( 'Astra_Elementor_Pro' ) ) :
 	Astra_Elementor_Pro::get_instance();
 
 endif;
+

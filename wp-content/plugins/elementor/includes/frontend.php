@@ -1,13 +1,7 @@
 <?php
 namespace Elementor;
 
-use Elementor\Core\Base\App;
 use Elementor\Core\Base\Document;
-use Elementor\Core\Responsive\Files\Frontend as FrontendFile;
-use Elementor\Core\Files\CSS\Global_CSS;
-use Elementor\Core\Files\CSS\Post as Post_CSS;
-use Elementor\Core\Files\CSS\Post_Preview;
-use Elementor\Core\Responsive\Responsive;
 use Elementor\Core\Settings\Manager as SettingsManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-class Frontend extends App {
+class Frontend {
 
 	/**
 	 * The priority of the content filter.
@@ -63,6 +57,18 @@ class Frontend extends App {
 	 * @var array Registered fonts. Default is an empty array.
 	 */
 	private $registered_fonts = [];
+
+	/**
+	 * Whether the front end mode is active.
+	 *
+	 * Used to determine whether we are in front end mode.
+	 *
+	 * @since 1.0.0
+	 * @access private
+	 *
+	 * @var bool Whether the front end mode is active. Default is false.
+	 */
+	private $_is_frontend_mode = false;
 
 	/**
 	 * Whether the page is using Elementor.
@@ -108,53 +114,6 @@ class Frontend extends App {
 	private $admin_bar_edit_documents = [];
 
 	/**
-	 * @var string[]
-	 */
-	private $body_classes = [
-		'elementor-default',
-	];
-
-	/**
-	 * Front End constructor.
-	 *
-	 * Initializing Elementor front end. Make sure we are not in admin, not and
-	 * redirect from old URL structure of Elementor editor.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 */
-	public function __construct() {
-		// We don't need this class in admin side, but in AJAX requests.
-		if ( is_admin() && ! Utils::is_ajax() ) {
-			return;
-		}
-
-		add_action( 'template_redirect', [ $this, 'init' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'register_scripts' ], 5 );
-		add_action( 'wp_enqueue_scripts', [ $this, 'register_styles' ], 5 );
-
-		$this->add_content_filter();
-
-		// Hack to avoid enqueue post CSS while it's a `the_excerpt` call.
-		add_filter( 'get_the_excerpt', [ $this, 'start_excerpt_flag' ], 1 );
-		add_filter( 'get_the_excerpt', [ $this, 'end_excerpt_flag' ], 20 );
-	}
-
-	/**
-	 * Get module name.
-	 *
-	 * Retrieve the module name.
-	 *
-	 * @since 2.3.0
-	 * @access public
-	 *
-	 * @return string Module name.
-	 */
-	public function get_name() {
-		return 'frontend';
-	}
-
-	/**
 	 * Init.
 	 *
 	 * Initialize Elementor front end. Hooks the needed actions to run Elementor
@@ -176,11 +135,8 @@ class Frontend extends App {
 			return;
 		}
 
-		if ( current_user_can( 'manage_options' ) ) {
-			Plugin::$instance->init_common();
-		}
-
 		$this->post_id = get_the_ID();
+		$this->_is_frontend_mode = true;
 
 		if ( is_singular() && Plugin::$instance->db->is_built_with_elementor( $this->post_id ) ) {
 			add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ] );
@@ -195,15 +151,24 @@ class Frontend extends App {
 	}
 
 	/**
-	 * @since 2.0.12
-	 * @access public
-	 * @param string|array $class
+	 * Print elements.
+	 *
+	 * Used to generate the element final HTML on the frontend.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 *
+	 * @param array $elements_data Element data.
 	 */
-	public function add_body_class( $class ) {
-		if ( is_array( $class ) ) {
-			$this->body_classes = array_merge( $this->body_classes, $class );
-		} else {
-			$this->body_classes[] = $class;
+	protected function _print_elements( $elements_data ) {
+		foreach ( $elements_data as $element_data ) {
+			$element = Plugin::$instance->elements_manager->create_element_instance( $element_data );
+
+			if ( ! $element ) {
+				continue;
+			}
+
+			$element->print_element();
 		}
 	}
 
@@ -223,7 +188,7 @@ class Frontend extends App {
 	 * @return array Body tag classes.
 	 */
 	public function body_class( $classes = [] ) {
-		$classes = array_merge( $classes, $this->body_classes );
+		$classes[] = 'elementor-default';
 
 		$id = get_the_ID();
 
@@ -279,9 +244,11 @@ class Frontend extends App {
 		 */
 		do_action( 'elementor/frontend/before_register_scripts' );
 
+		$suffix = Utils::is_script_debug() ? '' : '.min';
+
 		wp_register_script(
 			'elementor-waypoints',
-			$this->get_js_assets_url( 'waypoints', 'assets/lib/waypoints/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/waypoints/waypoints' . $suffix . '.js',
 			[
 				'jquery',
 			],
@@ -291,7 +258,7 @@ class Frontend extends App {
 
 		wp_register_script(
 			'flatpickr',
-			$this->get_js_assets_url( 'flatpickr', 'assets/lib/flatpickr/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/flatpickr/flatpickr' . $suffix . '.js',
 			[
 				'jquery',
 			],
@@ -301,7 +268,7 @@ class Frontend extends App {
 
 		wp_register_script(
 			'imagesloaded',
-			$this->get_js_assets_url( 'imagesloaded', 'assets/lib/imagesloaded/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/imagesloaded/imagesloaded' . $suffix . '.js',
 			[
 				'jquery',
 			],
@@ -311,7 +278,7 @@ class Frontend extends App {
 
 		wp_register_script(
 			'jquery-numerator',
-			$this->get_js_assets_url( 'jquery-numerator', 'assets/lib/jquery-numerator/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/jquery-numerator/jquery-numerator' . $suffix . '.js',
 			[
 				'jquery',
 			],
@@ -321,17 +288,17 @@ class Frontend extends App {
 
 		wp_register_script(
 			'jquery-swiper',
-			$this->get_js_assets_url( 'swiper.jquery', 'assets/lib/swiper/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/swiper/swiper.jquery' . $suffix . '.js',
 			[
 				'jquery',
 			],
-			'4.4.3',
+			'3.4.2',
 			true
 		);
 
 		wp_register_script(
 			'jquery-slick',
-			$this->get_js_assets_url( 'slick', 'assets/lib/slick/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/slick/slick' . $suffix . '.js',
 			[
 				'jquery',
 			],
@@ -341,17 +308,17 @@ class Frontend extends App {
 
 		wp_register_script(
 			'elementor-dialog',
-			$this->get_js_assets_url( 'dialog', 'assets/lib/dialog/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/dialog/dialog' . $suffix . '.js',
 			[
 				'jquery-ui-position',
 			],
-			'4.4.1',
+			'4.2.1',
 			true
 		);
 
 		wp_register_script(
 			'elementor-frontend',
-			$this->get_js_assets_url( 'frontend' ),
+			ELEMENTOR_ASSETS_URL . 'js/frontend' . $suffix . '.js',
 			[
 				'elementor-dialog',
 				'elementor-waypoints',
@@ -391,61 +358,43 @@ class Frontend extends App {
 		 */
 		do_action( 'elementor/frontend/before_register_styles' );
 
+		$suffix = Utils::is_script_debug() ? '' : '.min';
+
+		$direction_suffix = is_rtl() ? '-rtl' : '';
+
 		wp_register_style(
 			'elementor-icons',
-			$this->get_css_assets_url( 'elementor-icons', 'assets/lib/eicons/css/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/eicons/css/elementor-icons' . $suffix . '.css',
 			[],
-			'4.0.0'
+			'3.2.1'
 		);
 
 		wp_register_style(
 			'font-awesome',
-			$this->get_css_assets_url( 'font-awesome', 'assets/lib/font-awesome/css/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/font-awesome/css/font-awesome' . $suffix . '.css',
 			[],
 			'4.7.0'
 		);
 
 		wp_register_style(
 			'elementor-animations',
-			$this->get_css_assets_url( 'animations', 'assets/lib/animations/', true ),
+			ELEMENTOR_ASSETS_URL . 'lib/animations/animations.min.css',
 			[],
 			ELEMENTOR_VERSION
 		);
 
 		wp_register_style(
 			'flatpickr',
-			$this->get_css_assets_url( 'flatpickr', 'assets/lib/flatpickr/' ),
+			ELEMENTOR_ASSETS_URL . 'lib/flatpickr/flatpickr' . $suffix . '.css',
 			[],
 			'4.1.4'
 		);
 
-		$min_suffix = Utils::is_script_debug() ? '' : '.min';
-
-		$direction_suffix = is_rtl() ? '-rtl' : '';
-
-		$frontend_file_name = 'frontend' . $direction_suffix . $min_suffix . '.css';
-
-		$has_custom_file = Responsive::has_custom_breakpoints();
-
-		if ( $has_custom_file ) {
-			$frontend_file = new FrontendFile( 'custom-' . $frontend_file_name, Responsive::get_stylesheet_templates_path() . $frontend_file_name );
-
-			$time = $frontend_file->get_meta( 'time' );
-
-			if ( ! $time ) {
-				$frontend_file->update();
-			}
-
-			$frontend_file_url = $frontend_file->get_url();
-		} else {
-			$frontend_file_url = ELEMENTOR_ASSETS_URL . 'css/' . $frontend_file_name;
-		}
-
 		wp_register_style(
 			'elementor-frontend',
-			$frontend_file_url,
+			ELEMENTOR_ASSETS_URL . 'css/frontend' . $direction_suffix . $suffix . '.css',
 			[],
-			$has_custom_file ? null : ELEMENTOR_VERSION
+			ELEMENTOR_VERSION
 		);
 
 		/**
@@ -478,7 +427,49 @@ class Frontend extends App {
 
 		wp_enqueue_script( 'elementor-frontend' );
 
-		$this->print_config();
+		$elementor_frontend_config = [
+			'isEditMode' => Plugin::$instance->preview->is_preview_mode(),
+			'is_rtl' => is_rtl(),
+			'urls' => [
+				'assets' => ELEMENTOR_ASSETS_URL,
+			],
+		];
+
+		$elementor_frontend_config['settings'] = SettingsManager::get_settings_frontend_config();
+
+		if ( is_singular() ) {
+			$post = get_post();
+			$elementor_frontend_config['post'] = [
+				'id' => $post->ID,
+				'title' => $post->post_title,
+				'excerpt' => $post->post_excerpt,
+			];
+		} else {
+			$elementor_frontend_config['post'] = [
+				'id' => 0,
+				'title' => wp_get_document_title(),
+				'excerpt' => '',
+			];
+		}
+
+		if ( Plugin::$instance->preview->is_preview_mode() ) {
+			$elements_manager = Plugin::$instance->elements_manager;
+
+			$elements_frontend_keys = [
+				'section' => $elements_manager->get_element_types( 'section' )->get_frontend_settings_keys(),
+				'column' => $elements_manager->get_element_types( 'column' )->get_frontend_settings_keys(),
+			];
+
+			$elements_frontend_keys += Plugin::$instance->widgets_manager->get_widgets_frontend_settings_keys();
+
+			$elementor_frontend_config['elements'] = [
+				'data' => (object) [],
+				'editSettings' => (object) [],
+				'keys' => $elements_frontend_keys,
+			];
+		}
+
+		wp_localize_script( 'elementor-frontend', 'elementorFrontendConfig', $elementor_frontend_config );
 
 		/**
 		 * After frontend enqueue scripts.
@@ -527,7 +518,7 @@ class Frontend extends App {
 		if ( ! Plugin::$instance->preview->is_preview_mode() ) {
 			$this->parse_global_css_code();
 
-			$css_file = new Post_CSS( get_the_ID() );
+			$css_file = new Post_CSS_File( get_the_ID() );
 			$css_file->enqueue();
 		}
 	}
@@ -661,7 +652,7 @@ class Frontend extends App {
 				$fonts_url .= '&subset=' . $subsets[ $locale ];
 			}
 
-			wp_enqueue_style( 'google-fonts-' . $google_fonts_index, $fonts_url ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			wp_enqueue_style( 'google-fonts-' . $google_fonts_index, $fonts_url );
 		}
 
 		if ( ! empty( $google_fonts['early'] ) ) {
@@ -672,7 +663,7 @@ class Frontend extends App {
 
 				$font_url = sprintf( 'https://fonts.googleapis.com/earlyaccess/%s.css', strtolower( str_replace( ' ', '', $current_font ) ) );
 
-				wp_enqueue_style( 'google-earlyaccess-' . $google_fonts_index, $font_url ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+				wp_enqueue_style( 'google-earlyaccess-' . $google_fonts_index, $font_url );
 			}
 		}
 
@@ -706,7 +697,7 @@ class Frontend extends App {
 	 * @access protected
 	 */
 	protected function parse_global_css_code() {
-		$scheme_css_file = new Global_CSS( 'global.css' );
+		$scheme_css_file = new Global_CSS_File();
 
 		$scheme_css_file->enqueue();
 	}
@@ -726,7 +717,7 @@ class Frontend extends App {
 	public function apply_builder_in_content( $content ) {
 		$this->restore_content_filters();
 
-		if ( Plugin::$instance->preview->is_preview_mode() || $this->_is_excerpt ) {
+		if ( ! $this->_is_frontend_mode || $this->_is_excerpt ) {
 			return $content;
 		}
 
@@ -801,9 +792,9 @@ class Frontend extends App {
 
 		if ( ! $this->_is_excerpt ) {
 			if ( $document->is_autosave() ) {
-				$css_file = new Post_Preview( $document->get_post()->ID );
+				$css_file = new Post_Preview_CSS( $document->get_post()->ID );
 			} else {
-				$css_file = new Post_CSS( $post_id );
+				$css_file = new Post_CSS_File( $post_id );
 			}
 
 			$css_file->enqueue();
@@ -820,8 +811,15 @@ class Frontend extends App {
 			$css_file->print_css();
 		}
 
-		$document->print_elements_with_wrapper( $data );
-
+		?>
+		<div class="<?php echo esc_attr( $document->get_container_classes() ); ?>">
+			<div class="elementor-inner">
+				<div class="elementor-section-wrap">
+					<?php $this->_print_elements( $data ); ?>
+				</div>
+			</div>
+		</div>
+		<?php
 		$content = ob_get_clean();
 
 		/**
@@ -896,12 +894,9 @@ class Frontend extends App {
 	 *
 	 * @param int $post_id The post ID.
 	 *
-	 * @param bool $with_css Optional. Whether to retrieve the content with CSS
-	 *                       or not. Default is false.
-	 *
 	 * @return string The post content.
 	 */
-	public function get_builder_content_for_display( $post_id, $with_css = false ) {
+	public function get_builder_content_for_display( $post_id ) {
 		if ( ! get_post( $post_id ) ) {
 			return '';
 		}
@@ -922,9 +917,7 @@ class Frontend extends App {
 		$is_edit_mode = $editor->is_edit_mode();
 		$editor->set_edit_mode( false );
 
-		$with_css = $with_css ? true : $is_edit_mode;
-
-		$content = $this->get_builder_content( $post_id, $with_css );
+		$content = $this->get_builder_content( $post_id, $is_edit_mode );
 
 		// Restore edit mode state
 		Plugin::$instance->editor->set_edit_mode( $is_edit_mode );
@@ -991,68 +984,6 @@ class Frontend extends App {
 	}
 
 	/**
-	 * @since 2.0.9
-	 * @access public
-	 */
-	public function has_elementor_in_page() {
-		return $this->_has_elementor_in_page;
-	}
-
-	/**
-	 * @since 2.3.0
-	 * @access protected
-	 */
-	protected function get_init_settings() {
-		$is_preview_mode = Plugin::$instance->preview->is_preview_mode( Plugin::$instance->preview->get_post_id() );
-
-		$settings = [
-			'isEditMode' => $is_preview_mode,
-			'is_rtl' => is_rtl(),
-			'breakpoints' => Responsive::get_breakpoints(),
-			'version' => ELEMENTOR_VERSION,
-			'urls' => [
-				'assets' => ELEMENTOR_ASSETS_URL,
-			],
-		];
-
-		$settings['settings'] = SettingsManager::get_settings_frontend_config();
-
-		if ( is_singular() ) {
-			$post = get_post();
-			$settings['post'] = [
-				'id' => $post->ID,
-				'title' => $post->post_title,
-				'excerpt' => $post->post_excerpt,
-			];
-		} else {
-			$settings['post'] = [
-				'id' => 0,
-				'title' => wp_get_document_title(),
-				'excerpt' => '',
-			];
-		}
-
-		if ( $is_preview_mode ) {
-			$elements_manager = Plugin::$instance->elements_manager;
-
-			$elements_frontend_keys = [
-				'section' => $elements_manager->get_element_types( 'section' )->get_frontend_settings_keys(),
-				'column' => $elements_manager->get_element_types( 'column' )->get_frontend_settings_keys(),
-			];
-
-			$elements_frontend_keys += Plugin::$instance->widgets_manager->get_widgets_frontend_settings_keys();
-
-			$settings['elements'] = [
-				'data' => (object) [],
-				'editSettings' => (object) [],
-				'keys' => $elements_frontend_keys,
-			];
-		}
-
-		return $settings;
-	}
-
-	/**
 	 * Restore content filters.
 	 *
 	 * Restore removed WordPress filters that conflicted with Elementor.
@@ -1064,7 +995,32 @@ class Frontend extends App {
 		foreach ( $this->content_removed_filters as $filter ) {
 			add_filter( 'the_content', $filter );
 		}
-
 		$this->content_removed_filters = [];
+	}
+
+	/**
+	 * Front End constructor.
+	 *
+	 * Initializing Elementor front end. Make sure we are not in admin, not and
+	 * redirect from old URL structure of Elementor editor.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 */
+	public function __construct() {
+		// We don't need this class in admin side, but in AJAX requests.
+		if ( is_admin() && ! Utils::is_ajax() ) {
+			return;
+		}
+
+		add_action( 'template_redirect', [ $this, 'init' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'register_scripts' ], 5 );
+		add_action( 'wp_enqueue_scripts', [ $this, 'register_styles' ], 5 );
+
+		$this->add_content_filter();
+
+		// Hack to avoid enqueue post CSS while it's a `the_excerpt` call.
+		add_filter( 'get_the_excerpt', [ $this, 'start_excerpt_flag' ], 1 );
+		add_filter( 'get_the_excerpt', [ $this, 'end_excerpt_flag' ], 20 );
 	}
 }

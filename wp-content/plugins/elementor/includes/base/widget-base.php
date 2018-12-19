@@ -33,18 +33,6 @@ abstract class Widget_Base extends Element_Base {
 	protected $_has_template_content = true;
 
 	/**
-	 * Element edit tools.
-	 *
-	 * Holds all the edit tools of the element. For example: delete, duplicate etc.
-	 *
-	 * @access protected
-	 * @static
-	 *
-	 * @var array
-	 */
-	protected static $_edit_tools;
-
-	/**
 	 * Get element type.
 	 *
 	 * Retrieve the element type, in this case `widget`.
@@ -53,10 +41,40 @@ abstract class Widget_Base extends Element_Base {
 	 * @access public
 	 * @static
 	 *
-	 * @return string The type.
+	 * @return string Control type.
 	 */
 	public static function get_type() {
 		return 'widget';
+	}
+
+	/**
+	 * Get default edit tools.
+	 *
+	 * Retrieve the default edit tools of the widget. This method is used to set
+	 * initial tools - it adds Duplicate and Remove on top of of Edit and Save
+	 * tools.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @static
+	 *
+	 * @return array Default edit tools.
+	 */
+	protected static function get_default_edit_tools() {
+		$widget_label = __( 'Widget', 'elementor' );
+
+		return [
+			'duplicate' => [
+				/* translators: %s: Widget label */
+				'title' => sprintf( __( 'Duplicate %s', 'elementor' ), $widget_label ),
+				'icon' => 'clone',
+			],
+			'remove' => [
+				/* translators: %s: Widget label */
+				'title' => sprintf( __( 'Remove %s', 'elementor' ), $widget_label ),
+				'icon' => 'close',
+			],
+		];
 	}
 
 	/**
@@ -285,46 +303,6 @@ abstract class Widget_Base extends Element_Base {
 	}
 
 	/**
-	 * Get default edit tools.
-	 *
-	 * Retrieve the element default edit tools. Used to set initial tools.
-	 * By default the element has no edit tools.
-	 *
-	 * @since 1.0.0
-	 * @access protected
-	 * @static
-	 *
-	 * @return array Default edit tools.
-	 */
-	protected static function get_default_edit_tools() {
-		$widget_label = __( 'Widget', 'elementor' );
-
-		$edit_tools = [
-			'edit' => [
-				'title' => __( 'Edit', 'elementor' ),
-				'icon' => 'edit',
-			],
-		];
-
-		if ( self::is_edit_buttons_enabled() ) {
-			$edit_tools += [
-				'duplicate' => [
-					/* translators: %s: Widget label */
-					'title' => sprintf( __( 'Duplicate %s', 'elementor' ), $widget_label ),
-					'icon' => 'clone',
-				],
-				'remove' => [
-					/* translators: %s: Widget label */
-					'title' => sprintf( __( 'Remove %s', 'elementor' ), $widget_label ),
-					'icon' => 'close',
-				],
-			];
-		}
-
-		return $edit_tools;
-	}
-
-	/**
 	 * Register widget skins.
 	 *
 	 * This method is activated while initializing the widget base class. It is
@@ -360,19 +338,9 @@ abstract class Widget_Base extends Element_Base {
 			'widget_type' => $this->get_name(),
 			'keywords' => $this->get_keywords(),
 			'categories' => $this->get_categories(),
-			'html_wrapper_class' => $this->get_html_wrapper_class(),
-			'show_in_panel' => $this->show_in_panel(),
 		];
 
 		return array_merge( parent::_get_initial_config(), $config );
-	}
-
-	/**
-	 * @since 2.3.1
-	 * @access protected
-	 */
-	protected function should_print_empty() {
-		return false;
 	}
 
 	/**
@@ -393,6 +361,35 @@ abstract class Widget_Base extends Element_Base {
 			<?php
 			echo $template_content; // XSS ok.
 			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render widget edit tools.
+	 *
+	 * Used to generate the edit tools HTML.
+	 *
+	 * @since 1.8.0
+	 * @access protected
+	 */
+	protected function render_edit_tools() {
+		/* translators: %s: Widget label */
+		$edit_title = sprintf( __( 'Edit %s', 'elementor' ), __( 'Widget', 'elementor' ) );
+		?>
+		<div class="elementor-element-overlay">
+			<ul class="elementor-editor-element-settings elementor-editor-widget-settings">
+				<li class="elementor-editor-element-setting elementor-editor-element-trigger" title="<?php echo esc_attr( $edit_title ); ?>">
+					<i class="eicon-edit" aria-hidden="true"></i>
+					<span class="elementor-screen-only"><?php echo esc_html( $edit_title ); ?></span>
+				</li>
+				<?php foreach ( self::get_edit_tools() as $edit_tool_name => $edit_tool ) : ?>
+					<li class="elementor-editor-element-setting elementor-editor-element-<?php echo esc_attr( $edit_tool_name ); ?>" title="<?php echo esc_attr( $edit_tool['title'] ); ?>">
+						<i class="eicon-<?php echo esc_attr( $edit_tool['icon'] ); ?>" aria-hidden="true"></i>
+						<span class="elementor-screen-only"><?php echo esc_html( $edit_tool['title'] ); ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 		</div>
 		<?php
 	}
@@ -426,42 +423,6 @@ abstract class Widget_Base extends Element_Base {
 	}
 
 	/**
-	 * Get HTML wrapper class.
-	 *
-	 * Retrieve the widget container class. Can be used to override the
-	 * container class for specific widgets.
-	 *
-	 * @since 2.0.9
-	 * @access protected
-	 */
-	protected function get_html_wrapper_class() {
-		return 'elementor-widget-' . $this->get_name();
-	}
-
-	/**
-	 * Add widget render attributes.
-	 *
-	 * Used to add attributes to the current widget wrapper HTML tag.
-	 *
-	 * @since 1.0.0
-	 * @access protected
-	 */
-	protected function _add_render_attributes() {
-		parent::_add_render_attributes();
-
-		$this->add_render_attribute(
-			'_wrapper', 'class', [
-				'elementor-widget',
-				$this->get_html_wrapper_class(),
-			]
-		);
-
-		$settings = $this->get_settings();
-
-		$this->add_render_attribute( '_wrapper', 'data-element_type', $this->get_name() . '.' . ( ! empty( $settings['_skin'] ) ? $settings['_skin'] : 'default' ) );
-	}
-
-	/**
 	 * Render widget output on the frontend.
 	 *
 	 * Used to generate the final HTML displayed on the frontend.
@@ -484,22 +445,6 @@ abstract class Widget_Base extends Element_Base {
 		 */
 		do_action( 'elementor/widget/before_render_content', $this );
 
-		ob_start();
-
-		$skin = $this->get_current_skin();
-		if ( $skin ) {
-			$skin->set_parent( $this );
-			$skin->render();
-		} else {
-			$this->render();
-		}
-
-		$widget_content = ob_get_clean();
-
-		if ( empty( $widget_content ) ) {
-			return;
-		}
-
 		if ( Plugin::$instance->editor->is_edit_mode() ) {
 			$this->render_edit_tools();
 		}
@@ -507,6 +452,17 @@ abstract class Widget_Base extends Element_Base {
 		?>
 		<div class="elementor-widget-container">
 			<?php
+			ob_start();
+
+			$skin = $this->get_current_skin();
+			if ( $skin ) {
+				$skin->set_parent( $this );
+				$skin->render();
+			} else {
+				$this->render();
+			}
+
+			$widget_content = ob_get_clean();
 
 			/**
 			 * Render widget content.
@@ -550,6 +506,29 @@ abstract class Widget_Base extends Element_Base {
 	 */
 	public function render_plain_content() {
 		$this->render_content();
+	}
+
+	/**
+	 * Add widget render attributes.
+	 *
+	 * Used to add attributes to the current widget wrapper HTML tag.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 */
+	protected function _add_render_attributes() {
+		parent::_add_render_attributes();
+
+		$this->add_render_attribute(
+			'_wrapper', 'class', [
+				'elementor-widget',
+				'elementor-widget-' . $this->get_name(),
+			]
+		);
+
+		$settings = $this->get_settings();
+
+		$this->add_render_attribute( '_wrapper', 'data-element_type', $this->get_name() . '.' . ( ! empty( $settings['_skin'] ) ? $settings['_skin'] : 'default' ) );
 	}
 
 	/**

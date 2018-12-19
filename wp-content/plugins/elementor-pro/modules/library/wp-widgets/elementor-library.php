@@ -29,7 +29,6 @@ class Elementor_Library extends \WP_Widget {
 		echo $args['before_widget'];
 
 		if ( ! empty( $instance['title'] ) ) {
-			/** This filter is documented in wp-includes/widgets/class-wp-widget-pages.php */
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
 		}
 

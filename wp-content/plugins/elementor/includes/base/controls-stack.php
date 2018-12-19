@@ -1,7 +1,6 @@
 <?php
 namespace Elementor;
 
-use Elementor\Core\Base\Base_Object;
 use Elementor\Core\DynamicTags\Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.4.0
  * @abstract
  */
-abstract class Controls_Stack extends Base_Object {
+abstract class Controls_Stack {
 
 	/**
 	 * Responsive 'desktop' device name.
@@ -43,20 +42,19 @@ abstract class Controls_Stack extends Base_Object {
 	 *
 	 * @var string
 	 */
-	private $id;
-
-	private $active_settings;
-
-	private $parsed_active_settings;
+	private $_id;
 
 	/**
-	 * Parsed Dynamic Settings.
+	 * Parsed Settings.
+	 *
+	 * Holds the settings, which is the data entered by the user and processed
+	 * by elementor.
 	 *
 	 * @access private
 	 *
 	 * @var null|array
 	 */
-	private $parsed_dynamic_settings;
+	private $_settings;
 
 	/**
 	 * Raw Data.
@@ -68,7 +66,7 @@ abstract class Controls_Stack extends Base_Object {
 	 *
 	 * @var null|array
 	 */
-	private $data;
+	private $_data;
 
 	/**
 	 * The configuration.
@@ -80,7 +78,7 @@ abstract class Controls_Stack extends Base_Object {
 	 *
 	 * @var null|array
 	 */
-	private $config;
+	private $_config;
 
 	/**
 	 * Current section.
@@ -91,7 +89,7 @@ abstract class Controls_Stack extends Base_Object {
 	 *
 	 * @var null|array
 	 */
-	private $current_section;
+	private $_current_section;
 
 	/**
 	 * Current tab.
@@ -102,7 +100,7 @@ abstract class Controls_Stack extends Base_Object {
 	 *
 	 * @var null|array
 	 */
-	private $current_tab;
+	private $_current_tab;
 
 	/**
 	 * Current popover.
@@ -125,16 +123,6 @@ abstract class Controls_Stack extends Base_Object {
 	 * @var null|array
 	 */
 	private $injection_point;
-
-
-	/**
-	 * Data sanitized.
-	 *
-	 * @access private
-	 *
-	 * @var bool
-	 */
-	private $settings_sanitized = false;
 
 	/**
 	 * Get element name.
@@ -175,7 +163,7 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return string The ID.
 	 */
 	public function get_id() {
-		return $this->id;
+		return $this->_id;
 	}
 
 	/**
@@ -189,13 +177,13 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return string The converted ID.
 	 */
 	public function get_id_int() {
-		return hexdec( $this->id );
+		return hexdec( $this->_id );
 	}
 
 	/**
 	 * Get the type.
 	 *
-	 * Retrieve the type, e.g. 'stack', 'section', 'widget' etc.
+	 * Retrieve the type, e.g. 'stack', 'element', 'widget' etc.
 	 *
 	 * @since 1.4.0
 	 * @access public
@@ -215,7 +203,6 @@ abstract class Controls_Stack extends Base_Object {
 	 * will be returned.
 	 *
 	 * @since 1.4.0
-	 * @deprecated 2.3.0 Use `Controls_Stack::get_items()` instead
 	 * @access protected
 	 * @static
 	 *
@@ -243,7 +230,7 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return null|array Current section.
 	 */
 	public function get_current_section() {
-		return $this->current_section;
+		return $this->_current_section;
 	}
 
 	/**
@@ -257,7 +244,7 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return null|array Current tab.
 	 */
 	public function get_current_tab() {
-		return $this->current_tab;
+		return $this->_current_tab;
 	}
 
 	/**
@@ -275,34 +262,23 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return mixed Controls list.
 	 */
 	public function get_controls( $control_id = null ) {
-		return self::get_items( $this->get_stack()['controls'], $control_id );
+		return self::_get_items( $this->get_stack()['controls'], $control_id );
 	}
 
 	/**
 	 * Get active controls.
 	 *
-	 * Retrieve an array of active controls that meet the condition field.
-	 *
-	 * If specific controls was given as a parameter, retrieve active controls
-	 * from that list, otherwise check for all the controls available.
+	 * Retrieve an array of all the active controls that meet the condition field.
 	 *
 	 * @since 1.4.0
-	 * @since 2.0.9 Added the `controls` and the `settings` parameters.
 	 * @access public
-	 *
-	 * @param array $controls Optional. An array of controls. Default is null.
-	 * @param array $settings Optional. Controls settings. Default is null.
 	 *
 	 * @return array Active controls.
 	 */
-	public function get_active_controls( array $controls = null, array $settings = null ) {
-		if ( ! $controls ) {
-			$controls = $this->get_controls();
-		}
+	public function get_active_controls() {
+		$controls = $this->get_controls();
 
-		if ( ! $settings ) {
-			$settings = $this->get_controls_settings();
-		}
+		$settings = $this->get_controls_settings();
 
 		$active_controls = array_reduce(
 			array_keys( $controls ), function( $active_controls, $control_key ) use ( $controls, $settings ) {
@@ -366,9 +342,9 @@ abstract class Controls_Stack extends Base_Object {
 		}
 
 		if ( empty( $args['type'] ) || ! in_array( $args['type'], [ Controls_Manager::SECTION, Controls_Manager::WP_WIDGET ], true ) ) {
-			$target_section_args = $this->current_section;
+			$target_section_args = $this->_current_section;
 
-			$target_tab = $this->current_tab;
+			$target_tab = $this->_current_tab;
 
 			if ( $this->injection_point ) {
 				$target_section_args = $this->injection_point['section'];
@@ -501,16 +477,13 @@ abstract class Controls_Stack extends Base_Object {
 	 * @param array $position {
 	 *     The injection position.
 	 *
-	 *     @type string $type     Injection type, either `control` or `section`.
-	 *                            Default is `control`.
-	 *     @type string $at       Where to inject. If `$type` is `control` accepts
-	 *                            `before` and `after`. If `$type` is `section`
-	 *                            accepts `start` and `end`. Default values based on
-	 *                            the `type`.
-	 *     @type string $of       Control/Section ID.
-	 *     @type array  $fallback Fallback injection position. When the position is
-	 *                            not found it will try to fetch the fallback
-	 *                            position.
+	 *     @type string $type Injection type, either `control` or `section`.
+	 *                        Default is `control`.
+	 *     @type string $at   Where to inject. If `$type` is `control` accepts
+	 *                        `before` and `after`. If `$type` is `section`
+	 *                        accepts `start` and `end`. Default values based on
+	 *                        the `type`.
+	 *     @type string $of   Control/Section ID.
 	 * }
 	 *
 	 * @return bool|array Position info.
@@ -539,10 +512,6 @@ abstract class Controls_Stack extends Base_Object {
 		$target_control_index = $this->get_control_index( $position['of'] );
 
 		if ( false === $target_control_index ) {
-			if ( ! empty( $position['fallback'] ) ) {
-				return $this->get_position_info( $position['fallback'] );
-			}
-
 			return false;
 		}
 
@@ -723,16 +692,16 @@ abstract class Controls_Stack extends Base_Object {
 	 * a specific set of controls.
 	 *
 	 * @since 1.4.0
-	 * @since 2.0.9 Added the `settings` parameter.
 	 * @access public
 	 *
 	 * @param array $controls Optional. Controls list. Default is null.
-	 * @param array $settings Optional. Controls settings. Default is null.
 	 *
 	 * @return array Style controls.
 	 */
-	final public function get_style_controls( array $controls = null, array $settings = null ) {
-		$controls = $this->get_active_controls( $controls, $settings );
+	final public function get_style_controls( $controls = null ) {
+		if ( null === $controls ) {
+			$controls = $this->get_active_controls();
+		}
 
 		$style_controls = [];
 
@@ -746,13 +715,7 @@ abstract class Controls_Stack extends Base_Object {
 			$control = array_merge( $control_obj->get_settings(), $control );
 
 			if ( Controls_Manager::REPEATER === $control['type'] ) {
-				$style_fields = [];
-
-				foreach ( $this->get_settings( $control_name ) as $item ) {
-					$style_fields[] = $this->get_style_controls( $control['fields'], $item );
-				}
-
-				$control['style_fields'] = $style_fields;
+				$control['style_fields'] = $this->get_style_controls( $control['fields'] );
 			}
 
 			if ( ! empty( $control['selectors'] ) || ! empty( $control['dynamic'] ) || ! empty( $control['style_fields'] ) ) {
@@ -770,7 +733,6 @@ abstract class Controls_Stack extends Base_Object {
 	 * controls
 	 *
 	 * @since 1.4.0
-	 * @deprecated 2.1.0
 	 * @access public
 	 *
 	 * @return array Class controls.
@@ -951,11 +913,11 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return array|null The config.
 	 */
 	final public function get_config() {
-		if ( null === $this->config ) {
-			$this->config = $this->_get_initial_config();
+		if ( null === $this->_config ) {
+			$this->_config = $this->_get_initial_config();
 		}
 
-		return $this->config;
+		return $this->_config;
 	}
 
 	/**
@@ -1014,25 +976,23 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return mixed The raw data.
 	 */
 	public function get_data( $item = null ) {
-		if ( ! $this->settings_sanitized && ( ! $item || 'settings' === $item ) ) {
-			$this->data['settings'] = $this->sanitize_settings( $this->data['settings'] );
-
-			$this->settings_sanitized = true;
-		}
-
-		return self::get_items( $this->data, $item );
+		return self::_get_items( $this->_data, $item );
 	}
 
 	/**
-	 * @since 2.0.14
+	 * Get the settings.
+	 *
+	 * Retrieve all the settings or, when requested, a specific setting.
+	 *
+	 * @since 1.4.0
 	 * @access public
+	 *
+	 * @param string $setting Optional. The requested setting. Default is null.
+	 *
+	 * @return mixed The settings.
 	 */
-	public function get_parsed_dynamic_settings( $setting = null ) {
-		if ( null === $this->parsed_dynamic_settings ) {
-			$this->parsed_dynamic_settings = $this->parse_dynamic_settings( $this->get_settings() );
-		}
-
-		return self::get_items( $this->parsed_dynamic_settings, $setting );
+	public function get_settings( $setting = null ) {
+		return self::_get_items( $this->_settings, $setting );
 	}
 
 	/**
@@ -1041,56 +1001,18 @@ abstract class Controls_Stack extends Base_Object {
 	 * Retrieve the settings from all the active controls.
 	 *
 	 * @since 1.4.0
-	 * @since 2.1.0 Added the `controls` and the `settings` parameters.
 	 * @access public
-	 *
-	 * @param array $controls Optional. An array of controls. Default is null.
-	 * @param array $settings Optional. Controls settings. Default is null.
 	 *
 	 * @return array Active settings.
 	 */
-	public function get_active_settings( $settings = null, $controls = null ) {
-		$is_first_request = ! $settings && ! $this->active_settings;
+	public function get_active_settings() {
+		$settings = $this->get_settings();
 
-		if ( ! $settings ) {
-			if ( $this->active_settings ) {
-				return $this->active_settings;
-			}
+		$active_settings = array_intersect_key( $settings, $this->get_active_controls() );
 
-			$settings = $this->get_controls_settings();
+		$settings_mask = array_fill_keys( array_keys( $settings ), null );
 
-			$controls = $this->get_controls();
-		}
-
-		$active_settings = [];
-
-		foreach ( $settings as $setting_key => $setting ) {
-			if ( ! isset( $controls[ $setting_key ] ) ) {
-				$active_settings[ $setting_key ] = $setting;
-
-				continue;
-			}
-
-			$control = $controls[ $setting_key ];
-
-			if ( $this->is_control_visible( $control, $settings ) ) {
-				if ( Controls_Manager::REPEATER === $control['type'] ) {
-					foreach ( $setting as & $item ) {
-						$item = $this->get_active_settings( $item, $control['fields'] );
-					}
-				}
-
-				$active_settings[ $setting_key ] = $setting;
-			} else {
-				$active_settings[ $setting_key ] = null;
-			}
-		}
-
-		if ( $is_first_request ) {
-			$this->active_settings = $active_settings;
-		}
-
-		return $active_settings;
+		return array_merge( $settings_mask, $active_settings );
 	}
 
 	/**
@@ -1108,14 +1030,24 @@ abstract class Controls_Stack extends Base_Object {
 	 * @param string $setting_key Optional. The key of the requested setting.
 	 *                            Default is null.
 	 *
-	 * @return mixed The settings.
+	 * @return array The settings.
 	 */
 	public function get_settings_for_display( $setting_key = null ) {
-		if ( ! $this->parsed_active_settings ) {
-			$this->parsed_active_settings = $this->get_active_settings( $this->get_parsed_dynamic_settings(), $this->get_controls() );
+		if ( $setting_key ) {
+			$settings = [
+				$setting_key => $this->get_settings( $setting_key ),
+			];
+		} else {
+			$settings = $this->get_active_settings();
 		}
 
-		return self::get_items( $this->parsed_active_settings, $setting_key );
+		$parsed_settings = $this->parse_dynamic_settings( $settings );
+
+		if ( $setting_key ) {
+			return $parsed_settings[ $setting_key ];
+		}
+
+		return $parsed_settings;
 	}
 
 	/**
@@ -1260,6 +1192,7 @@ abstract class Controls_Stack extends Base_Object {
 			$values = $this->get_settings();
 		}
 
+		// Repeater fields
 		if ( ! empty( $control['conditions'] ) ) {
 			return Conditions::check( $control['conditions'], $values );
 		}
@@ -1359,14 +1292,14 @@ abstract class Controls_Stack extends Base_Object {
 
 		$this->add_control( $section_id, $args );
 
-		if ( null !== $this->current_section ) {
-			wp_die( sprintf( 'Elementor: You can\'t start a section before the end of the previous section "%s".', $this->current_section['section'] ) ); // XSS ok.
+		if ( null !== $this->_current_section ) {
+			wp_die( sprintf( 'Elementor: You can\'t start a section before the end of the previous section "%s".', $this->_current_section['section'] ) ); // XSS ok.
 		}
 
-		$this->current_section = $this->get_section_args( $section_id );
+		$this->_current_section = $this->get_section_args( $section_id );
 
 		if ( $this->injection_point ) {
-			$this->injection_point['section'] = $this->current_section;
+			$this->injection_point['section'] = $this->_current_section;
 		}
 
 		/**
@@ -1409,10 +1342,10 @@ abstract class Controls_Stack extends Base_Object {
 	 * @access public
 	 */
 	public function end_controls_section() {
-		$stack_name = $this->get_name();
+		$section_name = $this->get_name();
 
 		// Save the current section for the action.
-		$current_section = $this->current_section;
+		$current_section = $this->_current_section;
 		$section_id = $current_section['section'];
 		$args = [
 			'tab' => $current_section['tab'],
@@ -1436,16 +1369,16 @@ abstract class Controls_Stack extends Base_Object {
 		 *
 		 * Fires before Elementor section ends in the editor panel.
 		 *
-		 * The dynamic portions of the hook name, `$stack_name` and `$section_id`, refers to the stack name and section ID, respectively.
+		 * The dynamic portions of the hook name, `$section_name` and `$section_id`, refers to the section name and section ID, respectively.
 		 *
 		 * @since 1.4.0
 		 *
 		 * @param Controls_Stack $this The control.
 		 * @param array          $args Section arguments.
 		 */
-		do_action( "elementor/element/{$stack_name}/{$section_id}/before_section_end", $this, $args );
+		do_action( "elementor/element/{$section_name}/{$section_id}/before_section_end", $this, $args );
 
-		$this->current_section = null;
+		$this->_current_section = null;
 
 		/**
 		 * After section end.
@@ -1465,14 +1398,14 @@ abstract class Controls_Stack extends Base_Object {
 		 *
 		 * Fires after Elementor section ends in the editor panel.
 		 *
-		 * The dynamic portions of the hook name, `$stack_name` and `$section_id`, refers to the section name and section ID, respectively.
+		 * The dynamic portions of the hook name, `$section_name` and `$section_id`, refers to the section name and section ID, respectively.
 		 *
 		 * @since 1.4.0
 		 *
 		 * @param Controls_Stack $this The control.
 		 * @param array          $args Section arguments.
 		 */
-		do_action( "elementor/element/{$stack_name}/{$section_id}/after_section_end", $this, $args );
+		do_action( "elementor/element/{$section_name}/{$section_id}/after_section_end", $this, $args );
 	}
 
 	/**
@@ -1491,8 +1424,8 @@ abstract class Controls_Stack extends Base_Object {
 	 * @param string $tabs_id Tabs ID.
 	 */
 	public function start_controls_tabs( $tabs_id ) {
-		if ( null !== $this->current_tab ) {
-			wp_die( sprintf( 'Elementor: You can\'t start tabs before the end of the previous tabs "%s".', $this->current_tab['tabs_wrapper'] ) ); // XSS ok.
+		if ( null !== $this->_current_tab ) {
+			wp_die( sprintf( 'Elementor: You can\'t start tabs before the end of the previous tabs "%s".', $this->_current_tab['tabs_wrapper'] ) ); // XSS ok.
 		}
 
 		$this->add_control(
@@ -1502,12 +1435,12 @@ abstract class Controls_Stack extends Base_Object {
 			]
 		);
 
-		$this->current_tab = [
+		$this->_current_tab = [
 			'tabs_wrapper' => $tabs_id,
 		];
 
 		if ( $this->injection_point ) {
-			$this->injection_point['tab'] = $this->current_tab;
+			$this->injection_point['tab'] = $this->_current_tab;
 		}
 	}
 
@@ -1523,7 +1456,7 @@ abstract class Controls_Stack extends Base_Object {
 	 * @access public
 	 */
 	public function end_controls_tabs() {
-		$this->current_tab = null;
+		$this->_current_tab = null;
 	}
 
 	/**
@@ -1543,19 +1476,19 @@ abstract class Controls_Stack extends Base_Object {
 	 * @param array  $args   Tab arguments.
 	 */
 	public function start_controls_tab( $tab_id, $args ) {
-		if ( ! empty( $this->current_tab['inner_tab'] ) ) {
-			wp_die( sprintf( 'Elementor: You can\'t start a tab before the end of the previous tab "%s".', $this->current_tab['inner_tab'] ) ); // XSS ok.
+		if ( ! empty( $this->_current_tab['inner_tab'] ) ) {
+			wp_die( sprintf( 'Elementor: You can\'t start a tab before the end of the previous tab "%s".', $this->_current_tab['inner_tab'] ) ); // XSS ok.
 		}
 
 		$args['type'] = Controls_Manager::TAB;
-		$args['tabs_wrapper'] = $this->current_tab['tabs_wrapper'];
+		$args['tabs_wrapper'] = $this->_current_tab['tabs_wrapper'];
 
 		$this->add_control( $tab_id, $args );
 
-		$this->current_tab['inner_tab'] = $tab_id;
+		$this->_current_tab['inner_tab'] = $tab_id;
 
 		if ( $this->injection_point ) {
-			$this->injection_point['tab']['inner_tab'] = $this->current_tab['inner_tab'];
+			$this->injection_point['tab']['inner_tab'] = $this->_current_tab['inner_tab'];
 		}
 	}
 
@@ -1571,7 +1504,7 @@ abstract class Controls_Stack extends Base_Object {
 	 * @access public
 	 */
 	public function end_controls_tab() {
-		unset( $this->current_tab['inner_tab'] );
+		unset( $this->_current_tab['inner_tab'] );
 	}
 
 	/**
@@ -1656,7 +1589,7 @@ abstract class Controls_Stack extends Base_Object {
 			return;
 		}
 		?>
-		<script type="text/html" id="tmpl-elementor-<?php echo esc_attr( $this->get_name() ); ?>-content">
+		<script type="text/html" id="tmpl-elementor-<?php echo $this->get_type(); ?>-<?php echo esc_attr( $this->get_name() ); ?>-content">
 			<?php $this->print_template_content( $template_content ); ?>
 		</script>
 		<?php
@@ -1727,6 +1660,27 @@ abstract class Controls_Stack extends Base_Object {
 	}
 
 	/**
+	 * Set settings.
+	 *
+	 * Change or add new settings to an existing control in the stack.
+	 *
+	 * @since 1.4.0
+	 * @access public
+	 *
+	 * @param string|array $key   Setting name, or an array of key/value.
+	 * @param string|null  $value Optional. Setting value. Optional field if
+	 *                            `$key` is an array. Default is null.
+	 */
+	final public function set_settings( $key, $value = null ) {
+		// strict check if override all settings.
+		if ( is_array( $key ) ) {
+			$this->_settings = $key;
+		} else {
+			$this->_settings[ $key ] = $value;
+		}
+	}
+
+	/**
 	 * Register controls.
 	 *
 	 * Used to add new controls to any element type. For example, external
@@ -1760,11 +1714,21 @@ abstract class Controls_Stack extends Base_Object {
 	}
 
 	/**
-	 * @since 2.3.0
+	 * Get parsed settings.
+	 *
+	 * Retrieve the parsed settings for all the controls that represent them.
+	 * The parser set default values and process the settings.
+	 *
+	 * Classes that extend `Controls_Stack` can add new process to the settings
+	 * parser.
+	 *
+	 * @since 1.4.0
 	 * @access protected
+	 *
+	 * @return array Parsed settings.
 	 */
-	protected function get_init_settings() {
-		$settings = $this->get_data( 'settings' );
+	protected function _get_parsed_settings() {
+		$settings = $this->_data['settings'];
 
 		foreach ( $this->get_controls() as $control ) {
 			$control_obj = Plugin::$instance->controls_manager->get_control( $control['type'] );
@@ -1782,33 +1746,11 @@ abstract class Controls_Stack extends Base_Object {
 	}
 
 	/**
-	 * Get parsed settings.
-	 *
-	 * Retrieve the parsed settings for all the controls that represent them.
-	 * The parser set default values and process the settings.
-	 *
-	 * Classes that extend `Controls_Stack` can add new process to the settings
-	 * parser.
-	 *
-	 * @since 1.4.0
-	 * @deprecated 2.3.0 Use `Controls_Stack::get_init_settings()` instead
-	 * @access protected
-	 *
-	 * @return array Parsed settings.
-	 */
-	protected function _get_parsed_settings() {
-		_deprecated_function( __METHOD__, '2.3.0', 'Controls_Stack::get_init_settings' );
-
-		return $this->get_init_settings();
-	}
-
-	/**
 	 * Sanitize initial data.
 	 *
 	 * Performs data cleaning and sanitization.
 	 *
 	 * @since 2.0.0
-	 * @deprecated 2.1.5 Use `Controls_Stack::sanitize_settings` instead
 	 * @access protected
 	 *
 	 * @param array $data     Data to sanitize.
@@ -1818,9 +1760,45 @@ abstract class Controls_Stack extends Base_Object {
 	 * @return array Sanitized data.
 	 */
 	protected function sanitize_initial_data( $data, array $controls = [] ) {
-		_deprecated_function( __METHOD__, '2.1.5', 'Controls_Stack::sanitize_settings' );
+		if ( ! $controls ) {
+			$controls = $this->get_controls();
+		}
 
-		$data['settings'] = $this->sanitize_settings( $data['settings'], $controls );
+		$settings = $data['settings'];
+
+		foreach ( $controls as $control ) {
+			if ( 'repeater' === $control['type'] ) {
+				if ( empty( $settings[ $control['name'] ] ) ) {
+					continue;
+				}
+
+				foreach ( $settings[ $control['name'] ] as $index => $repeater_row_data ) {
+					$sanitized_row_data = $this->sanitize_initial_data( [
+						'settings' => $repeater_row_data,
+					], $control['fields'] );
+
+					$settings[ $control['name'] ][ $index ] = $sanitized_row_data['settings'];
+				}
+
+				continue;
+			}
+
+			$is_dynamic = isset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
+
+			if ( ! $is_dynamic ) {
+				continue;
+			}
+
+			$value_to_check = $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ];
+
+			$tag_text_data = Plugin::$instance->dynamic_tags->tag_text_to_tag_data( $value_to_check );
+
+			if ( ! Plugin::$instance->dynamic_tags->get_tag_info( $tag_text_data['name'] ) ) {
+				unset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
+			}
+		}
+
+		$data['settings'] = $settings;
 
 		return $data;
 	}
@@ -1927,61 +1905,13 @@ abstract class Controls_Stack extends Base_Object {
 	 * @param array $data Initial data.
 	 */
 	protected function _init( $data ) {
-		$this->data = array_merge( $this->get_default_data(), $data );
+		$this->_data = array_merge( $this->get_default_data(), $data );
 
-		$this->id = $data['id'];
-	}
+		$this->_id = $data['id'];
 
-	/**
-	 * Sanitize initial data.
-	 *
-	 * Performs settings cleaning and sanitization.
-	 *
-	 * @since 2.1.5
-	 * @access private
-	 *
-	 * @param array $settings Settings to sanitize.
-	 * @param array $controls Optional. An array of controls. Default is an
-	 *                        empty array.
-	 *
-	 * @return array Sanitized settings.
-	 */
-	private function sanitize_settings( array $settings, array $controls = [] ) {
-		if ( ! $controls ) {
-			$controls = $this->get_controls();
-		}
+		$this->_data = $this->sanitize_initial_data( $this->_data );
 
-		foreach ( $controls as $control ) {
-			if ( 'repeater' === $control['type'] ) {
-				if ( empty( $settings[ $control['name'] ] ) ) {
-					continue;
-				}
-
-				foreach ( $settings[ $control['name'] ] as $index => $repeater_row_data ) {
-					$sanitized_row_data = $this->sanitize_settings( $repeater_row_data, $control['fields'] );
-
-					$settings[ $control['name'] ][ $index ] = $sanitized_row_data;
-				}
-
-				continue;
-			}
-
-			$is_dynamic = isset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
-
-			if ( ! $is_dynamic ) {
-				continue;
-			}
-
-			$value_to_check = $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ];
-
-			$tag_text_data = Plugin::$instance->dynamic_tags->tag_text_to_tag_data( $value_to_check );
-
-			if ( ! Plugin::$instance->dynamic_tags->get_tag_info( $tag_text_data['name'] ) ) {
-				unset( $settings[ Manager::DYNAMIC_SETTING_KEY ][ $control['name'] ] );
-			}
-		}
-
-		return $settings;
+		$this->_settings = $this->_get_parsed_settings();
 	}
 
 	/**

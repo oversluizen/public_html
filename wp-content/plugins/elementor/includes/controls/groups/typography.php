@@ -171,13 +171,7 @@ class Group_Control_Typography extends Group_Control_Base {
 		$fields['line_height'] = [
 			'label' => _x( 'Line-Height', 'Typography Control', 'elementor' ),
 			'type' => Controls_Manager::SLIDER,
-			'desktop_default' => [
-				'unit' => 'em',
-			],
-			'tablet_default' => [
-				'unit' => 'em',
-			],
-			'mobile_default' => [
+			'default' => [
 				'unit' => 'em',
 			],
 			'range' => [
@@ -286,9 +280,6 @@ class Group_Control_Typography extends Group_Control_Base {
 			'popover' => [
 				'starter_name' => 'typography',
 				'starter_title' => _x( 'Typography', 'Typography Control', 'elementor' ),
-				'settings' => [
-					'render_type' => 'ui',
-				],
 			],
 		];
 	}

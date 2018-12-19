@@ -155,21 +155,10 @@ class Plugin {
 			'nonce' => wp_create_nonce( 'elementor-pro-frontend' ),
 		];
 
-		/**
-		 * Localize frontend settings.
-		 *
-		 * Filters the frontend localized settings.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param array $locale_settings Localized settings.
-		 */
-		$locale_settings = apply_filters( 'elementor_pro/frontend/localize_settings', $locale_settings );
-
 		wp_localize_script(
 			'elementor-pro-frontend',
 			'ElementorProFrontendConfig',
-			$locale_settings
+			apply_filters( 'elementor_pro/frontend/localize_settings', $locale_settings )
 		);
 	}
 
@@ -200,24 +189,13 @@ class Plugin {
 
 		$locale_settings = [
 			'i18n' => [],
-			'isActive' => $is_license_active,
+			'isActive' => true,
 		];
-
-		/**
-		 * Localize editor settings.
-		 *
-		 * Filters the editor localized settings.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param array $locale_settings Localized settings.
-		 */
-		$locale_settings = apply_filters( 'elementor_pro/editor/localize_settings', $locale_settings );
 
 		wp_localize_script(
 			'elementor-pro',
 			'ElementorProConfig',
-			$locale_settings
+			apply_filters( 'elementor_pro/editor/localize_settings', $locale_settings )
 		);
 	}
 

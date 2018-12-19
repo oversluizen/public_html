@@ -3,7 +3,7 @@
 Plugin Name: Safe SVG
 Plugin URI:  https://wpsvg.com/
 Description: Allows SVG uploads into WordPress and sanitizes the SVG before saving it
-Version:     1.8.1
+Version:     1.6.1
 Author:      Daryll Doyle
 Author URI:  http://enshrined.co.uk
 Text Domain: safe-svg
@@ -13,8 +13,6 @@ Domain Path: /languages
 defined( 'ABSPATH' ) or die( 'Really?' );
 
 require 'lib/vendor/autoload.php';
-require 'includes/safe-svg-tags.php';
-require 'includes/safe-svg-attributes.php';
 
 if ( ! class_exists( 'safe_svg' ) ) {
 
@@ -48,7 +46,6 @@ if ( ! class_exists( 'safe_svg' ) ) {
 			add_filter( 'wp_generate_attachment_metadata', array( $this, 'skip_svg_regeneration' ), 10, 2 );
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_upgrade_link' ) );
 			add_filter( 'wp_get_attachment_metadata', array( $this, 'metadata_error_fix' ), 10, 2 );
-            add_filter( 'wp_get_attachment_image_attributes',array( $this, 'fix_direct_image_output' ), 10, 3 );
 		}
 
 		/**
@@ -133,12 +130,6 @@ if ( ! class_exists( 'safe_svg' ) ) {
 				}
 			}
 
-			/**
-			 * Load extra filters to allow devs to access the safe tags and attrs by themselves.
-			 */
-			$this->sanitizer->setAllowedTags(new safe_svg_tags());
-			$this->sanitizer->setAllowedAttrs(new safe_svg_attributes());
-
 			$clean = $this->sanitizer->sanitize( $dirty );
 
 			if ( $clean === false ) {
@@ -185,30 +176,18 @@ if ( ! class_exists( 'safe_svg' ) ) {
 
 			if ( $response['mime'] == 'image/svg+xml' ) {
 				$possible_sizes = apply_filters( 'image_size_names_choose', array(
-                    'full'      => __( 'Full Size' ),
 					'thumbnail' => __( 'Thumbnail' ),
 					'medium'    => __( 'Medium' ),
 					'large'     => __( 'Large' ),
+					'full'      => __( 'Full Size' ),
 				) );
 
 				$sizes = array();
 
 				foreach ( $possible_sizes as $size => $label ) {
-                    $default_height = 2000;
-                    $default_width = 2000;
-
-                    if ( 'full' === $size ) {
-                        $dimensions = $this->svg_dimensions( get_attached_file( $attachment->ID ) );
-
-                        if ( $dimensions ) {
-                            $default_height = $dimensions['height'];
-                            $default_width  = $dimensions['width'];
-                        }
-                    }
-
 					$sizes[ $size ] = array(
-						'height'      => get_option( "{$size}_size_w", $default_height ),
-						'width'       => get_option( "{$size}_size_h", $default_width ),
+						'height'      => get_option( "{$size}_size_w", 2000 ),
+						'width'       => get_option( "{$size}_size_h", 2000 ),
 						'url'         => $response['url'],
 						'orientation' => 'portrait',
 					);
@@ -282,32 +261,27 @@ if ( ! class_exists( 'safe_svg' ) ) {
 		 * @return mixed
 		 */
 		function get_image_tag_override( $html, $id, $alt, $title, $align, $size ) {
-            $mime = get_post_mime_type( $id );
+			$mime = get_post_mime_type( $id );
 
-            if ( 'image/svg+xml' === $mime ) {
-                if ( is_array( $size ) ) {
-                    $width  = $size[0];
+			if ( 'image/svg+xml' === $mime ) {
+			    if( is_array( $size ) ) {
+                    $width = $size[0];
                     $height = $size[1];
-                } elseif ( 'full' == $size && $dimensions = $this->svg_dimensions( get_attached_file( $id ) ) ) {
-                    $width  = $dimensions['width'];
-                    $height = $dimensions['height'];
                 } else {
                     $width  = get_option( "{$size}_size_w", false );
                     $height = get_option( "{$size}_size_h", false );
                 }
 
-                if ( $height && $width ) {
+                if( $height && $width ) {
                     $html = str_replace( 'width="1" ', sprintf( 'width="%s" ', $width ), $html );
                     $html = str_replace( 'height="1" ', sprintf( 'height="%s" ', $height ), $html );
                 } else {
                     $html = str_replace( 'width="1" ', '', $html );
                     $html = str_replace( 'height="1" ', '', $html );
                 }
+			}
 
-                $html = str_replace( '/>', ' role="img" />', $html );
-            }
-
-            return $html;
+			return $html;
 		}
 
 		/**
@@ -358,64 +332,6 @@ if ( ! class_exists( 'safe_svg' ) ) {
 
 			return $data;
 		}
-
-        /**
-         * Get SVG size from the width/height or viewport.
-         *
-         * @param $svg
-         *
-         * @return array|bool
-         */
-        protected function svg_dimensions( $svg ) {
-            $svg    = @simplexml_load_file( $svg );
-            $width  = 0;
-            $height = 0;
-            if ( $svg ) {
-                $attributes = $svg->attributes();
-                if ( isset( $attributes->width, $attributes->height ) ) {
-                    $width  = floatval( $attributes->width );
-                    $height = floatval( $attributes->height );
-                } elseif ( isset( $attributes->viewBox ) ) {
-                    $sizes = explode( ' ', $attributes->viewBox );
-                    if ( isset( $sizes[2], $sizes[3] ) ) {
-                        $width  = floatval( $sizes[2] );
-                        $height = floatval( $sizes[3] );
-                    }
-                } else {
-                    return false;
-                }
-            }
-
-            return array( 'width' => $width, 'height' => $height );
-        }
-
-        /**
-         * Fix the output of images using wp_get_attachment_image
-         *
-         * @param array $attr Attributes for the image markup.
-         * @param WP_Post $attachment Image attachment post.
-         * @param string|array $size Requested size. Image size or array of width and height values
-         *                                 (in that order). Default 'thumbnail'.
-         */
-        public function fix_direct_image_output( $attr, $attachment, $size ) {
-            $mime = get_post_mime_type( $attachment->ID );
-            if ( 'image/svg+xml' === $mime ) {
-                $default_height = 100;
-                $default_width  = 100;
-
-                $dimensions = $this->svg_dimensions( get_attached_file( $attachment->ID ) );
-
-                if ( $dimensions ) {
-                    $default_height = $dimensions['height'];
-                    $default_width  = $dimensions['width'];
-                }
-
-                $attr['height'] = $default_height;
-                $attr['width']  = $default_width;
-            }
-
-            return $attr;
-        }
 
 	}
 }

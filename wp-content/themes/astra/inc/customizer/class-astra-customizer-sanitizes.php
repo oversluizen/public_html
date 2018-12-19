@@ -5,7 +5,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        https://wpastra.com/
+ * @link        http://wpastra.com/
  * @since       Astra 1.0.0
  */
 
@@ -39,7 +39,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 */
 		public static function get_instance() {
 			if ( ! isset( self::$instance ) ) {
-				self::$instance = new self();
+				self::$instance = new self;
 			}
 			return self::$instance;
 		}
@@ -55,7 +55,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $input Customizer setting input number.
 		 * @return number        Absolute number.
 		 */
-		public static function sanitize_integer( $input ) {
+		static public function sanitize_integer( $input ) {
 			return absint( $input );
 		}
 
@@ -66,7 +66,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  object $setting  Setting object.
 		 * @return number           Return number.
 		 */
-		public static function sanitize_number( $val, $setting ) {
+		static public function sanitize_number( $val, $setting ) {
 
 			$input_attrs = $setting->manager->get_control( $setting->id )->input_attrs;
 
@@ -102,7 +102,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $val Customizer setting input number.
 		 * @return number        Return number.
 		 */
-		public static function sanitize_number_n_blank( $val ) {
+		static public function sanitize_number_n_blank( $val ) {
 			return is_numeric( $val ) ? $val : '';
 		}
 
@@ -113,7 +113,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @return number        Return number.
 		 * @since  1.0.6
 		 */
-		public static function sanitize_spacing( $val ) {
+		static public function sanitize_spacing( $val ) {
 
 			foreach ( $val as $key => $value ) {
 				$val[ $key ] = ( is_numeric( $val[ $key ] ) && $val[ $key ] >= 0 ) ? $val[ $key ] : '';
@@ -129,7 +129,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @return number        Return number.
 		 * @since  1.2.1
 		 */
-		public static function sanitize_responsive_spacing( $val ) {
+		static public function sanitize_responsive_spacing( $val ) {
 
 			$spacing = array(
 				'desktop'      => array(
@@ -159,22 +159,19 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 				$spacing['desktop'] = array_map(
 					function ( $value ) {
 							return ( is_numeric( $value ) && $value >= 0 ) ? $value : '';
-					},
-					$val['desktop']
+					}, $val['desktop']
 				);
 
 				$spacing['tablet'] = array_map(
 					function ( $value ) {
 							return ( is_numeric( $value ) && $value >= 0 ) ? $value : '';
-					},
-					$val['tablet']
+					}, $val['tablet']
 				);
 
 				$spacing['mobile'] = array_map(
 					function ( $value ) {
 							return ( is_numeric( $value ) && $value >= 0 ) ? $value : '';
-					},
-					$val['mobile']
+					}, $val['mobile']
 				);
 
 				if ( isset( $val['desktop-unit'] ) ) {
@@ -207,7 +204,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  object       $setting Setting Onject.
 		 * @return array        Return number.
 		 */
-		public static function sanitize_responsive_slider( $val, $setting ) {
+		static public function sanitize_responsive_slider( $val, $setting ) {
 
 			$input_attrs = array();
 			if ( isset( $setting->manager->get_control( $setting->id )->input_attrs ) ) {
@@ -242,7 +239,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  array|number $val Customizer setting input number.
 		 * @return array        Return number.
 		 */
-		public static function sanitize_responsive_typo( $val ) {
+		static public function sanitize_responsive_typo( $val ) {
 
 			$responsive = array(
 				'desktop'      => '',
@@ -272,7 +269,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  string $value    setting input value.
 		 * @return object           Return the validity object.
 		 */
-		public static function validate_email( $validity, $value ) {
+		static public function validate_email( $validity, $value ) {
 			if ( ! is_email( $value ) ) {
 				$validity->add( 'required', __( 'Enter valid email address!', 'astra' ) );
 			}
@@ -285,7 +282,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $value Sidebar content width.
 		 * @return number        Sidebar content width value.
 		 */
-		public static function validate_sidebar_content_width( $value ) {
+		static public function validate_sidebar_content_width( $value ) {
 			$value = intval( $value );
 			if ( $value > 50 ) {
 				$value = 50;
@@ -301,7 +298,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $value Site width.
 		 * @return number        Site width value.
 		 */
-		public static function validate_site_width( $value ) {
+		static public function validate_site_width( $value ) {
 			$value = intval( $value );
 			if ( 1920 < $value ) {
 				$value = 1920;
@@ -317,7 +314,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $value Site padding.
 		 * @return number        Site padding value.
 		 */
-		public static function validate_site_padding( $value ) {
+		static public function validate_site_padding( $value ) {
 			$value = intval( $value );
 			if ( 200 < $value ) {
 				$value = 200;
@@ -333,7 +330,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $value Site margin.
 		 * @return number        Site margin value.
 		 */
-		public static function validate_site_margin( $value ) {
+		static public function validate_site_margin( $value ) {
 			$value = intval( $value );
 			if ( 600 < $value ) {
 				$value = 600;
@@ -349,7 +346,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  number $input setting input.
 		 * @return number        setting input value.
 		 */
-		public static function sanitize_checkbox( $input ) {
+		static public function sanitize_checkbox( $input ) {
 			if ( $input ) {
 				$output = '1';
 			} else {
@@ -364,7 +361,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  string $color setting input.
 		 * @return string        setting input value.
 		 */
-		public static function sanitize_hex_color( $color ) {
+		static public function sanitize_hex_color( $color ) {
 
 			if ( '' === $color ) {
 				return '';
@@ -384,7 +381,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  string $color setting input.
 		 * @return string        setting input value.
 		 */
-		public static function sanitize_alpha_color( $color ) {
+		static public function sanitize_alpha_color( $color ) {
 
 			if ( '' === $color ) {
 				return '';
@@ -407,7 +404,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  string $input    setting input.
 		 * @return mixed            setting input value.
 		 */
-		public static function sanitize_html( $input ) {
+		static public function sanitize_html( $input ) {
 			return wp_kses_post( $input );
 		}
 
@@ -418,7 +415,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  object $setting  setting object.
 		 * @return mixed            setting input value.
 		 */
-		public static function sanitize_multi_choices( $input, $setting ) {
+		static public function sanitize_multi_choices( $input, $setting ) {
 
 			// Get list of choices from the control
 			// associated with the setting.
@@ -443,7 +440,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  object $setting  setting object.
 		 * @return mixed            setting input value.
 		 */
-		public static function sanitize_choices( $input, $setting ) {
+		static public function sanitize_choices( $input, $setting ) {
 
 			// Ensure input is a slug.
 			$input = sanitize_key( $input );
@@ -463,7 +460,7 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		 * @param  mixed $input setting input.
 		 * @return mixed        setting input value.
 		 */
-		public static function sanitize_font_weight( $input ) {
+		static public function sanitize_font_weight( $input ) {
 
 			$valid = array(
 				'normal',
@@ -487,26 +484,12 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 		}
 
 		/**
-		 * Sanitize Font variant
-		 *
-		 * @param  mixed $input setting input.
-		 * @return mixed        setting input value.
-		 */
-		public static function sanitize_font_variant( $input ) {
-
-			if ( is_array( $input ) ) {
-				$input = implode( ',', $input );
-			}
-			return sanitize_text_field( $input );
-		}
-
-		/**
 		 * Sanitize Background Obj
 		 *
 		 * @param  mixed $bg_obj setting input.
 		 * @return array        setting input value.
 		 */
-		public static function sanitize_background_obj( $bg_obj ) {
+		static public function sanitize_background_obj( $bg_obj ) {
 
 			$out_bg_obj = array(
 				'background-color'      => '',
@@ -533,49 +516,6 @@ if ( ! class_exists( 'Astra_Customizer_Sanitizes' ) ) {
 			}
 
 			return $out_bg_obj;
-		}
-
-		/**
-		 * Sanitize Border Typography
-		 *
-		 * @since 1.4.0
-		 * @param  array|number $val Customizer setting input number.
-		 * @return array        Return number.
-		 */
-		public static function sanitize_border( $val ) {
-
-			$border = array(
-				'top'    => '',
-				'right'  => '',
-				'bottom' => '',
-				'left'   => '',
-			);
-			if ( is_array( $val ) ) {
-				$border['top']    = is_numeric( $val['top'] ) ? $val['top'] : '';
-				$border['right']  = is_numeric( $val['right'] ) ? $val['right'] : '';
-				$border['bottom'] = is_numeric( $val['bottom'] ) ? $val['bottom'] : '';
-				$border['left']   = is_numeric( $val['left'] ) ? $val['left'] : '';
-			}
-			return $border;
-		}
-
-		/**
-		 * Sanitize Customizer Link param.
-		 *
-		 * @param Array $val array(
-		 *      linked : Linked Customizer Section,
-		 *      link_text : Link Text.
-		 * ).
-		 *
-		 * @since 1.6.0
-		 *
-		 * @return Array
-		 */
-		public static function sanitize_customizer_links( $val ) {
-			$val['linked']    = sanitize_text_field( $val['linked'] );
-			$val['link_text'] = esc_html( $val['link_text'] );
-
-			return $val;
 		}
 	}
 }

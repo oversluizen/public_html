@@ -14,9 +14,8 @@ class QM_Collector_DB_Dupes extends QM_Collector {
 	}
 
 	public function process() {
-		$dbq = QM_Collectors::get( 'db_queries' );
 
-		if ( ! $dbq ) {
+		if ( ! $dbq = QM_Collectors::get( 'db_queries' ) ) {
 			return;
 		}
 		if ( ! isset( $dbq->data['dupes'] ) ) {
@@ -100,7 +99,7 @@ class QM_Collector_DB_Dupes extends QM_Collector {
 }
 
 function register_qm_collector_db_dupes( array $collectors, QueryMonitor $qm ) {
-	$collectors['db_dupes'] = new QM_Collector_DB_Dupes();
+	$collectors['db_dupes'] = new QM_Collector_DB_Dupes;
 	return $collectors;
 }
 

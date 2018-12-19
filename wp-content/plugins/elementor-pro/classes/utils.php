@@ -165,18 +165,7 @@ class Utils {
 			$title = __( 'Archives', 'elementor-pro' );
 		} // End if().
 
-		/**
-		 * The archive title.
-		 *
-		 * Filters the archive title.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $title Archive title to be displayed.
-		 */
-		$title = apply_filters( 'elementor/utils/get_the_archive_title', $title );
-
-		return $title;
+		return apply_filters( 'elementor/utils/get_the_archive_title', $title );
 	}
 
 	public static function set_global_authordata() {

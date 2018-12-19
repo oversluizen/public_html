@@ -5,7 +5,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        https://wpastra.com/
+ * @link        http://wpastra.com/
  * @since       Astra 1.0.13
  */
 
@@ -43,7 +43,7 @@ if ( ! class_exists( 'Astra_PB_Compatibility' ) ) {
 
 			// Theme Updates.
 			add_action( 'do_meta_boxes', array( $this, 'page_builder_compatibility' ) );
-			add_action( 'wp', array( $this, 'page_builder_compatibility' ), 25 );
+			add_action( 'wp', array( $this, 'page_builder_compatibility' ) );
 		}
 
 		/**

@@ -2,12 +2,9 @@
 namespace Elementor\Core;
 
 use Elementor\Core\Base\Document;
-use Elementor\Core\Common\Modules\Ajax\Module as Ajax;
 use Elementor\Core\DocumentTypes\Post;
 use Elementor\DB;
 use Elementor\Plugin;
-use Elementor\TemplateLibrary\Source_Local;
-use Elementor\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -83,8 +80,6 @@ class Documents_Manager {
 	 */
 	protected $switched_data = [];
 
-	protected $cpt = [];
-
 	/**
 	 * Documents manager constructor.
 	 *
@@ -94,11 +89,9 @@ class Documents_Manager {
 	 * @access public
 	 */
 	public function __construct() {
-		add_action( 'elementor/documents/register', [ $this, 'register_default_types' ], 0 );
+		$this->register_default_types();
+
 		add_action( 'elementor/ajax/register_actions', [ $this, 'register_ajax_actions' ] );
-		add_filter( 'post_row_actions', [ $this, 'filter_post_row_actions' ], 11, 2 );
-		add_filter( 'page_row_actions', [ $this, 'filter_post_row_actions' ], 11, 2 );
-		add_filter( 'user_has_cap', [ $this, 'remove_user_edit_cap' ], 10, 3 );
 	}
 
 	/**
@@ -111,7 +104,7 @@ class Documents_Manager {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param Ajax $ajax_manager An instance of the ajax manager.
+	 * @param Ajax_Manager $ajax_manager An instance of the ajax manager.
 	 */
 	public function register_ajax_actions( $ajax_manager ) {
 		$ajax_manager->register_ajax_action( 'save_builder', [ $this, 'ajax_save' ] );
@@ -134,6 +127,17 @@ class Documents_Manager {
 		foreach ( $default_types as $type => $class ) {
 			$this->register_document_type( $type, $class );
 		}
+
+		/**
+		 * Register Elementor documents.
+		 *
+		 * Fires after Elementor registers the default document types.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param Documents_Manager $this The document manager instance.
+		 */
+		do_action( 'elementor/documents/register', $this );
 	}
 
 	/**
@@ -145,25 +149,13 @@ class Documents_Manager {
 	 * @access public
 	 *
 	 * @param string $type  Document type name.
-	 * @param Document $class The name of the class that registers the document type.
+	 * @param string $class The name of the class that registers the document type.
 	 *                      Full name with the namespace.
 	 *
 	 * @return Documents_Manager The updated document manager instance.
 	 */
 	public function register_document_type( $type, $class ) {
 		$this->types[ $type ] = $class;
-
-		$cpt = $class::get_property( 'cpt' );
-		if ( $cpt ) {
-			foreach ( $cpt as $post_type ) {
-				$this->cpt[ $post_type ] = $type;
-			}
-		}
-
-		if ( $class::get_property( 'register_type' ) ) {
-			Source_Local::add_template_type( $type );
-		}
-
 		return $this;
 	}
 
@@ -181,8 +173,6 @@ class Documents_Manager {
 	 * @return false|Document Document data or false if post ID was not entered.
 	 */
 	public function get( $post_id, $from_cache = true ) {
-		$this->register_types();
-
 		$post_id = absint( $post_id );
 
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -192,24 +182,7 @@ class Documents_Manager {
 		$post_id = apply_filters( 'elementor/documents/get/post_id', $post_id );
 
 		if ( ! $from_cache || ! isset( $this->documents[ $post_id ] ) ) {
-
-			if ( wp_is_post_autosave( $post_id ) ) {
-				$post_type = get_post_type( wp_get_post_parent_id( $post_id ) );
-			} else {
-				$post_type = get_post_type( $post_id );
-			}
-
-			$doc_type = 'post';
-
-			if ( isset( $this->cpt[ $post_type ] ) ) {
-				$doc_type = $this->cpt[ $post_type ];
-			}
-
-			$meta_type = get_post_meta( $post_id, Document::TYPE_META_KEY, true );
-
-			if ( $meta_type && isset( $this->types[ $meta_type ] ) ) {
-				$doc_type = $meta_type;
-			}
+			$doc_type = get_post_meta( $post_id, Document::TYPE_META_KEY, true );
 
 			$doc_type_class = $this->get_document_type( $doc_type );
 			$this->documents[ $post_id ] = new $doc_type_class( [
@@ -269,27 +242,15 @@ class Documents_Manager {
 	 *
 	 * Retrieve the type of any given document.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $type
 	 *
-	 * @param string $fallback
-	 *
-	 * @return Document|bool The type of the document.
+	 * @return Document The type of the document.
 	 */
-	public function get_document_type( $type, $fallback = 'post' ) {
-		$types = $this->get_document_types();
-
-		if ( isset( $types[ $type ] ) ) {
-			return $types[ $type ];
-		}
-
-		if ( isset( $types[ $fallback ] ) ) {
-			return $types[ $fallback ];
-		}
-
-		return false;
+	public function get_document_type( $type ) {
+		return isset( $this->types[ $type ] ) ? $this->types[ $type ] : $this->types['post'];
 	}
 
 	/**
@@ -297,43 +258,13 @@ class Documents_Manager {
 	 *
 	 * Retrieve the all the registered document types.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access public
-	 *
-	 * @param array $args      Optional. An array of key => value arguments to match against
-	 *                               the properties. Default is empty array.
-	 * @param string $operator Optional. The logical operation to perform. 'or' means only one
-	 *                               element from the array needs to match; 'and' means all elements
-	 *                               must match; 'not' means no elements may match. Default 'and'.
 	 *
 	 * @return Document[] All the registered document types.
 	 */
-	public function get_document_types( $args = [], $operator = 'and' ) {
-		$this->register_types();
-
-		if ( ! empty( $args ) ) {
-			$types_properties = $this->get_types_properties();
-
-			$filtered = wp_filter_object_list( $types_properties, $args, $operator );
-
-			return array_intersect_key( $this->types, $filtered );
-		}
-
+	public function get_document_types() {
 		return $this->types;
-	}
-
-	/**
-	 * Get document types with their properties.
-	 *
-	 * @return array A list of properties arrays indexed by the type.
-	 */
-	public function get_types_properties() {
-		$types_properties = [];
-
-		foreach ( $this->get_document_types() as $type => $class ) {
-			$types_properties[ $type ] = $class::get_properties();
-		}
-		return $types_properties;
 	}
 
 	/**
@@ -351,20 +282,14 @@ class Documents_Manager {
 	 * @return Document The type of the document.
 	 */
 	public function create( $type, $post_data = [], $meta_data = [] ) {
-		$class = $this->get_document_type( $type, false );
-
-		if ( ! $class ) {
+		if ( ! isset( $this->types[ $type ] ) ) {
 			wp_die( sprintf( 'Type %s does not exist.', $type ) );
 		}
 
 		if ( empty( $post_data['post_title'] ) ) {
 			$post_data['post_title'] = __( 'Elementor', 'elementor' );
 			if ( 'post' !== $type ) {
-				$post_data['post_title'] = sprintf(
-					/* translators: %s: Document title */
-					__( 'Elementor %s', 'elementor' ),
-					call_user_func( [ $class, 'get_title' ] )
-				);
+				$post_data['post_title'] .= ' ' . call_user_func( [ $this->types[ $type ], 'get_title' ] );
 			}
 			$update_title = true;
 		}
@@ -384,74 +309,16 @@ class Documents_Manager {
 		}
 
 		/** @var Document $document */
-		$document = new $class( [
+
+		$class_name = $this->types[ $type ];
+
+		$document = new $class_name( [
 			'post_id' => $post_id,
 		] );
 
-		$document->save_template_type();
+		$document->save_type();
 
 		return $document;
-	}
-
-	/**
-	 * Remove user edit capabilities if document is not editable.
-	 *
-	 * Filters the user capabilities to disable editing in admin.
-	 *
-	 * @param array $allcaps An array of all the user's capabilities.
-	 * @param array $caps    Actual capabilities for meta capability.
-	 * @param array $args    Optional parameters passed to has_cap(), typically object ID.
-	 *
-	 * @return array
-	 */
-	public function remove_user_edit_cap( $allcaps, $caps, $args ) {
-		global $pagenow;
-
-		if ( ! in_array( $pagenow, [ 'post.php', 'edit.php' ], true ) ) {
-			return $allcaps;
-		}
-
-		$capability = $args[0];
-
-		if ( 'edit_post' !== $capability ) {
-			return $allcaps;
-		}
-
-		if ( empty( $args[2] ) ) {
-			return $allcaps;
-		}
-
-		$post_id = $args[2];
-
-		$document = Plugin::$instance->documents->get( $post_id );
-
-		if ( ! $document ) {
-			return $allcaps;
-		}
-
-		$allcaps[ $caps[0] ] = $document::get_property( 'is_editable' );
-
-		return $allcaps;
-	}
-
-	/**
-	 * Filter Post Row Actions.
-	 *
-	 * Let the Document to filter the array of row action links on the Posts list table.
-	 *
-	 * @param array $actions
-	 * @param \WP_Post $post
-	 *
-	 * @return array
-	 */
-	public function filter_post_row_actions( $actions, $post ) {
-		$document = $this->get( $post->ID );
-
-		if ( $document ) {
-			$actions = $document->filter_admin_row_actions( $actions );
-		}
-
-		return $actions;
 	}
 
 	/**
@@ -482,7 +349,7 @@ class Documents_Manager {
 
 		$status = DB::STATUS_DRAFT;
 
-		if ( isset( $request['status'] ) && in_array( $request['status'], [ DB::STATUS_PUBLISH, DB::STATUS_PRIVATE, DB::STATUS_PENDING, DB::STATUS_AUTOSAVE ], true ) ) {
+		if ( isset( $request['status'] ) && in_array( $request['status'], [ DB::STATUS_PUBLISH, DB::STATUS_PRIVATE, DB::STATUS_PENDING, DB::STATUS_AUTOSAVE ] , true ) ) {
 			$status = $request['status'];
 		}
 
@@ -492,12 +359,6 @@ class Documents_Manager {
 			if ( in_array( $document->get_post()->post_status, [ DB::STATUS_PUBLISH, DB::STATUS_PRIVATE ], true ) ) {
 				$document = $document->get_autosave( 0, true );
 			}
-		}
-
-		// Set default page template because the footer-saver doesn't send default values,
-		// But if the template was changed from canvas to default - it needed to save.
-		if ( Utils::is_cpt_custom_templates_supported() && ! isset( $request['settings']['template'] ) ) {
-			$request['settings']['template'] = 'default';
 		}
 
 		$data = [
@@ -648,18 +509,5 @@ class Documents_Manager {
 	 */
 	public function get_groups() {
 		return $this->groups;
-	}
-
-	private function register_types() {
-		if ( ! did_action( 'elementor/documents/register' ) ) {
-			/**
-			 * Register Elementor documents.
-			 *
-			 * @since 2.0.0
-			 *
-			 * @param Documents_Manager $this The document manager instance.
-			 */
-			do_action( 'elementor/documents/register', $this );
-		}
 	}
 }

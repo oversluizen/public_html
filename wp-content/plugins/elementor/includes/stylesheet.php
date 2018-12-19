@@ -391,21 +391,7 @@ class Stylesheet {
 				}
 
 				if ( isset( $a_query['min'] ) ) {
-					$range = $a_query['min'] - $b_query['min'];
-
-					if ( $range ) {
-						return $range;
-					}
-
-					$a_has_max = isset( $a_query['max'] );
-
-					if ( $a_has_max xor isset( $b_query['max'] ) ) {
-						return $a_has_max ? 1 : -1;
-					}
-
-					if ( ! $a_has_max ) {
-						return 0;
-					}
+					return $a_query['min'] - $b_query['min'];
 				}
 
 				return $b_query['max'] - $a_query['max'];

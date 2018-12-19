@@ -6,7 +6,7 @@
  * @package Astra
  */
 
-jQuery(window).on("load", function() {
+jQuery(window).load(function() {
   	jQuery('html').addClass('colorpicker-ready');
 });
 

@@ -16,15 +16,18 @@ class QM_Output_Html_Transients extends QM_Output_Html {
 
 		$data = $this->collector->get_data();
 
+		echo '<div class="qm" id="' . esc_attr( $this->collector->id() ) . '">';
+
 		if ( ! empty( $data['trans'] ) ) {
 
-			$this->before_tabular_output();
+			echo '<table>';
+			echo '<caption class="screen-reader-text">' . esc_html__( 'Transient Updates', 'query-monitor' ) . '</caption>';
 
 			echo '<thead>';
 			echo '<tr>';
 			echo '<th scope="col">' . esc_html__( 'Updated Transient', 'query-monitor' ) . '</th>';
 			if ( is_multisite() ) {
-				echo '<th scope="col">' . esc_html_x( 'Type', 'transient type', 'query-monitor' ) . '</th>';
+				echo '<th>' . esc_html_x( 'Type', 'transient type', 'query-monitor' ) . '</th>';
 			}
 			echo '<th scope="col">' . esc_html__( 'Expiration', 'query-monitor' ) . '</th>';
 			echo '<th scope="col">' . esc_html_x( 'Size', 'size of transient value', 'query-monitor' ) . '</th>';
@@ -50,26 +53,25 @@ class QM_Output_Html_Transients extends QM_Output_Html {
 				);
 				if ( is_multisite() ) {
 					printf(
-						'<td class="qm-ltr qm-nowrap">%s</td>',
+						'<td class="qm-ltr">%s</td>',
 						esc_html( $row['type'] )
 					);
 				}
 
 				if ( 0 === $row['expiration'] ) {
 					printf(
-						'<td class="qm-nowrap"><em>%s</em></td>',
+						'<td><em>%s</em></td>',
 						esc_html__( 'none', 'query-monitor' )
 					);
 				} else {
 					printf(
-						'<td class="qm-nowrap">%s <span class="qm-info">(~%s)</span></td>',
-						esc_html( $row['expiration'] ),
-						esc_html( human_time_diff( 0, $row['expiration'] ) )
+						'<td>%s</td>',
+						esc_html( $row['expiration'] )
 					);
 				}
 
 				printf(
-					'<td class="qm-nowrap">~%s</td>',
+					'<td>~%s</td>',
 					esc_html( size_format( $row['size'] ) )
 				);
 
@@ -103,15 +105,19 @@ class QM_Output_Html_Transients extends QM_Output_Html {
 
 			}
 
-			$this->after_tabular_output();
+			echo '</tbody>';
+			echo '</table>';
+
 		} else {
-			$this->before_non_tabular_output();
 
-			$notice = __( 'No transients set.', 'query-monitor' );
-			echo $this->build_notice( $notice ); // WPCS: XSS ok.
+			echo '<div class="qm-none">';
+			echo '<p>' . esc_html__( 'None', 'query-monitor' ) . '</p>';
+			echo '</div>';
 
-			$this->after_non_tabular_output();
 		}
+
+		echo '</div>';
+
 	}
 
 	public function admin_menu( array $menu ) {
@@ -137,8 +143,7 @@ class QM_Output_Html_Transients extends QM_Output_Html {
 }
 
 function register_qm_output_html_transients( array $output, QM_Collectors $collectors ) {
-	$collector = $collectors::get( 'transients' );
-	if ( $collector ) {
+	if ( $collector = QM_Collectors::get( 'transients' ) ) {
 		$output['transients'] = new QM_Output_Html_Transients( $collector );
 	}
 	return $output;

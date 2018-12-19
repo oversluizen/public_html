@@ -57,14 +57,4 @@
 			display: inline-block;
 		}
 	}
-
-	.ast-non-reponsive{
-		&.ast-responsive-input,
-		&.ast-responsive-input.active {
-			display: inline-block;
-		}
-		&.ast-responsive-select {
-			display: inline-block;
-		}
-	}
 }

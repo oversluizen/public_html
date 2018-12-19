@@ -3,6 +3,7 @@ namespace ElementorPro\Modules\ThemeBuilder\Classes;
 
 use Elementor\TemplateLibrary\Source_Local;
 use ElementorPro\Modules\ThemeBuilder\Documents;
+use ElementorPro\Modules\ThemeBuilder\Module;
 use ElementorPro\Plugin;
 
 if ( ! defined( 'ABSPATH' ) ) {

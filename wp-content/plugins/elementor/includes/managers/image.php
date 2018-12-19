@@ -99,6 +99,7 @@ class Images_Manager {
 	 * @access public
 	 */
 	public function __construct() {
+		add_action( 'wp_ajax_elementor_get_image_details', [ $this, 'get_image_details' ] );
 		add_action( 'wp_ajax_elementor_get_images_details', [ $this, 'get_images_details' ] );
 	}
 }

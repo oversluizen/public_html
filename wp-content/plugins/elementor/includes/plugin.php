@@ -1,12 +1,8 @@
 <?php
 namespace Elementor;
 
-use Elementor\Core\Admin\Admin;
-use Elementor\Core\Common\Modules\Ajax\Module as Ajax;
-use Elementor\Core\Common\App as CommonApp;
-use Elementor\Core\Debug\Inspector;
+use Elementor\Core\Ajax_Manager;
 use Elementor\Core\Documents_Manager;
-use Elementor\Core\Files\Manager as Files_Manager;
 use Elementor\Core\Modules_Manager;
 use Elementor\Debug\Debug;
 use Elementor\Core\Settings\Manager as Settings_Manager;
@@ -59,10 +55,9 @@ class Plugin {
 	 * Holds the plugin ajax manager.
 	 *
 	 * @since 1.9.0
-	 * @deprecated 2.3.0 Use `Plugin::$instance->common->get_component( 'ajax' )` instead
 	 * @access public
 	 *
-	 * @var Ajax
+	 * @var Ajax_Manager
 	 */
 	public $ajax;
 
@@ -319,27 +314,14 @@ class Plugin {
 	public $skins_manager;
 
 	/**
-	 * Files Manager.
+	 * Posts CSS manager.
 	 *
-	 * Holds the files manager.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @var Files_Manager
-	 */
-	public $files_manager;
-
-	/**
-	 * Files Manager.
-	 *
-	 * Holds the files manager.
+	 * Holds the posts CSS manager.
 	 *
 	 * @since 1.0.0
 	 * @access public
-	 * @deprecated 2.1.0 Use `Plugin::$files_manager` instead
 	 *
-	 * @var Files_Manager
+	 * @var Posts_CSS_Manager
 	 */
 	public $posts_css_manager;
 
@@ -378,22 +360,6 @@ class Plugin {
 	 * @var Beta_Testers
 	 */
 	public $beta_testers;
-
-	/**
-	 * @var Inspector
-	 * @deprecated 2.1.2 Use $inspector.
-	 */
-	public $debugger;
-
-	/**
-	 * @var Inspector
-	 */
-	public $inspector;
-
-	/**
-	 * @var CommonApp
-	 */
-	public $common;
 
 	/**
 	 * Clone.
@@ -478,17 +444,6 @@ class Plugin {
 	}
 
 	/**
-	 * @since 2.3.0
-	 * @access public
-	 */
-	public function on_rest_api_init() {
-		// On admin/frontend sometimes the rest API is initialized after the common is initialized.
-		if ( ! $this->common ) {
-			$this->init_common();
-		}
-	}
-
-	/**
 	 * Init components.
 	 *
 	 * Initialize Elementor components. Register actions, run setting manager,
@@ -499,8 +454,8 @@ class Plugin {
 	 * @access private
 	 */
 	private function init_components() {
-		$this->inspector = new Inspector();
-		$this->debugger = $this->inspector;
+		// Allow all components to use AJAX.
+		$this->ajax = new Ajax_Manager();
 
 		Settings_Manager::run();
 
@@ -511,13 +466,8 @@ class Plugin {
 		$this->elements_manager = new Elements_Manager();
 		$this->widgets_manager = new Widgets_Manager();
 		$this->skins_manager = new Skins_Manager();
-		$this->files_manager = new Files_Manager();
-		/*
-		 * @TODO: Remove deprecated alias
-		 */
-		$this->posts_css_manager = $this->files_manager;
+		$this->posts_css_manager = new Posts_CSS_Manager();
 		$this->settings = new Settings();
-		$this->tools = new Tools();
 		$this->editor = new Editor();
 		$this->preview = new Preview();
 		$this->frontend = new Frontend();
@@ -527,36 +477,24 @@ class Plugin {
 		$this->dynamic_tags = new Dynamic_Tags_Manager();
 		$this->modules_manager = new Modules_Manager();
 		$this->role_manager = new Core\RoleManager\Role_Manager();
-		$this->system_info = new System_Info\Main();
-		$this->revisions_manager = new Revisions_Manager();
 
-		User::init();
 		Upgrades::add_actions();
 		Api::init();
 		Tracker::init();
 
 		if ( is_admin() ) {
+			$this->revisions_manager = new Revisions_Manager();
 			$this->heartbeat = new Heartbeat();
 			$this->wordpress_widgets_manager = new WordPress_Widgets_Manager();
+			$this->system_info = new System_Info\Main();
 			$this->admin = new Admin();
+			$this->tools = new Tools();
 			$this->beta_testers = new Beta_Testers();
 
 			if ( Utils::is_ajax() ) {
 				new Images_Manager();
 			}
 		}
-	}
-
-	/**
-	 * @since 2.3.0
-	 * @access public
-	 */
-	public function init_common() {
-		$this->common = new CommonApp();
-
-		$this->common->init_components();
-
-		$this->ajax = $this->common->get_component( 'ajax' );
 	}
 
 	/**
@@ -605,11 +543,9 @@ class Plugin {
 	private function __construct() {
 		$this->register_autoloader();
 
-		Maintenance::init();
 		Compatibility::register_actions();
 
 		add_action( 'init', [ $this, 'init' ], 0 );
-		add_action( 'rest_api_init', [ $this, 'on_rest_api_init' ] );
 	}
 }
 

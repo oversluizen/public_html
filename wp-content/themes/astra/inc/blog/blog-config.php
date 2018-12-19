@@ -25,18 +25,13 @@ if ( ! function_exists( 'astra_get_post_meta' ) ) {
 		$output_str = '';
 		$loop_count = 1;
 
-		$separator = apply_filters( 'astra_post_meta_separator', $separator );
-
 		foreach ( $post_meta as $meta_value ) {
 
 			switch ( $meta_value ) {
 
 				case 'author':
-					$author = get_the_author();
-					if ( ! empty( $author ) ) {
-						$output_str .= ( 1 != $loop_count && '' != $output_str ) ? ' ' . $separator . ' ' : '';
-						$output_str .= esc_html( astra_default_strings( 'string-blog-meta-author-by', false ) ) . astra_post_author();
-					}
+					$output_str .= ( 1 != $loop_count && '' != $output_str ) ? ' ' . $separator . ' ' : '';
+					$output_str .= esc_html( astra_default_strings( 'string-blog-meta-author-by', false ) ) . astra_post_author();
 					break;
 
 				case 'date':
@@ -129,22 +124,14 @@ if ( ! function_exists( 'astra_post_author' ) ) {
 	 * @return html                Markup.
 	 */
 	function astra_post_author( $output_filter = '' ) {
+		$output = '';
 
-		ob_start();
+		$byline = sprintf(
+			esc_html( '%s' ),
+			'<a class="url fn n" title="View all posts by ' . esc_attr( get_the_author() ) . '" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '" rel="author" itemprop="url"> <span class="author-name" itemprop="name">' . esc_html( get_the_author() ) . '</span> </a>'
+		);
 
-		?>
-
-		<span class="posted-by vcard author" itemtype="https://schema.org/Person" itemscope="itemscope" itemprop="author">
-			<?php // Translators: Author Name. ?>
-			<a class="url fn n" title="<?php printf( esc_attr__( 'View all posts by %1$s', 'astra' ), get_the_author() ); ?>" 
-				href="<?php echo get_author_posts_url( get_the_author_meta( 'ID' ) ); ?>" rel="author" itemprop="url">
-				<span class="author-name" itemprop="name"><?php echo get_the_author(); ?></span>
-			</a>
-		</span>
-
-		<?php
-
-		$output = ob_get_clean();
+		$output .= '<span class="posted-by vcard author" itemtype="https://schema.org/Person" itemscope="itemscope" itemprop="author"> ' . $byline . '</span>';
 
 		return apply_filters( 'astra_post_author', $output, $output_filter );
 	}
@@ -176,7 +163,7 @@ if ( ! function_exists( 'astra_post_link' ) ) {
 
 		$post_link = sprintf(
 			esc_html( '%s' ),
-			'<a class="' . esc_attr( implode( ' ', $read_more_classes ) ) . '" href="' . esc_url( get_permalink() ) . '"> ' . the_title( '<span class="screen-reader-text">', '</span>', false ) . ' ' . $read_more_text . '</a>'
+			'<a class="' . implode( ' ', $read_more_classes ) . '" href="' . esc_url( get_permalink() ) . '"> ' . the_title( '<span class="screen-reader-text">', '</span>', false ) . $read_more_text . '</a>'
 		);
 
 		$output = ' &hellip;<p class="read-more"> ' . $post_link . '</p>';
@@ -438,7 +425,7 @@ if ( ! function_exists( 'astra_the_content_more_link' ) ) {
 
 		$post_link = sprintf(
 			esc_html( '%s' ),
-			'<a class="' . esc_attr( implode( ' ', $read_more_classes ) ) . '" href="' . esc_url( get_permalink() ) . '"> ' . the_title( '<span class="screen-reader-text">', '</span>', false ) . $more_link_text . '</a>'
+			'<a class="' . implode( ' ', $read_more_classes ) . '" href="' . esc_url( get_permalink() ) . '"> ' . the_title( '<span class="screen-reader-text">', '</span>', false ) . $more_link_text . '</a>'
 		);
 
 		$more_link_element = ' &hellip;<p class="ast-the-content-more-link"> ' . $post_link . '</p>';

@@ -1,4 +1,4 @@
-<?php if ( ! defined( 'ABSPATH' ) ) exit;
+<?php if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly.
 
 
 if ( ! class_exists( 'UM' ) ) {
@@ -30,8 +30,6 @@ if ( ! class_exists( 'UM' ) ) {
 	 * @method UM_Terms_Conditions_API Terms_Conditions_API()
 	 * @method UM_Private_Content_API Private_Content_API()
 	 * @method UM_User_Location_API User_Location_API()
-	 * @method UM_Photos_API Photos_API()
-	 * @method UM_Groups Groups()
 	 *
 	 */
 	final class UM extends UM_Functions {
@@ -51,18 +49,14 @@ if ( ! class_exists( 'UM' ) ) {
 
 		/**
 		 * @var bool Old variable
-		 *
-		 * @todo deprecate this variable
 		 */
 		public $is_filtering;
 
 
 		/**
-		 * WP Native permalinks turned on?
-		 *
-		 * @var
+		 * @var array Languages
 		 */
-		public $is_permalinks;
+		var $available_languages;
 
 
 		/**
@@ -78,7 +72,6 @@ if ( ! class_exists( 'UM' ) ) {
 		static public function instance() {
 			if ( is_null( self::$instance ) ) {
 				self::$instance = new self();
-				self::$instance->_um_construct();
 			}
 
 			return self::$instance;
@@ -137,9 +130,9 @@ if ( ! class_exists( 'UM' ) ) {
 		 * @param bool $instance
 		 */
 		public function set_class( $class_name, $instance = false ) {
-			if ( empty( $this->classes[ $class_name ] ) ) {
+			if ( empty( $this->classes[$class_name] ) ) {
 				$class = 'UM_' . $class_name;
-				$this->classes[ $class_name ] = $instance ? $class::instance() : new $class;
+				$this->classes[$class_name] = $instance ? $class::instance() : new $class;
 			}
 		}
 
@@ -169,37 +162,117 @@ if ( ! class_exists( 'UM' ) ) {
 		 */
 		function __construct() {
 			parent::__construct();
-		}
 
-
-		/**
-		 * UM pseudo-constructor.
-		 *
-		 * @since 2.0.18
-		 */
-		function _um_construct() {
 			//register autoloader for include UM classes
 			spl_autoload_register( array( $this, 'um__autoloader' ) );
 
 			if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
-				if ( get_option( 'permalink_structure' ) ) {
-					$this->is_permalinks = true;
-				}
-
 				$this->is_filtering = 0;
 				$this->honeypot = 'request';
+				$this->available_languages = array(
+					'en_US' => 'English (US)',
+					'es_ES' => 'Español',
+					'es_MX' => 'Español (México)',
+					'fr_FR' => 'Français',
+					'it_IT' => 'Italiano',
+					'de_DE' => 'Deutsch',
+					'nl_NL' => 'Nederlands',
+					'pt_BR' => 'Português do Brasil',
+					'fi_FI' => 'Suomi',
+					'ro_RO' => 'Română',
+					'da_DK' => 'Dansk',
+					'sv_SE' => 'Svenska',
+					'pl_PL' => 'Polski',
+					'cs_CZ' => 'Czech',
+					'el'    => 'Greek',
+					'id_ID' => 'Indonesian',
+					'zh_CN' => '简体中文',
+					'ru_RU' => 'Русский',
+					'tr_TR' => 'Türkçe',
+					'fa_IR' => 'Farsi',
+					'he_IL' => 'Hebrew',
+					'ar'    => 'العربية',
+				);
 
-				// textdomain loading
-				$this->localize();
+				/**
+				 * UM hook
+				 *
+				 * @type filter
+				 * @title um_language_textdomain
+				 * @description Change UM textdomain
+				 * @input_vars
+				 * [{"var":"$domain","type":"string","desc":"UM Textdomain"}]
+				 * @change_log
+				 * ["Since: 2.0"]
+				 * @usage add_filter( 'um_language_textdomain', 'function_name', 10, 1 );
+				 * @example
+				 * <?php
+				 * add_filter( 'um_language_textdomain', 'my_textdomain', 10, 1 );
+				 * function my_textdomain( $domain ) {
+				 *     // your code here
+				 *     return $domain;
+				 * }
+				 * ?>
+				 */
+				$language_domain = apply_filters( 'um_language_textdomain', 'ultimate-member' );
+
+				$language_locale = ( get_locale() != '' ) ? get_locale() : 'en_US';
+
+				/**
+				 * UM hook
+				 *
+				 * @type filter
+				 * @title um_language_locale
+				 * @description Change UM language locale
+				 * @input_vars
+				 * [{"var":"$locale","type":"string","desc":"UM language locale"}]
+				 * @change_log
+				 * ["Since: 2.0"]
+				 * @usage add_filter( 'um_language_locale', 'function_name', 10, 1 );
+				 * @example
+				 * <?php
+				 * add_filter( 'um_language_locale', 'my_language_locale', 10, 1 );
+				 * function my_language_locale( $locale ) {
+				 *     // your code here
+				 *     return $locale;
+				 * }
+				 * ?>
+				 */
+				$language_locale = apply_filters( 'um_language_locale', $language_locale );
+
+				$language_file = WP_LANG_DIR . '/plugins/' . $language_domain . '-' . $language_locale . '.mo';
+
+				/**
+				 * UM hook
+				 *
+				 * @type filter
+				 * @title um_language_file
+				 * @description Change UM language file path
+				 * @input_vars
+				 * [{"var":"$language_file","type":"string","desc":"UM language file path"}]
+				 * @change_log
+				 * ["Since: 2.0"]
+				 * @usage add_filter( 'um_language_file', 'function_name', 10, 1 );
+				 * @example
+				 * <?php
+				 * add_filter( 'um_language_file', 'my_language_file', 10, 1 );
+				 * function my_language_file( $language_file ) {
+				 *     // your code here
+				 *     return $language_file;
+				 * }
+				 * ?>
+				 */
+				$language_file = apply_filters( 'um_language_file', $language_file );
+
+				load_textdomain( $language_domain, $language_file );
+
 
 				// include UM classes
 				$this->includes();
 
 				// include hook files
 				add_action( 'plugins_loaded', array( &$this, 'init' ), 0 );
-				//run hook for extensions init
-				add_action( 'plugins_loaded', array( &$this, 'extensions_init' ), -19 );
 
 				add_action( 'init', array( &$this, 'old_update_patch' ), 0 );
 
@@ -209,6 +282,7 @@ if ( ! class_exists( 'UM' ) ) {
 				// init widgets
 				add_action( 'widgets_init', array( &$this, 'widgets_init' ) );
 
+
 				//include short non class functions
 				require_once 'um-short-functions.php';
 				require_once 'um-deprecated-functions.php';
@@ -216,90 +290,6 @@ if ( ! class_exists( 'UM' ) ) {
 		}
 
 
-		/**
-		 * Loading UM textdomain
-		 *
-		 * 'ultimate-member' by default
-		 */
-		function localize() {
-			$language_locale = ( get_locale() != '' ) ? get_locale() : 'en_US';
-
-			/**
-			 * UM hook
-			 *
-			 * @type filter
-			 * @title um_language_locale
-			 * @description Change UM language locale
-			 * @input_vars
-			 * [{"var":"$locale","type":"string","desc":"UM language locale"}]
-			 * @change_log
-			 * ["Since: 2.0"]
-			 * @usage add_filter( 'um_language_locale', 'function_name', 10, 1 );
-			 * @example
-			 * <?php
-			 * add_filter( 'um_language_locale', 'my_language_locale', 10, 1 );
-			 * function my_language_locale( $locale ) {
-			 *     // your code here
-			 *     return $locale;
-			 * }
-			 * ?>
-			 */
-			$language_locale = apply_filters( 'um_language_locale', $language_locale );
-
-
-			/**
-			 * UM hook
-			 *
-			 * @type filter
-			 * @title um_language_textdomain
-			 * @description Change UM textdomain
-			 * @input_vars
-			 * [{"var":"$domain","type":"string","desc":"UM Textdomain"}]
-			 * @change_log
-			 * ["Since: 2.0"]
-			 * @usage add_filter( 'um_language_textdomain', 'function_name', 10, 1 );
-			 * @example
-			 * <?php
-			 * add_filter( 'um_language_textdomain', 'my_textdomain', 10, 1 );
-			 * function my_textdomain( $domain ) {
-			 *     // your code here
-			 *     return $domain;
-			 * }
-			 * ?>
-			 */
-			$language_domain = apply_filters( 'um_language_textdomain', 'ultimate-member' );
-
-			$language_file = WP_LANG_DIR . '/plugins/' . $language_domain . '-' . $language_locale . '.mo';
-
-			/**
-			 * UM hook
-			 *
-			 * @type filter
-			 * @title um_language_file
-			 * @description Change UM language file path
-			 * @input_vars
-			 * [{"var":"$language_file","type":"string","desc":"UM language file path"}]
-			 * @change_log
-			 * ["Since: 2.0"]
-			 * @usage add_filter( 'um_language_file', 'function_name', 10, 1 );
-			 * @example
-			 * <?php
-			 * add_filter( 'um_language_file', 'my_language_file', 10, 1 );
-			 * function my_language_file( $language_file ) {
-			 *     // your code here
-			 *     return $language_file;
-			 * }
-			 * ?>
-			 */
-			$language_file = apply_filters( 'um_language_file', $language_file );
-
-			load_textdomain( $language_domain, $language_file );
-		}
-
-
-		/**
-		 * 1.3.x active extensions deactivate for properly running 2.0.x AJAX upgrades
-		 */
 		function old_update_patch() {
 			global $um_woocommerce, $um_bbpress, $um_followers, $um_friends, $um_mailchimp, $um_messaging, $um_mycred, $um_notices, $um_notifications, $um_online, $um_private_content, $um_profile_completeness, $um_recaptcha, $um_reviews, $um_activity, $um_social_login, $um_user_tags, $um_verified;
 
@@ -396,6 +386,47 @@ if ( ! class_exists( 'UM' ) ) {
 
 
 		/**
+		 * Show notice for customers with old extension's versions
+		 */
+		/*function old_extensions_notice() {
+			if ( ! is_admin() ) {
+				return;
+			}
+
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+				return;
+			}
+
+			$show = false;
+
+			$slugs = array_map( function( $item ) {
+				return 'um-' . $item . '/um-' . $item . '.php';
+			}, array_keys( $this->dependencies()->ext_required_version ) );
+
+			$active_plugins = $this->dependencies()->get_active_plugins();
+			foreach ( $slugs as $slug ) {
+				if ( in_array( $slug, $active_plugins ) ) {
+					$plugin_data = get_plugin_data( um_path . '..' . DIRECTORY_SEPARATOR . $slug );
+					if ( version_compare( '2.0', $plugin_data['Version'], '>' ) ) {
+						$show = true;
+						break;
+					}
+				}
+			}
+
+			if ( ! $show ) {
+				return;
+			}
+
+			/*global $um_woocommerce;
+			remove_action( 'init', array( $um_woocommerce, 'plugin_check' ), 1 );
+			$um_woocommerce->plugin_inactive = true;*
+
+			echo '<div class="error"><p>' . sprintf( __( '<strong>%s %s</strong> requires 2.0 extensions. You have pre 2.0 extensions installed on your site. <br /> Please update %s extensions to latest versions. For more info see this <a href="%s" target="_blank">doc</a>.', 'ultimate-member' ), ultimatemember_plugin_name, ultimatemember_version, ultimatemember_plugin_name, 'http://docs.ultimatemember.com/article/266-updating-to-2-0-versions-of-extensions' ) . '</p></div>';
+		}*/
+
+
+		/**
 		 * Autoload UM classes handler
 		 *
 		 * @since 2.0
@@ -408,7 +439,7 @@ if ( ! class_exists( 'UM' ) ) {
 				$array = explode( '\\', strtolower( $class ) );
 				$array[ count( $array ) - 1 ] = 'class-'. end( $array );
 				if ( strpos( $class, 'um_ext' ) === 0 ) {
-					$full_path = str_replace( 'ultimate-member', '', untrailingslashit( um_path ) ) . str_replace( '_', '-', $array[1] ) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR;
+					$full_path = str_replace( 'ultimate-member', '', rtrim( um_path, '/' ) ) . str_replace( '_', '-', $array[1] ) . '/includes/';
 					unset( $array[0], $array[1] );
 					$path = implode( DIRECTORY_SEPARATOR, $array );
 					$path = str_replace( '_', '-', $path );
@@ -462,8 +493,6 @@ if ( ! class_exists( 'UM' ) ) {
 			if ( ! $version ) {
 				update_option( 'um_last_version_upgrade', ultimatemember_version );
 
-				add_option( 'um_first_activation_date', time() );
-
 				//show avatars on first install
 				if ( ! get_option( 'show_avatars' ) ) {
 					update_option( 'show_avatars', 1 );
@@ -481,14 +510,6 @@ if ( ! class_exists( 'UM' ) ) {
 
 
 		/**
-		 *
-		 */
-		function extensions_init() {
-			do_action( 'um_core_loaded' );
-		}
-
-
-		/**
 		 * Include required core files used in admin and on the frontend.
 		 *
 		 * @since 2.0
@@ -502,13 +523,8 @@ if ( ! class_exists( 'UM' ) ) {
 			if ( $this->is_request( 'ajax' ) ) {
 				$this->admin();
 				$this->ajax_init();
-				$this->admin_ajax_hooks();
 				$this->metabox();
 				$this->admin_upgrade()->init_packages_ajax_handlers();
-				$this->admin_gdpr();
-				$this->columns();
-				$this->notices();
-				$this->admin_navmenu();
 			} elseif ( $this->is_request( 'admin' ) ) {
 				$this->admin();
 				$this->admin_menu();
@@ -521,8 +537,6 @@ if ( ! class_exists( 'UM' ) ) {
 				$this->users();
 				$this->dragdrop();
 				$this->plugin_updater();
-				$this->admin_gdpr();
-				$this->admin_navmenu();
 			} elseif ( $this->is_request( 'frontend' ) ) {
 				$this->enqueue();
 				$this->account();
@@ -548,48 +562,9 @@ if ( ! class_exists( 'UM' ) ) {
 			$this->permalinks();
 			$this->modal();
 			$this->cron();
+			$this->tracking();
 			$this->mobile();
 			$this->external_integrations();
-			$this->gdpr();
-		}
-
-
-		/**
-		 * Get extension API
-		 *
-		 * @since 2.0.34
-		 *
-		 * @param $slug
-		 *
-		 * @return um_ext\um_bbpress\Init
-		 */
-		function extension( $slug ) {
-			if ( empty( $this->classes[ $slug ] ) ) {
-				$class = "um_ext\um_{$slug}\Init";
-
-				/**
-				 * @var $class um_ext\um_bbpress\Init
-				 */
-				$this->classes[ $slug ] = $class::instance();
-			}
-
-			return $this->classes[ $slug ];
-		}
-
-
-		/**
-		 * @param $class
-		 *
-		 * @return mixed
-		 */
-		function call_class( $class ) {
-			$key = strtolower( $class );
-
-			if ( empty( $this->classes[ $key ] ) ) {
-				$this->classes[ $key ] = new $class;
-			}
-
-			return $this->classes[ $key ];
 		}
 
 
@@ -654,17 +629,6 @@ if ( ! class_exists( 'UM' ) ) {
 
 
 		/**
-		 * @since 2.0.30
-		 */
-		function admin_ajax_hooks() {
-			if ( empty( $this->classes['admin_ajax_hooks'] ) ) {
-				$this->classes['admin_ajax_hooks'] = new um\admin\core\Admin_Ajax_Hooks();
-			}
-			return $this->classes['admin_ajax_hooks'];
-		}
-
-
-		/**
 		 * @since 2.0
 		 *
 		 * @return um\admin\Admin()
@@ -691,19 +655,6 @@ if ( ! class_exists( 'UM' ) ) {
 
 
 		/**
-		 * @since 2.0.26
-		 *
-		 * @return um\admin\core\Admin_Navmenu()
-		 */
-		function admin_navmenu() {
-			if ( empty( $this->classes['admin_navmenu'] ) ) {
-				$this->classes['admin_navmenu'] = new um\admin\core\Admin_Navmenu();
-			}
-			return $this->classes['admin_navmenu'];
-		}
-
-
-		/**
 		 * @since 2.0
 		 *
 		 * @return um\admin\core\Admin_Settings()
@@ -723,52 +674,9 @@ if ( ! class_exists( 'UM' ) ) {
 		 */
 		function admin_upgrade() {
 			if ( empty( $this->classes['admin_upgrade'] ) ) {
-				$this->classes['admin_upgrade'] = um\admin\core\Admin_Upgrade::instance();
-				//$this->classes['admin_upgrade'] = new um\admin\core\Admin_Upgrade();
+				$this->classes['admin_upgrade'] = new um\admin\core\Admin_Upgrade();
 			}
 			return $this->classes['admin_upgrade'];
-		}
-
-
-		/**
-		 * GDPR privacy policy
-		 *
-		 * @since 2.0.14
-		 *
-		 * @return bool|um\admin\core\Admin_GDPR()
-		 */
-		function admin_gdpr() {
-			global $wp_version;
-
-			if ( version_compare( $wp_version, '4.9.6', '<' ) ) {
-				return false;
-			}
-
-			if ( empty( $this->classes['admin_gdpr'] ) ) {
-				$this->classes['admin_gdpr'] = new um\admin\core\Admin_GDPR();
-			}
-			return $this->classes['admin_gdpr'];
-		}
-
-
-		/**
-		 * GDPR privacy policy
-		 *
-		 * @since 2.0.14
-		 *
-		 * @return bool|um\core\GDPR()
-		 */
-		function gdpr() {
-			global $wp_version;
-
-			if ( version_compare( $wp_version, '4.9.6', '<' ) ) {
-				return false;
-			}
-
-			if ( empty( $this->classes['gdpr'] ) ) {
-				$this->classes['gdpr'] = new um\core\GDPR();
-			}
-			return $this->classes['gdpr'];
 		}
 
 
@@ -869,7 +777,7 @@ if ( ! class_exists( 'UM' ) ) {
 		 * @param $data array
 		 * @return um\admin\core\Admin_Forms()
 		 */
-		function admin_forms( $data = false ) {
+		function admin_forms( $data ) {
 			if ( empty( $this->classes['admin_forms_' . $data['class']] ) ) {
 				$this->classes['admin_forms_' . $data['class']] = new um\admin\core\Admin_Forms( $data );
 			}
@@ -883,26 +791,13 @@ if ( ! class_exists( 'UM' ) ) {
 		 * @param $data array
 		 * @return um\admin\core\Admin_Forms_Settings()
 		 */
-		function admin_forms_settings( $data = false ) {
+		function admin_forms_settings( $data ) {
 			if ( empty( $this->classes['admin_forms_settings_' . $data['class']] ) ) {
 				$this->classes['admin_forms_settings_' . $data['class']] = new um\admin\core\Admin_Forms_Settings( $data );
 			}
 			return $this->classes['admin_forms_settings_' . $data['class']];
 		}
 
-
-		/**
-		 * @since 2.0.34
-		 *
-		 * @return um\Extensions
-		 */
-		function extensions() {
-			if ( empty( $this->classes['extensions'] ) ) {
-				$this->classes['extensions'] = new um\Extensions();
-			}
-
-			return $this->classes['extensions'];
-		}
 
 
 		/**
@@ -1226,19 +1121,6 @@ if ( ! class_exists( 'UM' ) ) {
 			return $this->classes['files'];
 		}
 
-		
-		/**
-		 * @since 2.0.21
-		 *
-		 * @return um\core\Uploader
-		 */
-		function uploader() {
-			if ( empty( $this->classes['uploader'] ) ) {
-				$this->classes['uploader'] = new um\core\Uploader();
-			}
-			return $this->classes['uploader'];
-		}
-
 
 		/**
 		 * @since 2.0
@@ -1355,14 +1237,14 @@ if ( ! class_exists( 'UM' ) ) {
 		/**
 		 * @since 2.0
 		 *
-		 * @return um\core\Templates
+		 * @return um\core\Tracking
 		 */
-		function templates() {
-			if ( empty( $this->classes['templates'] ) ) {
-				$this->classes['templates'] = new um\core\Templates();
+		function tracking() {
+			if ( empty( $this->classes['tracking'] ) ) {
+				$this->classes['tracking'] = new um\core\Tracking();
 			}
 
-			return $this->classes['templates'];
+			return $this->classes['tracking'];
 		}
 
 
@@ -1389,6 +1271,10 @@ if ( ! class_exists( 'UM' ) ) {
 
 			ob_start();
 
+			if ( $this->options()->get( 'disable_menu' ) == 0 ) {
+				require_once 'core/um-navmenu.php';
+			}
+
 			require_once 'core/um-actions-form.php';
 			require_once 'core/um-actions-access.php';
 			require_once 'core/um-actions-wpadmin.php';
@@ -1398,6 +1284,7 @@ if ( ! class_exists( 'UM' ) ) {
 			require_once 'core/um-actions-register.php';
 			require_once 'core/um-actions-profile.php';
 			require_once 'core/um-actions-account.php';
+			require_once 'core/um-actions-password.php';
 			require_once 'core/um-actions-members.php';
 			require_once 'core/um-actions-global.php';
 			require_once 'core/um-actions-user.php';

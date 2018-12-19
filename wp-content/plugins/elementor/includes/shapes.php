@@ -104,11 +104,6 @@ class Shapes {
 	 * @return string Shape file path.
 	 */
 	public static function get_shape_path( $shape, $is_negative = false ) {
-
-		if ( isset( self::$shapes[ $shape ] ) && isset( self::$shapes[ $shape ]['path'] ) ) {
-			return self::$shapes[ $shape ]['path'];
-		}
-
 		$file_name = $shape;
 
 		if ( $is_negative ) {
@@ -128,7 +123,7 @@ class Shapes {
 	 * @static
 	 */
 	private static function init_shapes() {
-		$native_shapes = [
+		self::$shapes = [
 			'mountains' => [
 				'title' => _x( 'Mountains', 'Shapes', 'elementor' ),
 				'has_flip' => true,
@@ -209,19 +204,5 @@ class Shapes {
 				'has_negative' => true,
 			],
 		];
-
-		$additional_shapes = [];
-		/**
-		 * Additional shapes.
-		 *
-		 * Filters the shapes used by Elementor to add additional shapes.
-		 *
-		 * @since 2.0.1
-		 *
-		 * @param array $additional_shapes Additional Elementor fonts.
-		 */
-		$additional_shapes = apply_filters( 'elementor/shapes/additional_shapes', $additional_shapes );
-
-		self::$shapes = array_merge( $native_shapes, $additional_shapes );
 	}
 }

@@ -20,8 +20,9 @@ class QM_Output_Html_DB_Dupes extends QM_Output_Html {
 			return;
 		}
 
-		$this->before_tabular_output();
-
+		echo '<div class="qm" id="' . esc_attr( $this->collector->id() ) . '">';
+		echo '<table>';
+		echo '<caption>' . esc_html( $this->collector->name() ) . '</caption>';
 		echo '<thead>';
 
 		echo '<tr>';
@@ -29,7 +30,7 @@ class QM_Output_Html_DB_Dupes extends QM_Output_Html {
 		echo '<th scope="col" class="qm-num">' . esc_html__( 'Count', 'query-monitor' ) . '</th>';
 		echo '<th scope="col">' . esc_html__( 'Callers', 'query-monitor' ) . '</th>';
 		if ( ! empty( $data['dupe_components'] ) ) {
-			echo '<th scope="col">' . esc_html__( 'Components', 'query-monitor' ) . '</th>';
+			echo '<th>' . esc_html__( 'Components', 'query-monitor' ) . '</th>';
 		}
 		echo '<th scope="col">' . esc_html__( 'Potential Troublemakers', 'query-monitor' ) . '</th>';
 		echo '</tr>';
@@ -101,13 +102,14 @@ class QM_Output_Html_DB_Dupes extends QM_Output_Html {
 		}
 		echo '</tbody>';
 
-		$this->after_tabular_output();
+		echo '</table>';
+		echo '</div>';
+
 	}
 
 	public function admin_menu( array $menu ) {
-		$dbq = QM_Collectors::get( 'db_dupes' );
 
-		if ( $dbq ) {
+		if ( $dbq = QM_Collectors::get( 'db_dupes' ) ) {
 			$dbq_data = $dbq->get_data();
 			if ( isset( $dbq_data['dupes'] ) && count( $dbq_data['dupes'] ) ) {
 				$menu[] = $this->menu( array(
@@ -126,8 +128,7 @@ class QM_Output_Html_DB_Dupes extends QM_Output_Html {
 }
 
 function register_qm_output_html_db_dupes( array $output, QM_Collectors $collectors ) {
-	$collector = $collectors::get( 'db_dupes' );
-	if ( $collector ) {
+	if ( $collector = QM_Collectors::get( 'db_dupes' ) ) {
 		$output['db_dupes'] = new QM_Output_Html_DB_Dupes( $collector );
 	}
 	return $output;

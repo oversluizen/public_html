@@ -1,12 +1,11 @@
 <?php
 
 use \enshrined\svgSanitize\data\AllowedAttributes;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Class AllowedAttributesTest
  */
-class AllowedAttributesTest extends TestCase
+class AllowedAttributesTest extends PHPUnit_Framework_TestCase
 {
 
     /**

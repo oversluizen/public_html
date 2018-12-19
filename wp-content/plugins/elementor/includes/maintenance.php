@@ -26,17 +26,11 @@ class Maintenance {
 	 * @access public
 	 * @static
 	 */
-	public static function activation( $network_wide ) {
+	public static function activation() {
 		wp_clear_scheduled_hook( 'elementor/tracker/send_event' );
 
 		wp_schedule_event( time(), 'daily', 'elementor/tracker/send_event' );
 		flush_rewrite_rules();
-
-		if ( is_multisite() && $network_wide ) {
-			return;
-		}
-
-		set_transient( 'elementor_activation_redirect', true, MINUTE_IN_SECONDS );
 	}
 
 	/**
@@ -68,3 +62,5 @@ class Maintenance {
 		register_uninstall_hook( ELEMENTOR_PLUGIN_BASE, [ __CLASS__, 'uninstall' ] );
 	}
 }
+
+Maintenance::init();

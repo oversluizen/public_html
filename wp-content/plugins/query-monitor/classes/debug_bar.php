@@ -16,33 +16,19 @@ class Debug_Bar {
 	}
 
 	public function enqueue() {
-		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_register_style( 'debug-bar', false, array(
 			'query-monitor',
 		) );
-		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		wp_register_script( 'debug-bar', false, array(
 			'query-monitor',
 		) );
 
-		/**
-		 * Fires after scripts have been enqueued. This mimics the same action fired in the Debug Bar plugin.
-		 *
-		 * @since 2.7.0
-		 */
 		do_action( 'debug_bar_enqueue_scripts' );
 	}
 
 	public function init_panels() {
 		require_once 'debug_bar_panel.php';
 
-		/**
-		 * Filters the debug bar panel list. This mimics the same filter called in the Debug Bar plugin.
-		 *
-		 * @since 2.7.0
-		 *
-		 * @param Debug_Bar_Panel[] $panels Array of Debug Bar panel instances.
-		 */
 		$this->panels = apply_filters( 'debug_bar_panels', array() );
 	}
 
@@ -55,7 +41,7 @@ class Debug_Bar {
 	}
 
 	public function Debug_Bar() {
-		self::__construct();
+		Debug_Bar::__construct();
 	}
 
 }

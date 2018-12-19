@@ -20,7 +20,10 @@ class QM_Output_Html_Timing extends QM_Output_Html {
 			return;
 		}
 
-		$this->before_tabular_output();
+		echo '<div class="qm" id="' . esc_attr( $this->collector->id() ) . '">';
+		echo '<table>';
+
+		echo '<caption class="screen-reader-text">' . esc_html__( 'Function Timing', 'query-monitor' ) . '</caption>';
 
 		echo '<thead>';
 		echo '<tr>';
@@ -56,7 +59,7 @@ class QM_Output_Html_Timing extends QM_Output_Html {
 
 				printf(
 					'<td class="qm-num">%s</td>',
-					esc_html( number_format_i18n( $row['function_time'], 4 ) )
+					esc_html( number_format_i18n( $row['function_time'] * 1000, 4 ) )
 				);
 
 				$mem = sprintf(
@@ -75,33 +78,6 @@ class QM_Output_Html_Timing extends QM_Output_Html {
 
 				echo '</tr>';
 
-				if ( ! empty( $row['laps'] ) ) {
-					foreach ( $row['laps'] as $lap_id => $lap ) {
-						echo '<tr>';
-
-						echo '<td class="qm-ltr"><code>&mdash;&nbsp;';
-						echo esc_html( $row['function'] . ': ' . $lap_id );
-						echo '</code></td>';
-
-						printf(
-							'<td class="qm-num">%s</td>',
-							esc_html( number_format_i18n( $lap['time_used'], 4 ) )
-						);
-
-						$mem = sprintf(
-							/* translators: %s: Approximate memory used in kilobytes */
-							__( '~%s kB', 'query-monitor' ),
-							number_format_i18n( $lap['memory_used'] / 1024 )
-						);
-						printf(
-							'<td class="qm-num">%s</td>',
-							esc_html( $mem )
-						);
-						echo '<td class="qm-nowrap"></td>';
-
-						echo '</tr>';
-					}
-				}
 			}
 		}
 		if ( ! empty( $data['warning'] ) ) {
@@ -137,8 +113,9 @@ class QM_Output_Html_Timing extends QM_Output_Html {
 		}
 
 		echo '</tbody>';
+		echo '</table>';
+		echo '</div>';
 
-		$this->after_tabular_output();
 	}
 
 	public function admin_menu( array $menu ) {
@@ -168,8 +145,7 @@ class QM_Output_Html_Timing extends QM_Output_Html {
 }
 
 function register_qm_output_html_timing( array $output, QM_Collectors $collectors ) {
-	$collector = $collectors::get( 'timing' );
-	if ( $collector ) {
+	if ( $collector = QM_Collectors::get( 'timing' ) ) {
 		$output['timing'] = new QM_Output_Html_Timing( $collector );
 	}
 	return $output;

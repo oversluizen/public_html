@@ -15,8 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class Tag extends Base_Tag {
 
-	const WRAPPED_TAG = false;
-
 	/**
 	 * @since 2.0.0
 	 * @access public
@@ -35,16 +33,17 @@ abstract class Tag extends Base_Tag {
 		$value = ob_get_clean();
 
 		if ( $value ) {
-			// TODO: fix spaces in `before`/`after` if WRAPPED_TAG ( conflicted with .elementor-tag { display: inline-flex; } );
 			if ( ! empty( $settings['before'] ) ) {
-				$value = wp_kses_post( $settings['before'] ) . $value;
+				$before = str_replace( ' ', '&nbsp;', $settings['before'] );
+				$value = wp_kses_post( $before ) . $value;
 			}
 
 			if ( ! empty( $settings['after'] ) ) {
-				$value .= wp_kses_post( $settings['after'] );
+				$after = str_replace( ' ', '&nbsp;', $settings['after'] );
+				$value .= wp_kses_post( $after );
 			}
 
-			if ( self::WRAPPED_TAG ) :
+			if ( ! empty( $options['wrap'] ) ) :
 				$value = '<span id="elementor-tag-' . esc_attr( $this->get_id() ) . '" class="elementor-tag">' . $value . '</span>';
 			endif;
 
@@ -61,18 +60,6 @@ abstract class Tag extends Base_Tag {
 	 */
 	final public function get_content_type() {
 		return 'ui';
-	}
-
-	/**
-	 * @since 2.0.9
-	 * @access public
-	 */
-	public function get_editor_config() {
-		$config = parent::get_editor_config();
-
-		$config['wrapped_tag'] = $this::WRAPPED_TAG;
-
-		return $config;
 	}
 
 	/**

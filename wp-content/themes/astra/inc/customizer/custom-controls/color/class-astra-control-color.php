@@ -7,7 +7,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        https://wpastra.com/
+ * @link        http://wpastra.com/
  * @since       1.0.0
  */
 
@@ -97,17 +97,17 @@ class Astra_Control_Color extends WP_Customize_Control {
 			}
 			defaultValueAttr = ' data-default-color=' + defaultValue; // Quotes added automatically.
 		} #>
-		<# if ( data.label ) { #>
-			<label>
+		<label>
+			<# if ( data.label ) { #>
 				<span class="customize-control-title">{{{ data.label }}}</span>
-			</label>
-		<# } #>
-		<# if ( data.description ) { #>
-			<span class="description customize-control-description">{{{ data.description }}}</span>
-		<# } #>
-		<div class="customize-control-content">
-			<input class="ast-color-picker-alpha color-picker-hex" type="text" maxlength="7" data-alpha="true" placeholder="{{ defaultValue }}" {{ defaultValueAttr }} value="{{data.value}}" />
-		</div>
+			<# } #>
+			<# if ( data.description ) { #>
+				<span class="description customize-control-description">{{{ data.description }}}</span>
+			<# } #>
+			<div class="customize-control-content">
+				<input class="ast-color-picker-alpha color-picker-hex" type="text" maxlength="7" data-alpha="true" placeholder="{{ defaultValue }}" {{ defaultValueAttr }} value="{{data.value}}" />
+			</div>
+		</label>
 
 		<?php
 	}

@@ -202,16 +202,6 @@ class Upload extends Field_Base {
 		static $blacklist = false;
 		if ( ! $blacklist ) {
 			$blacklist = [ 'php', 'php3', 'php4', 'php5', 'php6', 'phps', 'php7', 'phtml', 'shtml', 'pht', 'swf', 'html', 'asp', 'aspx', 'cmd', 'csh', 'bat', 'htm', 'hta', 'jar', 'exe', 'com', 'js', 'lnk', 'htaccess', 'htpasswd', 'phtml', 'ps1', 'ps2', 'py', 'rb', 'tmp', 'cgi' ];
-
-			/**
-			 * Forms file types black list.
-			 *
-			 * Filters the black list of  file types that won’t be uploaded using the forms.
-			 *
-			 * @since 1.0.0
-			 *
-			 * @param array $blacklist A black list of file types.
-			 */
 			$blacklist = apply_filters( 'elementor_pro/forms/filetypes/blacklist', $blacklist );
 		}
 		return $blacklist;
@@ -281,31 +271,17 @@ class Upload extends Field_Base {
 	}
 
 	/**
-	 * Gets the path to uploaded file.
-	 *
+	 * Gets path to upload form attachments
 	 * @return string
 	 */
 	private function get_upload_dir() {
 		$wp_upload_dir = wp_upload_dir();
 		$path = $wp_upload_dir['basedir'] . '/elementor/forms';
-
-		/**
-		 * Upload file path.
-		 *
-		 * Filters the path to a file uploaded using Elementor forms.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $url File URL.
-		 */
-		$path = apply_filters( 'elementor_pro/forms/upload_path', $path );
-
-		return $path;
+		return apply_filters( 'elementor_pro/forms/upload_path', $path );
 	}
 
 	/**
-	 * Gets the URL to uploaded file.
-	 *
+	 *  Gets url to uploaded file
 	 * @param $file_name
 	 *
 	 * @return string
@@ -313,20 +289,7 @@ class Upload extends Field_Base {
 	private function get_file_url( $file_name ) {
 		$wp_upload_dir = wp_upload_dir();
 		$url = $wp_upload_dir['baseurl'] . '/elementor/forms/' . $file_name;
-
-		/**
-		 * Upload file URL.
-		 *
-		 * Filters the URL to a file uploaded using Elementor forms.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $url       File URL.
-		 * @param string $file_name File name.
-		 */
-		$url = apply_filters( 'elementor_pro/forms/upload_url', $url, $file_name );
-
-		return $url;
+		return apply_filters( 'elementor_pro/forms/upload_url', $url, $file_name );
 	}
 
 	/**

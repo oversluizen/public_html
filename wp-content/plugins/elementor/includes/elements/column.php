@@ -16,16 +16,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Element_Column extends Element_Base {
 
 	/**
-	 * Element edit tools.
+	 * Column edit tools.
 	 *
-	 * Holds all the edit tools of the element. For example: delete, duplicate etc.
+	 * Holds the column edit tools.
 	 *
+	 * @since 1.0.0
 	 * @access protected
 	 * @static
 	 *
-	 * @var array
+	 * @var array Column edit tools.
 	 */
 	protected static $_edit_tools;
+
+	/**
+	 * Get default edit tools.
+	 *
+	 * Retrieve the column default edit tools. Used to set initial tools.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 * @static
+	 *
+	 * @return array Default column edit tools.
+	 */
+	protected static function get_default_edit_tools() {
+		$column_label = __( 'Column', 'elementor' );
+
+		return [
+			'duplicate' => [
+				/* translators: %s: Column label */
+				'title' => sprintf( __( 'Duplicate %s', 'elementor' ), $column_label ),
+				'icon' => 'clone',
+			],
+			'add' => [
+				/* translators: %s: Column label */
+				'title' => sprintf( __( 'Add %s', 'elementor' ), $column_label ),
+				'icon' => 'plus',
+			],
+			'remove' => [
+				/* translators: %s: Column label */
+				'title' => sprintf( __( 'Remove %s', 'elementor' ), $column_label ),
+				'icon' => 'close',
+			],
+		];
+	}
 
 	/**
 	 * Get column name.
@@ -38,21 +72,6 @@ class Element_Column extends Element_Base {
 	 * @return string Column name.
 	 */
 	public function get_name() {
-		return 'column';
-	}
-
-	/**
-	 * Get element type.
-	 *
-	 * Retrieve the element type, in this case `column`.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 * @static
-	 *
-	 * @return string The type.
-	 */
-	public static function get_type() {
 		return 'column';
 	}
 
@@ -85,50 +104,6 @@ class Element_Column extends Element_Base {
 	}
 
 	/**
-	 * Get default edit tools.
-	 *
-	 * Retrieve the element default edit tools. Used to set initial tools.
-	 *
-	 * @since 1.0.0
-	 * @access protected
-	 * @static
-	 *
-	 * @return array Default edit tools.
-	 */
-	protected static function get_default_edit_tools() {
-		$column_label = __( 'Column', 'elementor' );
-
-		$edit_tools = [
-			'edit' => [
-				'title' => __( 'Edit', 'elementor' ),
-				'icon' => 'column',
-			],
-		];
-
-		if ( self::is_edit_buttons_enabled() ) {
-			$edit_tools += [
-				'duplicate' => [
-					/* translators: %s: Column label */
-					'title' => sprintf( __( 'Duplicate %s', 'elementor' ), $column_label ),
-					'icon' => 'clone',
-				],
-				'add' => [
-					/* translators: %s: Column label */
-					'title' => sprintf( __( 'Add %s', 'elementor' ), $column_label ),
-					'icon' => 'plus',
-				],
-				'remove' => [
-					/* translators: %s: Column label */
-					'title' => sprintf( __( 'Remove %s', 'elementor' ), $column_label ),
-					'icon' => 'close',
-				],
-			];
-		}
-
-		return $edit_tools;
-	}
-
-	/**
 	 * Register column controls.
 	 *
 	 * Used to add new controls to the column element.
@@ -143,15 +118,6 @@ class Element_Column extends Element_Base {
 			[
 				'label' => __( 'Layout', 'elementor' ),
 				'tab' => Controls_Manager::TAB_LAYOUT,
-			]
-		);
-
-		$this->add_control(
-			'_title',
-			[
-				'label' => __( 'Title', 'elementor' ),
-				'type' => Controls_Manager::HIDDEN,
-				'render_type' => 'none',
 			]
 		);
 
@@ -221,7 +187,6 @@ class Element_Column extends Element_Base {
 			'div',
 			'header',
 			'footer',
-			'main',
 			'article',
 			'section',
 			'aside',
@@ -300,7 +265,6 @@ class Element_Column extends Element_Base {
 					],
 				],
 				'render_type' => 'ui',
-				'separator' => 'before',
 			]
 		);
 
@@ -362,37 +326,6 @@ class Element_Column extends Element_Base {
 			]
 		);
 
-		$this->add_group_control(
-			Group_Control_Css_Filter::get_type(),
-			[
-				'name' => 'css_filters',
-				'selector' => '{{WRAPPER}} > .elementor-element-populated >  .elementor-background-overlay',
-			]
-		);
-
-		$this->add_control(
-			'overlay_blend_mode',
-			[
-				'label' => __( 'Blend Mode', 'elementor' ),
-				'type' => Controls_Manager::SELECT,
-				'options' => [
-					'' => __( 'Normal', 'elementor' ),
-					'multiply' => 'Multiply',
-					'screen' => 'Screen',
-					'overlay' => 'Overlay',
-					'darken' => 'Darken',
-					'lighten' => 'Lighten',
-					'color-dodge' => 'Color Dodge',
-					'saturation' => 'Saturation',
-					'color' => 'Color',
-					'luminosity' => 'Luminosity',
-				],
-				'selectors' => [
-					'{{WRAPPER}} > .elementor-element-populated > .elementor-background-overlay' => 'mix-blend-mode: {{VALUE}}',
-				],
-			]
-		);
-
 		$this->end_controls_tab();
 
 		$this->start_controls_tab(
@@ -433,14 +366,6 @@ class Element_Column extends Element_Base {
 			]
 		);
 
-		$this->add_group_control(
-			Group_Control_Css_Filter::get_type(),
-			[
-				'name' => 'css_filters_hover',
-				'selector' => '{{WRAPPER}}:hover > .elementor-element-populated >  .elementor-background-overlay',
-			]
-		);
-
 		$this->add_control(
 			'background_overlay_hover_transition',
 			[
@@ -456,7 +381,6 @@ class Element_Column extends Element_Base {
 					],
 				],
 				'render_type' => 'ui',
-				'separator' => 'before',
 			]
 		);
 
@@ -553,7 +477,6 @@ class Element_Column extends Element_Base {
 			[
 				'label' => __( 'Transition Duration', 'elementor' ),
 				'type' => Controls_Manager::SLIDER,
-				'separator' => 'before',
 				'default' => [
 					'size' => 0.3,
 				],
@@ -570,8 +493,7 @@ class Element_Column extends Element_Base {
 							'name' => 'background_background',
 							'operator' => '!==',
 							'value' => '',
-						],
-						[
+						], [
 							'name' => 'border_border',
 							'operator' => '!==',
 							'value' => '',
@@ -728,6 +650,7 @@ class Element_Column extends Element_Base {
 				'label' => __( 'Z-Index', 'elementor' ),
 				'type' => Controls_Manager::NUMBER,
 				'min' => 0,
+				'placeholder' => 0,
 				'selectors' => [
 					'{{WRAPPER}}' => 'z-index: {{VALUE}};',
 				],
@@ -789,7 +712,6 @@ class Element_Column extends Element_Base {
 				'default' => '',
 				'title' => __( 'Add your custom id WITHOUT the Pound key. e.g: my-id', 'elementor' ),
 				'label_block' => false,
-				'style_transfer' => false,
 			]
 		);
 
@@ -805,25 +727,64 @@ class Element_Column extends Element_Base {
 			]
 		);
 
-		// TODO: Backward comparability for deprecated controls
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_responsive',
+			[
+				'label' => __( 'Responsive', 'elementor' ),
+				'tab' => Controls_Manager::TAB_ADVANCED,
+			]
+		);
+
 		$this->add_control(
 			'screen_sm',
 			[
-				'type' => Controls_Manager::HIDDEN,
+				'label' => __( 'Mobile Width', 'elementor' ),
+				'type' => Controls_Manager::SELECT,
+				'default' => 'default',
+				'options' => [
+					'default' => __( 'Default', 'elementor' ),
+					'custom' => __( 'Custom', 'elementor' ),
+				],
+				'classes' => 'elementor-control-deprecated',
+				'description' => __( 'Deprecated: Mobile Width control is no longer supported. Please use the Column Width control in the Layout tab instead.', 'elementor' ),
 			]
 		);
 
 		$this->add_control(
 			'screen_sm_width',
 			[
-				'type' => Controls_Manager::HIDDEN,
+				'label' => __( 'Column Width', 'elementor' ),
+				'type' => Controls_Manager::SELECT,
+				'options' => [
+					'10' => '10%',
+					'11' => '11%',
+					'12' => '12%',
+					'14' => '14%',
+					'16' => '16%',
+					'20' => '20%',
+					'25' => '25%',
+					'30' => '30%',
+					'33' => '33%',
+					'40' => '40%',
+					'50' => '50%',
+					'60' => '60%',
+					'66' => '66%',
+					'70' => '70%',
+					'75' => '75%',
+					'80' => '80%',
+					'83' => '83%',
+					'90' => '90%',
+					'100' => '100%',
+				],
+				'default' => '100',
 				'condition' => [
 					'screen_sm' => [ 'custom' ],
 				],
 				'prefix_class' => 'elementor-sm-',
 			]
 		);
-		// END Backward comparability
 
 		$this->end_controls_section();
 
@@ -842,6 +803,10 @@ class Element_Column extends Element_Base {
 		?>
 		<div class="elementor-element-overlay">
 			<ul class="elementor-editor-element-settings elementor-editor-column-settings">
+				<li class="elementor-editor-element-setting elementor-editor-element-trigger" title="<?php echo esc_attr( sprintf( __( 'Edit %s', 'elementor' ), __( 'Column', 'elementor' ) ) ); ?>">
+					<i class="eicon-column" aria-hidden="true"></i>
+					<span class="elementor-screen-only"><?php printf( __( 'Edit %s', 'elementor' ), __( 'Column', 'elementor' ) ); ?></span>
+				</li>
 				<?php foreach ( self::get_edit_tools() as $edit_tool_name => $edit_tool ) : ?>
 					<li class="elementor-editor-element-setting elementor-editor-element-<?php echo $edit_tool_name; ?>" title="<?php echo $edit_tool['title']; ?>">
 						<i class="eicon-<?php echo $edit_tool['icon']; ?>" aria-hidden="true"></i>

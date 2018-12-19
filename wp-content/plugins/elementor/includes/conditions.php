@@ -39,9 +39,9 @@ class Conditions {
 			case '!==':
 				return $left_value !== $right_value;
 			case 'in':
-				return false !== array_search( $left_value, $right_value );
+				return -1 !== array_search( $left_value, $right_value );
 			case '!in':
-				return false === array_search( $left_value, $right_value );
+				return -1 === array_search( $left_value, $right_value );
 			case '<':
 				return $left_value < $right_value;
 			case '<=':
@@ -86,13 +86,7 @@ class Conditions {
 					$value = $value[ $parsed_name[2] ];
 				}
 
-				$operator = null;
-
-				if ( ! empty( $term['operator'] ) ) {
-					$operator = $term['operator'];
-				}
-
-				$comparison_result = self::compare( $value, $term['value'], $operator );
+				$comparison_result = self::compare( $value, $term['value'], $term['operator'] );
 			}
 
 			if ( $is_or_condition ) {

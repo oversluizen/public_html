@@ -29,9 +29,8 @@ class QM_Activation extends QM_Plugin {
 	}
 
 	public function activate( $sitewide = false ) {
-		$db = WP_CONTENT_DIR . '/db.php';
 
-		if ( ! file_exists( $db ) && function_exists( 'symlink' ) ) {
+		if ( ! file_exists( $db = WP_CONTENT_DIR . '/db.php' ) && function_exists( 'symlink' ) ) {
 			@symlink( plugin_dir_path( $this->file ) . 'wp-content/db.php', $db ); // @codingStandardsIgnoreLine
 		}
 
@@ -44,10 +43,9 @@ class QM_Activation extends QM_Plugin {
 	}
 
 	public function deactivate() {
-		$admins = QM_Util::get_admins();
 
 		// Remove legacy capability handling:
-		if ( $admins ) {
+		if ( $admins = QM_Util::get_admins() ) {
 			$admins->remove_cap( 'view_query_monitor' );
 		}
 

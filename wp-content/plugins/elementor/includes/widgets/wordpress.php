@@ -111,20 +111,6 @@ class Widget_WordPress extends Widget_Base {
 	}
 
 	/**
-	 * Get widget keywords.
-	 *
-	 * Retrieve the list of keywords the widget belongs to.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @return array Widget keywords.
-	 */
-	public function get_keywords() {
-		return [ 'wordpress', 'widget' ];
-	}
-
-	/**
 	 * Whether the reload preview is required or not.
 	 *
 	 * Used to determine whether the reload preview is required.
@@ -156,9 +142,7 @@ class Widget_WordPress extends Widget_Base {
 		echo '<input type="hidden" class="id_base" value="' . esc_attr( $instance->id_base ) . '" />';
 		echo '<input type="hidden" class="widget-id" value="widget-' . esc_attr( $this->get_id() ) . '" />';
 		echo '<div class="widget-content">';
-		$widget_data = $this->get_settings( 'wp' );
-		$instance->form( $widget_data );
-		do_action( 'in_widget_form', $instance, null, $widget_data );
+		$instance->form( $this->get_settings( 'wp' ) );
 		echo '</div></div></div>';
 		return ob_get_clean();
 	}
@@ -202,9 +186,7 @@ class Widget_WordPress extends Widget_Base {
 		$settings = parent::_get_parsed_settings();
 
 		if ( ! empty( $settings['wp'] ) ) {
-			$widget = $this->get_widget_instance();
-			$instance = $widget->update( $settings['wp'], [] );
-			$settings['wp'] = apply_filters( 'widget_update_callback', $instance, $settings['wp'], [], $widget );
+			$settings['wp'] = $this->get_widget_instance()->update( $settings['wp'], [] );
 		}
 
 		return $settings;

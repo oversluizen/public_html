@@ -50,8 +50,6 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 		 *
 		 */
 		function ajax_muted_action() {
-			UM()->check_ajax_nonce();
-
 			extract( $_REQUEST );
 
 			if ( ! UM()->roles()->um_current_user_can( 'edit', $user_id ) )
@@ -88,7 +86,6 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 		 *
 		 */
 		function ajax_select_options() {
-			UM()->check_ajax_nonce();
 
 			$arr_options = array();
 			$arr_options['status'] = 'success';
@@ -99,66 +96,57 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 			$form_fields = UM()->fields()->get_fields();
 			$arr_options['fields'] = $form_fields;
 
-			if ( $arr_options['post']['members_directory'] == 'yes' ) {
+			/**
+			 * UM hook
+			 *
+			 * @type filter
+			 * @title um_ajax_select_options__debug_mode
+			 * @description Activate debug mode for AJAX select options
+			 * @input_vars
+			 * [{"var":"$debug_mode","type":"bool","desc":"Enable Debug mode"}]
+			 * @change_log
+			 * ["Since: 2.0"]
+			 * @usage
+			 * <?php add_filter( 'um_ajax_select_options__debug_mode', 'function_name', 10, 1 ); ?>
+			 * @example
+			 * <?php
+			 * add_filter( 'um_ajax_select_options__debug_mode', 'my_ajax_select_options__debug_mode', 10, 1 );
+			 * function my_ajax_select_options__debug_mode( $debug_mode ) {
+			 *     // your code here
+			 *     return $debug_mode;
+			 * }
+			 * ?>
+			 */
+			$debug = apply_filters('um_ajax_select_options__debug_mode', false );
+			if( $debug ){
+				$arr_options['debug'] = array(
+					$_POST,
+					$form_fields,
+				);
+			}
+
+			if( isset( $_POST['child_callback'] ) && ! empty( $_POST['child_callback'] ) && isset( $form_fields[ $_POST['child_name'] ] )  ){
+
 				$ajax_source_func = $_POST['child_callback'];
-				if( function_exists( $ajax_source_func ) ){
-					$arr_options['items'] = call_user_func( $ajax_source_func, $arr_options['field']['parent_dropdown_relationship']  );
-					wp_send_json( $arr_options );
-				}
-			} else {
-				/**
-				 * UM hook
-				 *
-				 * @type filter
-				 * @title um_ajax_select_options__debug_mode
-				 * @description Activate debug mode for AJAX select options
-				 * @input_vars
-				 * [{"var":"$debug_mode","type":"bool","desc":"Enable Debug mode"}]
-				 * @change_log
-				 * ["Since: 2.0"]
-				 * @usage
-				 * <?php add_filter( 'um_ajax_select_options__debug_mode', 'function_name', 10, 1 ); ?>
-				 * @example
-				 * <?php
-				 * add_filter( 'um_ajax_select_options__debug_mode', 'my_ajax_select_options__debug_mode', 10, 1 );
-				 * function my_ajax_select_options__debug_mode( $debug_mode ) {
-				 *     // your code here
-				 *     return $debug_mode;
-				 * }
-				 * ?>
-				 */
-				$debug = apply_filters('um_ajax_select_options__debug_mode', false );
-				if( $debug ){
-					$arr_options['debug'] = array(
-						$_POST,
-						$form_fields,
-					);
-				}
 
-				if( isset( $_POST['child_callback'] ) && ! empty( $_POST['child_callback'] ) && isset( $form_fields[ $_POST['child_name'] ] )  ){
+				// If the requested callback function is added in the form or added in the field option, execute it with call_user_func.
+				if( isset( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
+				    ! empty( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
+				    $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] == $ajax_source_func ){
 
-					$ajax_source_func = $_POST['child_callback'];
-
-					// If the requested callback function is added in the form or added in the field option, execute it with call_user_func.
-					if ( isset( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
-						! empty( $form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] ) &&
-						$form_fields[ $_POST['child_name'] ]['custom_dropdown_options_source'] == $ajax_source_func ) {
-
-						$arr_options['field'] = $form_fields[ $_POST['child_name'] ];
-
-						if( function_exists( $ajax_source_func ) ){
-							$arr_options['items'] = call_user_func( $ajax_source_func, $arr_options['field']['parent_dropdown_relationship']  );
-						}
-
-					} else {
-						$arr_options['status'] = 'error';
-						$arr_options['message'] = __( 'This is not possible for security reasons.','ultimate-member');
+					$arr_options['field'] = $form_fields[ $_POST['child_name'] ];
+					if( function_exists( $ajax_source_func ) ){
+						$arr_options['items'] = call_user_func( $ajax_source_func, $arr_options['field']['parent_dropdown_relationship']  );
 					}
 
+				}else{
+					$arr_options['status'] = 'error';
+					$arr_options['message'] = __( 'This is not possible for security reasons.','ultimate-member');
 				}
 
-				wp_send_json( $arr_options );
 			}
+
+			wp_send_json( $arr_options );
 		}
 
 
@@ -320,11 +308,11 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 							global $wp_roles;
 							$role_keys = array_map( function( $item ) {
 								return 'um_' . $item;
-							}, get_option( 'um_roles', array() ) );
+							}, get_option( 'um_roles' ) );
 							$exclude_roles = array_diff( array_keys( $wp_roles->roles ), array_merge( $role_keys, array( 'subscriber' ) ) );
 
 							if ( ! empty( $role ) &&
-								( ! in_array( $role , $custom_field_roles ) || in_array( $role , $exclude_roles ) ) ) {
+							     ( ! in_array( $role , $custom_field_roles ) || in_array( $role , $exclude_roles ) ) ) {
 								wp_die( __( 'This is not possible for security reasons.','ultimate-member') );
 							}
 
@@ -341,6 +329,19 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 
 					if ( isset( $_POST[ UM()->honeypot ] ) && $_POST[ UM()->honeypot ] != '' ){
 						wp_die( 'Hello, spam bot!', 'ultimate-member' );
+					}
+
+					if ( ! in_array( $this->form_data['mode'], array( 'login' ) ) ) {
+
+						$form_timestamp  = trim($_POST['timestamp']);
+						$live_timestamp  = current_time( 'timestamp' );
+
+						if ( $form_timestamp == '' && UM()->options()->get( 'enable_timebot' ) == 1 )
+							wp_die( __('Hello, spam bot!','ultimate-member') );
+
+						if ( !current_user_can('manage_options') && $live_timestamp - $form_timestamp < 6 && UM()->options()->get( 'enable_timebot' ) == 1  )
+							wp_die( __('Whoa, slow down! You\'re seeing this message because you tried to submit a form too fast and we think you might be a spam bot. If you are a real human being please wait a few seconds before submitting the form. Thanks!','ultimate-member') );
+
 					}
 
 					/**
@@ -477,15 +478,11 @@ if ( ! class_exists( 'um\core\Form' ) ) {
 			$global_role = get_option( 'default_role' ); // WP Global settings
 
 			$um_global_role = UM()->options()->get( 'register_role' ); // UM Settings Global settings
-			if ( ! empty( $um_global_role ) ) {
+			if ( ! empty( $um_global_role ) )
 				$global_role = $um_global_role; // Form Global settings
-			}
+
 
 			$mode = $this->form_type( $post_id );
-
-			/**
-			 * @todo WPML integration to get role from original if it's empty
-			 */
 			$use_custom = get_post_meta( $post_id, "_um_{$mode}_use_custom_settings", true );
 			if ( $use_custom ) { // Custom Form settings
 				$role = get_post_meta( $post_id, "_um_{$mode}_role", true );

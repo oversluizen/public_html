@@ -22,14 +22,19 @@ class QM_Output_Html_Languages extends QM_Output_Html {
 			return;
 		}
 
-		$this->before_tabular_output();
-
+		echo '<div class="qm" id="' . esc_attr( $this->collector->id() ) . '">';
+		echo '<table>';
+		echo '<caption>' . esc_html( sprintf(
+			/* translators: %s: Name of current language */
+			__( 'Language Setting: %s', 'query-monitor' ),
+			$data['locale']
+		) ) . '</caption>';
 		echo '<thead>';
 		echo '<tr>';
-		echo '<th scope="col">' . esc_html__( 'Text Domain', 'query-monitor' ) . '</th>';
-		echo '<th scope="col">' . esc_html__( 'Caller', 'query-monitor' ) . '</th>';
-		echo '<th scope="col">' . esc_html__( 'MO File', 'query-monitor' ) . '</th>';
-		echo '<th scope="col">' . esc_html__( 'Size', 'query-monitor' ) . '</th>';
+		echo '<th>' . esc_html__( 'Text Domain', 'query-monitor' ) . '</th>';
+		echo '<th>' . esc_html__( 'Caller', 'query-monitor' ) . '</th>';
+		echo '<th>' . esc_html__( 'MO File', 'query-monitor' ) . '</th>';
+		echo '<th>' . esc_html__( 'Size', 'query-monitor' ) . '</th>';
 		echo '</tr>';
 		echo '</thead>';
 
@@ -41,7 +46,7 @@ class QM_Output_Html_Languages extends QM_Output_Html {
 			foreach ( $mofiles as $mofile ) {
 				echo '<tr>';
 
-				echo '<td class="qm-ltr">' . esc_html( $mofile['domain'] ) . '</td>';
+				echo '<th class="qm-ltr">' . esc_html( $mofile['domain'] ) . '</th>';
 
 				if ( self::has_clickable_links() ) {
 					echo '<td class="qm-nowrap qm-ltr">';
@@ -77,7 +82,9 @@ class QM_Output_Html_Languages extends QM_Output_Html {
 
 		echo '</tbody>';
 
-		$this->after_tabular_output();
+		echo '</table>';
+		echo '</div>';
+
 	}
 
 	public function admin_menu( array $menu ) {
@@ -96,8 +103,7 @@ class QM_Output_Html_Languages extends QM_Output_Html {
 }
 
 function register_qm_output_html_languages( array $output, QM_Collectors $collectors ) {
-	$collector = $collectors::get( 'languages' );
-	if ( $collector ) {
+	if ( $collector = QM_Collectors::get( 'languages' ) ) {
 		$output['languages'] = new QM_Output_Html_Languages( $collector );
 	}
 	return $output;

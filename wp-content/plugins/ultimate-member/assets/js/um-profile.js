@@ -43,40 +43,35 @@ jQuery(document).ready(function() {
 		metakey = 'profile_photo';
 		
 		jQuery.ajax({
-			url: wp.ajax.settings.url,
+			url: um_scripts.delete_profile_photo,
 			type: 'post',
 			data: {
-				action:'um_delete_profile_photo',
 				metakey: metakey,
-				user_id: user_id,
-				nonce: um_scripts.nonce
+				user_id: user_id
 			}
 		});
 		
 	});
 
 	jQuery(document).on('click', '.um-reset-cover-photo', function(e){
-		var obj = jQuery(this);
+		
 		jQuery('.um-cover-overlay').hide();
+		
 		jQuery('.um-cover-e').html('<a href="#" class="um-cover-add um-manual-trigger" data-parent=".um-cover" data-child=".um-btn-auto-width"><span class="um-cover-add-i"><i class="um-icon-plus um-tip-n" title="Upload a cover photo"></i></span></a>');
+		
 		jQuery('.um-dropdown').hide();
-
+		
 		um_responsive();
 		
 		user_id = jQuery(this).attr('data-user_id');
 		metakey = 'cover_photo';
 		
 		jQuery.ajax({
-			url: wp.ajax.settings.url,
+			url: um_scripts.delete_cover_photo,
 			type: 'post',
 			data: {
-				action: 'um_delete_cover_photo',
 				metakey: metakey,
-				user_id: user_id,
-				nonce: um_scripts.nonce
-			},
-			success: function( response ) {
-				obj.hide();
+				user_id: user_id
 			}
 		});
 		

@@ -250,7 +250,6 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 			[
 				'label' => __( 'Excerpt Length', 'elementor-pro' ),
 				'type' => Controls_Manager::NUMBER,
-				/** This filter is documented in wp-includes/formatting.php */
 				'default' => apply_filters( 'excerpt_length', 25 ),
 				'condition' => [
 					$this->get_control_id( 'show_excerpt' ) => 'yes',
@@ -953,10 +952,7 @@ abstract class Skin_Base extends Elementor_Skin_Base {
 	protected function render_date() {
 		?>
 		<span class="elementor-post-date">
-			<?php
-			/** This filter is documented in wp-includes/general-template.php */
-			echo apply_filters( 'the_date', get_the_date(), get_option( 'date_format' ), '', '' );
-			?>
+			<?php echo apply_filters( 'the_date', get_the_date(), get_option( 'date_format' ), '', '' ); ?>
 		</span>
 		<?php
 	}

@@ -75,20 +75,6 @@ class Widget_Video extends Widget_Base {
 	}
 
 	/**
-	 * Get widget keywords.
-	 *
-	 * Retrieve the list of keywords the widget belongs to.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @return array Widget keywords.
-	 */
-	public function get_keywords() {
-		return [ 'video', 'player', 'embed', 'youtube', 'vimeo', 'dailymotion' ];
-	}
-
-	/**
 	 * Register video widget controls.
 	 *
 	 * Adds different input fields to allow the user to change and customize the widget settings.
@@ -107,31 +93,28 @@ class Widget_Video extends Widget_Base {
 		$this->add_control(
 			'video_type',
 			[
-				'label' => __( 'Source', 'elementor' ),
+				'label' => __( 'Video Type', 'elementor' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'youtube',
 				'options' => [
 					'youtube' => __( 'YouTube', 'elementor' ),
 					'vimeo' => __( 'Vimeo', 'elementor' ),
-					'dailymotion' => __( 'Dailymotion', 'elementor' ),
-					'hosted' => __( 'Self Hosted', 'elementor' ),
 				],
 			]
 		);
 
 		$this->add_control(
-			'youtube_url',
+			'link',
 			[
-				'label' => __( 'URL', 'elementor' ),
+				'label' => __( 'Link', 'elementor' ),
 				'type' => Controls_Manager::TEXT,
 				'dynamic' => [
 					'active' => true,
 					'categories' => [
 						TagsModule::POST_META_CATEGORY,
-						TagsModule::URL_CATEGORY,
 					],
 				],
-				'placeholder' => __( 'Enter your URL', 'elementor' ) . ' (YouTube)',
+				'placeholder' => __( 'Enter your YouTube link', 'elementor' ),
 				'default' => 'https://www.youtube.com/watch?v=9uOETcuFjbE',
 				'label_block' => true,
 				'condition' => [
@@ -141,18 +124,17 @@ class Widget_Video extends Widget_Base {
 		);
 
 		$this->add_control(
-			'vimeo_url',
+			'vimeo_link',
 			[
-				'label' => __( 'URL', 'elementor' ),
+				'label' => __( 'Link', 'elementor' ),
 				'type' => Controls_Manager::TEXT,
 				'dynamic' => [
 					'active' => true,
 					'categories' => [
 						TagsModule::POST_META_CATEGORY,
-						TagsModule::URL_CATEGORY,
 					],
 				],
-				'placeholder' => __( 'Enter your URL', 'elementor' ) . ' (Vimeo)',
+				'placeholder' => __( 'Enter your Vimeo link', 'elementor' ),
 				'default' => 'https://vimeo.com/235215203',
 				'label_block' => true,
 				'condition' => [
@@ -162,38 +144,19 @@ class Widget_Video extends Widget_Base {
 		);
 
 		$this->add_control(
-			'dailymotion_url',
+			'hosted_link',
 			[
-				'label' => __( 'URL', 'elementor' ),
+				'label' => __( 'Link', 'elementor' ),
 				'type' => Controls_Manager::TEXT,
 				'dynamic' => [
 					'active' => true,
 					'categories' => [
 						TagsModule::POST_META_CATEGORY,
-						TagsModule::URL_CATEGORY,
 					],
 				],
-				'placeholder' => __( 'Enter your URL', 'elementor' ) . ' (Dailymotion)',
-				'default' => 'https://www.dailymotion.com/video/x6tqhqb',
+				'placeholder' => __( 'Enter your video link', 'elementor' ),
+				'default' => '',
 				'label_block' => true,
-				'condition' => [
-					'video_type' => 'dailymotion',
-				],
-			]
-		);
-
-		$this->add_control(
-			'hosted_url',
-			[
-				'label' => __( 'URL', 'elementor' ),
-				'type' => Controls_Manager::MEDIA,
-				'dynamic' => [
-					'active' => true,
-					'categories' => [
-						TagsModule::MEDIA_CATEGORY,
-					],
-				],
-				'media_type' => 'video',
 				'condition' => [
 					'video_type' => 'hosted',
 				],
@@ -201,32 +164,7 @@ class Widget_Video extends Widget_Base {
 		);
 
 		$this->add_control(
-			'start',
-			[
-				'label' => __( 'Start Time', 'elementor' ),
-				'type' => Controls_Manager::NUMBER,
-				'description' => __( 'Specify a start time (in seconds)', 'elementor' ),
-				'condition' => [
-					'loop' => '',
-				],
-			]
-		);
-
-		$this->add_control(
-			'end',
-			[
-				'label' => __( 'End Time', 'elementor' ),
-				'type' => Controls_Manager::NUMBER,
-				'description' => __( 'Specify an end time (in seconds)', 'elementor' ),
-				'condition' => [
-					'loop' => '',
-					'video_type' => [ 'youtube', 'hosted' ],
-				],
-			]
-		);
-
-		$this->add_control(
-			'video_options',
+			'heading_youtube',
 			[
 				'label' => __( 'Video Options', 'elementor' ),
 				'type' => Controls_Manager::HEADING,
@@ -234,100 +172,70 @@ class Widget_Video extends Widget_Base {
 			]
 		);
 
+		// YouTube.
 		$this->add_control(
-			'autoplay',
+			'yt_autoplay',
 			[
 				'label' => __( 'Autoplay', 'elementor' ),
 				'type' => Controls_Manager::SWITCHER,
+				'condition' => [
+					'video_type' => 'youtube',
+				],
 			]
 		);
 
 		$this->add_control(
-			'mute',
+			'yt_rel',
+			[
+				'label' => __( 'Suggested Videos', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
+				'label_off' => __( 'Hide', 'elementor' ),
+				'label_on' => __( 'Show', 'elementor' ),
+				'condition' => [
+					'video_type' => 'youtube',
+				],
+			]
+		);
+
+		$this->add_control(
+			'yt_controls',
+			[
+				'label' => __( 'Player Control', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
+				'label_off' => __( 'Hide', 'elementor' ),
+				'label_on' => __( 'Show', 'elementor' ),
+				'default' => 'yes',
+				'condition' => [
+					'video_type' => 'youtube',
+				],
+			]
+		);
+
+		$this->add_control(
+			'yt_showinfo',
+			[
+				'label' => __( 'Player Title & Actions', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
+				'label_off' => __( 'Hide', 'elementor' ),
+				'label_on' => __( 'Show', 'elementor' ),
+				'default' => 'yes',
+				'condition' => [
+					'video_type' => 'youtube',
+				],
+			]
+		);
+
+		$this->add_control(
+			'yt_mute',
 			[
 				'label' => __( 'Mute', 'elementor' ),
 				'type' => Controls_Manager::SWITCHER,
-			]
-		);
-
-		$this->add_control(
-			'loop',
-			[
-				'label' => __( 'Loop', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
 				'condition' => [
-					'video_type!' => 'dailymotion',
+					'video_type' => 'youtube',
 				],
 			]
 		);
 
-		$this->add_control(
-			'controls',
-			[
-				'label' => __( 'Player Controls', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'Hide', 'elementor' ),
-				'label_on' => __( 'Show', 'elementor' ),
-				'default' => 'yes',
-				'condition' => [
-					'video_type!' => 'vimeo',
-				],
-			]
-		);
-
-		$this->add_control(
-			'showinfo',
-			[
-				'label' => __( 'Video Info', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'Hide', 'elementor' ),
-				'label_on' => __( 'Show', 'elementor' ),
-				'default' => 'yes',
-				'condition' => [
-					'video_type' => [ 'dailymotion' ],
-				],
-			]
-		);
-
-		$this->add_control(
-			'modestbranding',
-			[
-				'label' => __( 'Modest Branding', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'condition' => [
-					'video_type' => [ 'youtube' ],
-					'controls' => 'yes',
-				],
-			]
-		);
-
-		$this->add_control(
-			'logo',
-			[
-				'label' => __( 'Logo', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'Hide', 'elementor' ),
-				'label_on' => __( 'Show', 'elementor' ),
-				'default' => 'yes',
-				'condition' => [
-					'video_type' => [ 'dailymotion' ],
-				],
-			]
-		);
-
-		$this->add_control(
-			'color',
-			[
-				'label' => __( 'Controls Color', 'elementor' ),
-				'type' => Controls_Manager::COLOR,
-				'default' => '',
-				'condition' => [
-					'video_type' => [ 'vimeo', 'dailymotion' ],
-				],
-			]
-		);
-
-		// YouTube.
 		$this->add_control(
 			'yt_privacy',
 			[
@@ -340,22 +248,29 @@ class Widget_Video extends Widget_Base {
 			]
 		);
 
+		// Vimeo.
 		$this->add_control(
-			'rel',
+			'vimeo_autoplay',
 			[
-				'label' => __( 'Suggested Videos', 'elementor' ),
-				'type' => Controls_Manager::SELECT,
-				'options' => [
-					'' => __( 'Current Video Channel', 'elementor' ),
-					'yes' => __( 'Any Video', 'elementor' ),
-				],
+				'label' => __( 'Autoplay', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
 				'condition' => [
-					'video_type' => 'youtube',
+					'video_type' => 'vimeo',
 				],
 			]
 		);
 
-		// Vimeo.
+		$this->add_control(
+			'vimeo_loop',
+			[
+				'label' => __( 'Loop', 'elementor' ),
+				'type' => Controls_Manager::SWITCHER,
+				'condition' => [
+					'video_type' => 'vimeo',
+				],
+			]
+		);
+
 		$this->add_control(
 			'vimeo_title',
 			[
@@ -399,25 +314,13 @@ class Widget_Video extends Widget_Base {
 		);
 
 		$this->add_control(
-			'download_button',
+			'vimeo_color',
 			[
-				'label' => __( 'Download Button', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'Hide', 'elementor' ),
-				'label_on' => __( 'Show', 'elementor' ),
+				'label' => __( 'Controls Color', 'elementor' ),
+				'type' => Controls_Manager::COLOR,
+				'default' => '',
 				'condition' => [
-					'video_type' => 'hosted',
-				],
-			]
-		);
-
-		$this->add_control(
-			'poster',
-			[
-				'label' => __( 'Poster', 'elementor' ),
-				'type' => Controls_Manager::MEDIA,
-				'condition' => [
-					'video_type' => 'hosted',
+					'video_type' => 'vimeo',
 				],
 			]
 		);
@@ -458,23 +361,8 @@ class Widget_Video extends Widget_Base {
 				'default' => [
 					'url' => Utils::get_placeholder_image_src(),
 				],
-				'dynamic' => [
-					'active' => true,
-				],
 				'condition' => [
 					'show_image_overlay' => 'yes',
-				],
-			]
-		);
-
-		$this->add_control(
-			'lazy_load',
-			[
-				'label' => __( 'Lazy Load', 'elementor' ),
-				'type' => Controls_Manager::SWITCHER,
-				'condition' => [
-					'show_image_overlay' => 'yes',
-					'video_type!' => 'hosted',
 				],
 			]
 		);
@@ -497,6 +385,9 @@ class Widget_Video extends Widget_Base {
 				'label' => __( 'Play Icon', 'elementor' ),
 				'type' => Controls_Manager::SWITCHER,
 				'default' => 'yes',
+				'label_off' => __( 'No', 'elementor' ),
+				'label_on' => __( 'Yes', 'elementor' ),
+				'return_value' => 'yes',
 				'condition' => [
 					'show_image_overlay' => 'yes',
 					'image_overlay[url]!' => '',
@@ -537,21 +428,12 @@ class Widget_Video extends Widget_Base {
 				'type' => Controls_Manager::SELECT,
 				'options' => [
 					'169' => '16:9',
-					'219' => '21:9',
 					'43' => '4:3',
 					'32' => '3:2',
 				],
 				'default' => '169',
 				'prefix_class' => 'elementor-aspect-ratio-',
 				'frontend_available' => true,
-			]
-		);
-
-		$this->add_group_control(
-			Group_Control_Css_Filter::get_type(),
-			[
-				'name' => 'css_filters',
-				'selector' => '{{WRAPPER}} .elementor-wrapper',
 			]
 		);
 
@@ -564,7 +446,6 @@ class Widget_Video extends Widget_Base {
 					'show_image_overlay' => 'yes',
 					'show_play_icon' => 'yes',
 				],
-				'separator' => 'before',
 			]
 		);
 
@@ -576,6 +457,7 @@ class Widget_Video extends Widget_Base {
 				'selectors' => [
 					'{{WRAPPER}} .elementor-custom-embed-play i' => 'color: {{VALUE}}',
 				],
+				'separator' => 'before',
 				'condition' => [
 					'show_image_overlay' => 'yes',
 					'show_play_icon' => 'yes',
@@ -675,6 +557,7 @@ class Widget_Video extends Widget_Base {
 			[
 				'label' => __( 'Content Width', 'elementor' ),
 				'type' => Controls_Manager::SLIDER,
+				'units' => [ '%' ],
 				'default' => [
 					'unit' => '%',
 				],
@@ -733,32 +616,22 @@ class Widget_Video extends Widget_Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 
-		$video_url = $settings[ $settings['video_type'] . '_url' ];
+		$video_link = 'youtube' === $settings['video_type'] ? $settings['link'] : $settings['vimeo_link'];
 
-		if ( 'hosted' === $settings['video_type'] ) {
-			$video_url = $this->get_hosted_video_url();
-		}
-
-		if ( empty( $video_url ) ) {
+		if ( empty( $video_link ) ) {
 			return;
 		}
 
-		if ( 'hosted' === $settings['video_type'] ) {
-			ob_start();
+		$embed_params = $this->get_embed_params();
 
-			$this->render_hosted_video();
+		$embed_options = [
+			'privacy' => $settings['yt_privacy'],
+		];
 
-			$video_html = ob_get_clean();
-		} else {
-			$embed_params = $this->get_embed_params();
-
-			$embed_options = $this->get_embed_options();
-
-			$video_html = Embed::get_embed_html( $video_url, $embed_params, $embed_options );
-		}
+		$video_html = Embed::get_embed_html( $video_link, $embed_params, $embed_options );
 
 		if ( empty( $video_html ) ) {
-			echo esc_url( $video_url );
+			echo esc_url( $video_link );
 
 			return;
 		}
@@ -781,26 +654,15 @@ class Widget_Video extends Widget_Base {
 				$this->add_render_attribute( 'image-overlay', 'class', 'elementor-custom-embed-image-overlay' );
 
 				if ( $settings['lightbox'] ) {
-					if ( 'hosted' === $settings['video_type'] ) {
-						$lightbox_url = $video_url;
-					} else {
-						$lightbox_url = Embed::get_embed_url( $video_url, $embed_params, $embed_options );
-					}
-
 					$lightbox_options = [
 						'type' => 'video',
-						'videoType' => $settings['video_type'],
-						'url' => $lightbox_url,
+						'url' => Embed::get_embed_url( $video_link, $embed_params, $embed_options ),
 						'modalOptions' => [
 							'id' => 'elementor-lightbox-' . $this->get_id(),
 							'entranceAnimation' => $settings['lightbox_content_animation'],
 							'videoAspectRatio' => $settings['aspect_ratio'],
 						],
 					];
-
-					if ( 'hosted' === $settings['video_type'] ) {
-						$lightbox_options['videoParams'] = $this->get_hosted_params();
-					}
 
 					$this->add_render_attribute( 'image-overlay', [
 						'data-elementor-open-lightbox' => 'yes',
@@ -829,7 +691,7 @@ class Widget_Video extends Widget_Base {
 				</div>
 			<?php } ?>
 		</div>
-		<?php
+	<?php
 	}
 
 	/**
@@ -842,8 +704,7 @@ class Widget_Video extends Widget_Base {
 	 */
 	public function render_plain_content() {
 		$settings = $this->get_settings_for_display();
-
-		$url = $settings[ $settings['video_type'] . '_url' ];
+		$url = 'youtube' === $settings['video_type'] ? $settings['link'] : $settings['vimeo_link'];
 
 		echo esc_url( $url );
 	}
@@ -863,69 +724,36 @@ class Widget_Video extends Widget_Base {
 
 		$params = [];
 
-		if ( $settings['autoplay'] && ! $this->has_image_overlay() ) {
-			$params['autoplay'] = '1';
-		}
-
-		$params_dictionary = [];
-
 		if ( 'youtube' === $settings['video_type'] ) {
-			$params_dictionary = [
-				'loop',
-				'controls',
-				'mute',
-				'rel',
-				'modestbranding',
-			];
+			$youtube_options = [ 'autoplay', 'rel', 'controls', 'showinfo', 'mute' ];
 
-			if ( $settings['loop'] ) {
-				$video_properties = Embed::get_video_properties( $settings['youtube_url'] );
+			foreach ( $youtube_options as $option ) {
+				if ( 'autoplay' === $option && $this->has_image_overlay() ) {
+					continue;
+				}
 
-				$params['playlist'] = $video_properties['video_id'];
+				$value = ( 'yes' === $settings[ 'yt_' . $option ] ) ? '1' : '0';
+				$params[ $option ] = $value;
 			}
-
-			$params['start'] = $settings['start'];
-
-			$params['end'] = $settings['end'];
 
 			$params['wmode'] = 'opaque';
-		} elseif ( 'vimeo' === $settings['video_type'] ) {
-			$params_dictionary = [
-				'loop',
-				'mute' => 'muted',
-				'vimeo_title' => 'title',
-				'vimeo_portrait' => 'portrait',
-				'vimeo_byline' => 'byline',
-			];
-
-			$params['color'] = str_replace( '#', '', $settings['color'] );
-
-			$params['autopause'] = '0';
-		} elseif ( 'dailymotion' === $settings['video_type'] ) {
-			$params_dictionary = [
-				'controls',
-				'mute',
-				'showinfo' => 'ui-start-screen-info',
-				'logo' => 'ui-logo',
-			];
-
-			$params['ui-highlight'] = str_replace( '#', '', $settings['color'] );
-
-			$params['start'] = $settings['start'];
-
-			$params['endscreen-enable'] = '0';
 		}
 
-		foreach ( $params_dictionary as $key => $param_name ) {
-			$setting_name = $param_name;
+		if ( 'vimeo' === $settings['video_type'] ) {
+			$vimeo_options = [ 'autoplay', 'loop', 'title', 'portrait', 'byline' ];
 
-			if ( is_string( $key ) ) {
-				$setting_name = $key;
+			foreach ( $vimeo_options as $option ) {
+				if ( 'autoplay' === $option && $this->has_image_overlay() ) {
+					continue;
+				}
+
+				$value = ( 'yes' === $settings[ 'vimeo_' . $option ] ) ? '1' : '0';
+				$params[ $option ] = $value;
 			}
 
-			$setting_value = $settings[ $setting_name ] ? '1' : '0';
+			$params['color'] = str_replace( '#', '', $settings['vimeo_color'] );
 
-			$params[ $param_name ] = $setting_value;
+			$params['autopause'] = '0';
 		}
 
 		return $params;
@@ -945,96 +773,5 @@ class Widget_Video extends Widget_Base {
 		$settings = $this->get_settings_for_display();
 
 		return ! empty( $settings['image_overlay']['url'] ) && 'yes' === $settings['show_image_overlay'];
-	}
-
-	/**
-	 * @since 2.1.0
-	 * @access private
-	 */
-	private function get_embed_options() {
-		$settings = $this->get_settings_for_display();
-
-		$embed_options = [];
-
-		if ( 'youtube' === $settings['video_type'] ) {
-			$embed_options['privacy'] = $settings['yt_privacy'];
-		} elseif ( 'vimeo' === $settings['video_type'] ) {
-			$embed_options['start'] = $settings['start'];
-		}
-
-		$embed_options['lazy_load'] = ! empty( $settings['lazy_load'] );
-
-		return $embed_options;
-	}
-
-	/**
-	 * @since 2.1.0
-	 * @access private
-	 */
-	private function get_hosted_params() {
-		$settings = $this->get_settings_for_display();
-
-		$video_params = [];
-
-		foreach ( [ 'autoplay', 'loop', 'controls' ] as $option_name ) {
-			if ( $settings[ $option_name ] ) {
-				$video_params[ $option_name ] = '';
-			}
-		}
-
-		if ( $settings['mute'] ) {
-			$video_params['muted'] = 'muted';
-		}
-
-		if ( ! $settings['download_button'] ) {
-			$video_params['controlsList'] = 'nodownload';
-		}
-
-		if ( $settings['poster']['url'] ) {
-			$video_params['poster'] = $settings['poster']['url'];
-		}
-
-		return $video_params;
-	}
-
-	/**
-	 * @since 2.1.0
-	 * @access private
-	 */
-	private function get_hosted_video_url() {
-		$settings = $this->get_settings_for_display();
-
-		$video_url = $settings['hosted_url']['url'];
-
-		if ( ! $video_url ) {
-			return '';
-		}
-
-		if ( $settings['start'] || $settings['end'] ) {
-			$video_url .= '#t=';
-		}
-
-		if ( $settings['start'] ) {
-			$video_url .= $settings['start'];
-		}
-
-		if ( $settings['end'] ) {
-			$video_url .= ',' . $settings['end'];
-		}
-
-		return $video_url;
-	}
-
-	/**
-	 * @since 2.1.0
-	 * @access private
-	 */
-	private function render_hosted_video() {
-		$video_params = $this->get_hosted_params();
-
-		$video_url = $this->get_hosted_video_url();
-		?>
-		<video class="elementor-video" src="<?php echo esc_url( $video_url ); ?>" <?php echo Utils::render_html_attributes( $video_params ); ?>></video>
-		<?php
 	}
 }

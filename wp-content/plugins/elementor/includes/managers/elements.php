@@ -243,6 +243,8 @@ class Elements_Manager {
 	 * @deprecated 2.0.0 Use `Plugin::$instance->documents->ajax_discard_changes()` method instead.
 	 * @access public
 	 *
+	 * @throws \Exception If the request has no post id.
+	 *
 	 * @param $request
 	 *
 	 * @return bool
@@ -265,6 +267,9 @@ class Elements_Manager {
 	 * @deprecated 2.0.0 Use `Plugin::$instance->documents->ajax_save()` method instead.
 	 * @access public
 	 *
+	 * @throws \Exception If the request has no post id.
+	 * @throws \Exception If current user don't have permissions to edit the post.
+	 *
 	 * @param array $request
 	 *
 	 * @return mixed
@@ -284,7 +289,7 @@ class Elements_Manager {
 		 *
 		 * @param array $return_data The returned data. Default is an empty array.
 		 */
-		$return_data = apply_filters_deprecated( 'elementor/ajax_save_builder/return_data', [ $return_data, $request['editor_post_id'] ], '2.0.0', 'elementor/documents/ajax_save/return_data' );
+		$return_data = Utils::apply_filters_deprecated( 'elementor/ajax_save_builder/return_data', [ $return_data, $request['editor_post_id'] ], '2.0.0', 'elementor/documents/ajax_save/return_data' );
 
 		return $return_data;
 	}
@@ -332,19 +337,20 @@ class Elements_Manager {
 				'icon' => 'eicon-font',
 			],
 			'pro-elements' => [
-				'title' => __( 'Pro', 'elementor' ),
-			],
-			'general' => [
-				'title' => __( 'General', 'elementor' ),
-				'icon' => 'eicon-font',
+				'title' => __( 'Pro Elements', 'elementor' ),
+				'icon' => 'font',
 			],
 			'theme-elements' => [
-				'title' => __( 'Site', 'elementor' ),
-				'active' => false,
+				'title' => __( 'Theme Elements', 'elementor' ),
+				'icon' => 'font',
 			],
 			'woocommerce-elements' => [
-				'title' => __( 'WooCommerce', 'elementor' ),
-				'active' => false,
+				'title' => __( 'Woocommerce Elements', 'elementor' ),
+				'icon' => 'font',
+			],
+			'general' => [
+				'title' => __( 'General Elements', 'elementor' ),
+				'icon' => 'eicon-font',
 			],
 		];
 
@@ -371,7 +377,6 @@ class Elements_Manager {
 		$this->categories['wordpress'] = [
 			'title' => __( 'WordPress', 'elementor' ),
 			'icon' => 'eicon-wordpress',
-			'active' => false,
 		];
 	}
 

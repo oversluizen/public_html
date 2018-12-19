@@ -13,12 +13,11 @@
 		um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Styles...', 'ultimate-member' ) ) ?>' );
 
 		jQuery.ajax({
-			url: wp.ajax.settings.url,
+			url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 			type: 'POST',
 			dataType: 'json',
 			data: {
-				action: 'um_styles20beta1',
-				nonce: um_admin_scripts.nonce
+				action: 'um_styles20beta1'
 			},
 			success: function( response ) {
 				if ( typeof response.data != 'undefined' ) {
@@ -37,12 +36,11 @@
 		function upgrade_roles() {
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Roles...', 'ultimate-member' ) ) ?>' );
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_user_roles20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_user_roles20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -72,13 +70,12 @@
 				var role = um_roles_data.shift();
 				um_add_upgrade_log( '<?php echo esc_js( __( 'Getting ', 'ultimate-member' ) ) ?>"'  + role.role_key + '"<?php echo esc_js( __( ' users...', 'ultimate-member' ) ) ?>' );
 				jQuery.ajax({
-					url: wp.ajax.settings.url,
+					url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 					type: 'POST',
 					dataType: 'json',
 					data: {
 						action: 'um_get_users_per_role20beta1',
-						key_in_meta: role.key_in_meta,
-						nonce: um_admin_scripts.nonce
+						key_in_meta: role.key_in_meta
 					},
 					success: function( response ) {
 						if ( typeof response.data.count != 'undefined' ) {
@@ -106,15 +103,14 @@
 		function update_user_per_page( role_key, key_in_meta ) {
 			if ( current_page <= users_pages ) {
 				jQuery.ajax({
-					url: wp.ajax.settings.url,
+					url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 					type: 'POST',
 					dataType: 'json',
 					data: {
 						action: 'um_update_users_per_page20beta1',
 						role_key: role_key,
 						key_in_meta: key_in_meta,
-						page: current_page,
-						nonce: um_admin_scripts.nonce
+						page: current_page
 					},
 					success: function( response ) {
 						if ( typeof response.data != 'undefined' ) {
@@ -139,12 +135,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Content Restriction Settings...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_content_restriction20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_content_restriction20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -165,12 +160,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Settings...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_settings20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_settings20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -191,12 +185,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Menu Items...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_menus20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_menus20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -217,12 +210,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Mailchimp Lists...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_mc_lists20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_mc_lists20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -243,12 +235,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Social Login Forms...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_social_login20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_social_login20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -269,12 +260,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade UM Custom Post Types...', 'ultimate-member' ) ) ?>' );
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_cpt20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_cpt20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -296,12 +286,11 @@
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Get bbPress Forums count...', 'ultimate-member' ) ) ?>' );
 			current_page = 1;
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_get_forums20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_get_forums20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -324,13 +313,12 @@
 		function update_forums_per_page() {
 			if ( current_page <= forums_pages ) {
 				jQuery.ajax({
-					url: wp.ajax.settings.url,
+					url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 					type: 'POST',
 					dataType: 'json',
 					data: {
 						action: 'um_update_forum_per_page20beta1',
-						page: current_page,
-						nonce: um_admin_scripts.nonce
+						page: current_page
 					},
 					success: function( response ) {
 						if ( typeof response.data != 'undefined' ) {
@@ -358,12 +346,11 @@
 			current_page = 1;
 
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_get_products20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_get_products20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {
@@ -386,13 +373,12 @@
 		function update_products_per_page() {
 			if ( current_page <= products_pages ) {
 				jQuery.ajax({
-					url: wp.ajax.settings.url,
+					url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 					type: 'POST',
 					dataType: 'json',
 					data: {
 						action: 'um_update_products_per_page20beta1',
-						page: current_page,
-						nonce: um_admin_scripts.nonce
+						page: current_page
 					},
 					success: function( response ) {
 						if ( typeof response.data != 'undefined' ) {
@@ -416,12 +402,11 @@
 		function upgrade_email_templates() {
 			um_add_upgrade_log( '<?php echo esc_js( __( 'Upgrade Email Templates...', 'ultimate-member' ) ) ?>' );
 			jQuery.ajax({
-				url: wp.ajax.settings.url,
+				url: '<?php echo admin_url( 'admin-ajax.php' ) ?>',
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					action: 'um_email_templates20beta1',
-					nonce: um_admin_scripts.nonce
+					action: 'um_email_templates20beta1'
 				},
 				success: function( response ) {
 					if ( typeof response.data != 'undefined' ) {

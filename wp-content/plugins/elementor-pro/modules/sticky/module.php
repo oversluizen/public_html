@@ -36,11 +36,9 @@ class Module extends Module_Base {
 			[
 				'label' => __( 'Sticky', 'elementor-pro' ),
 				'type' => Controls_Manager::SWITCHER,
-				'condition' => [
-					'stretch_section' => ''
-				],
+				'label_on' => __( 'On', 'elementor-pro' ),
+				'label_off' => __( 'Off', 'elementor-pro' ),
 				'render_type' => 'none',
-				'return_value' => 'top',
 				'frontend_available' => true,
 			]
 		);

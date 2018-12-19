@@ -5,7 +5,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        https://wpastra.com/
+ * @link        http://wpastra.com/
  * @since       1.0.0
  */
 
@@ -98,7 +98,7 @@ class Astra_Control_Sortable extends WP_Customize_Control {
 					</li>
 				<# }); #>
 				<# _.each( data.choices, function( choiceLabel, choiceID ) { #>
-				<# if ( Array.isArray(data.value) && -1 === data.value.indexOf( choiceID ) ) { #>
+					<# if ( -1 === data.value.indexOf( choiceID ) ) { #>
 						<li {{{ data.inputAttrs }}} class='ast-sortable-item invisible' data-value='{{ choiceID }}'>
 							<i class='dashicons dashicons-menu'></i>
 							<i class="dashicons dashicons-visibility visibility"></i>

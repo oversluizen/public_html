@@ -57,20 +57,6 @@ class Widget_Shortcode extends Widget_Base {
 	}
 
 	/**
-	 * Get widget keywords.
-	 *
-	 * Retrieve the list of keywords the widget belongs to.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @return array Widget keywords.
-	 */
-	public function get_keywords() {
-		return [ 'shortcode', 'code' ];
-	}
-
-	/**
 	 * Whether the reload preview is required or not.
 	 *
 	 * Used to determine whether the reload preview is required.
@@ -105,9 +91,6 @@ class Widget_Shortcode extends Widget_Base {
 			[
 				'label' => __( 'Enter your shortcode', 'elementor' ),
 				'type' => Controls_Manager::TEXTAREA,
-				'dynamic' => [
-					'active' => true,
-				],
 				'placeholder' => '[gallery id="123" size="medium"]',
 				'default' => '',
 			]
@@ -125,7 +108,7 @@ class Widget_Shortcode extends Widget_Base {
 	 * @access protected
 	 */
 	protected function render() {
-		$shortcode = $this->get_settings_for_display( 'shortcode' );
+		$shortcode = $this->get_settings( 'shortcode' );
 
 		$shortcode = do_shortcode( shortcode_unautop( $shortcode ) );
 		?>

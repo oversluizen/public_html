@@ -13,12 +13,12 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 	}
 
 	public function output() {
-		if ( ! defined( 'QM_ENABLE_CAPS_PANEL' ) || ! QM_ENABLE_CAPS_PANEL ) {
-			$this->before_non_tabular_output();
-
-			echo '<section>';
-			echo '<div class="qm-notice">';
-			echo '<p>';
+		if ( ! defined( 'QM_ENABLE_CAPS_PANEL' ) ) {
+			echo '<div class="qm qm-non-tabular" id="' . esc_attr( $this->collector->id() ) . '">';
+			echo '<div class="qm-boxed qm-boxed-wrap">';
+			echo '<div class="qm-section">';
+			echo '<h2>' . esc_html( $this->collector->name() ) . '</h2>';
+			echo '<p class="qm-warn">';
 			printf(
 				/* translators: %s: Configuration file name. */
 				esc_html__( 'For performance reasons, this panel is not enabled by default. To enable it, add the following code to your %s file:', 'query-monitor' ),
@@ -27,42 +27,36 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 			echo '</p>';
 			echo "<p><code>define( 'QM_ENABLE_CAPS_PANEL', true );</code></p>";
 			echo '</div>';
-			echo '</section>';
-
-			$this->after_non_tabular_output();
+			echo '</div>';
+			echo '</div>';
 
 			return;
 		}
 
 		$data = $this->collector->get_data();
 
-		if ( ! empty( $data['caps'] ) ) {
-			$this->before_tabular_output();
+		echo '<div class="qm" id="' . esc_attr( $this->collector->id() ) . '">';
+		echo '<table>';
 
-			$results    = array(
+		if ( ! empty( $data['caps'] ) ) {
+
+			$results = array(
 				'true',
 				'false',
 			);
-			$show_user  = ( count( $data['users'] ) > 1 );
-			$parts      = $data['parts'];
-			$components = $data['components'];
+			$show_user = ( count( $data['users'] ) > 1 );
 
-			usort( $parts, 'strcasecmp' );
-			usort( $components, 'strcasecmp' );
+			echo '<caption class="screen-reader-text">' . esc_html( $this->collector->name() ) . '</caption>';
 
 			echo '<thead>';
 			echo '<tr>';
 			echo '<th scope="col" class="qm-filterable-column">';
-			echo $this->build_filter( 'name', $parts, __( 'Capability Check', 'query-monitor' ) ); // WPCS: XSS ok;
+			echo $this->build_filter( 'name', $data['parts'], __( 'Capability Check', 'query-monitor' ) ); // WPCS: XSS ok;
 			echo '</th>';
 
 			if ( $show_user ) {
-				$users = $data['users'];
-
-				usort( $users, 'strcasecmp' );
-
 				echo '<th scope="col" class="qm-filterable-column qm-num">';
-				echo $this->build_filter( 'user', $users, __( 'User', 'query-monitor' ) ); // WPCS: XSS ok;
+				echo $this->build_filter( 'user', $data['users'], __( 'User', 'query-monitor' ) ); // WPCS: XSS ok;
 				echo '</th>';
 			}
 
@@ -71,7 +65,7 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 			echo '</th>';
 			echo '<th scope="col">' . esc_html__( 'Caller', 'query-monitor' ) . '</th>';
 			echo '<th scope="col" class="qm-filterable-column">';
-			echo $this->build_filter( 'component', $components, __( 'Component', 'query-monitor' ) ); // WPCS: XSS ok.
+			echo $this->build_filter( 'component', $data['components'], __( 'Component', 'query-monitor' ) ); // WPCS: XSS ok.
 			echo '</th>';
 			echo '</tr>';
 			echo '</thead>';
@@ -81,7 +75,7 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 			foreach ( $data['caps'] as $row ) {
 				$component = $row['trace']->get_component();
 
-				$row_attr                      = array();
+				$row_attr = array();
 				$row_attr['data-qm-name']      = implode( ' ', $row['parts'] );
 				$row_attr['data-qm-user']      = $row['user'];
 				$row_attr['data-qm-component'] = $component->name;
@@ -89,10 +83,6 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 
 				if ( 'core' !== $component->context ) {
 					$row_attr['data-qm-component'] .= ' non-core';
-				}
-
-				if ( '' === $row['name'] ) {
-					$row_attr['class'] = 'qm-warn';
 				}
 
 				$attr = '';
@@ -110,7 +100,7 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 
 				if ( ! empty( $row['args'] ) ) {
 					foreach ( $row['args'] as $arg ) {
-						$name .= ',&nbsp;' . esc_html( QM_Util::display_variable( $arg ) );
+						$name .= '<br>' . esc_html( QM_Util::display_variable( $arg ) );
 					}
 				}
 
@@ -147,8 +137,8 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 				if ( ! count( $filtered_trace ) ) {
 					$responsible_name = QM_Util::standard_dir( $trace[1]['file'], '' ) . ':' . $trace[1]['line'];
 
-					$responsible_item                 = $trace[1];
-					$responsible_item['display']      = $responsible_name;
+					$responsible_item = $trace[1];
+					$responsible_item['display'] = $responsible_name;
 					$responsible_item['calling_file'] = $trace[1]['file'];
 					$responsible_item['calling_line'] = $trace[1]['line'];
 					array_unshift( $filtered_trace, $responsible_item );
@@ -186,25 +176,35 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 			$colspan = ( $show_user ) ? 5 : 4;
 
 			echo '<tr>';
-			echo '<td colspan="' . absint( $colspan ) . '">';
 			printf(
-				/* translators: %s: Number of user capability checks */
-				esc_html_x( 'Total: %s', 'User capability checks', 'query-monitor' ),
-				'<span class="qm-items-number">' . esc_html( number_format_i18n( count( $data['caps'] ) ) ) . '</span>'
+				'<td colspan="%1$d">%2$s</td>',
+				esc_attr( $colspan ),
+				esc_html( sprintf(
+					/* translators: %s: Number of user capability checks */
+					__( 'Total Checks: %s', 'query-monitor' ),
+					number_format_i18n( count( $data['caps'] ) )
+				) )
 			);
-			echo '</td>';
 			echo '</tr>';
 			echo '</tfoot>';
 
-			$this->after_tabular_output();
 		} else {
-			$this->before_non_tabular_output();
 
-			$notice = __( 'No capability checks were recorded.', 'query-monitor' );
-			echo $this->build_notice( $notice ); // WPCS: XSS ok.
+			echo '<caption>' . esc_html( $this->collector->name() ) . '</caption>';
 
-			$this->after_non_tabular_output();
+			echo '<tbody>';
+			echo '<tr>';
+			echo '<td>';
+			esc_html_e( 'No capability checks were recorded.', 'query-monitor' );
+			echo '</td>';
+			echo '</tr>';
+			echo '</tbody>';
+
 		}
+
+		echo '</table>';
+		echo '</div>';
+
 	}
 
 	public function admin_menu( array $menu ) {
@@ -218,8 +218,7 @@ class QM_Output_Html_Caps extends QM_Output_Html {
 }
 
 function register_qm_output_html_caps( array $output, QM_Collectors $collectors ) {
-	$collector = $collectors::get( 'caps' );
-	if ( $collector ) {
+	if ( $collector = QM_Collectors::get( 'caps' ) ) {
 		$output['caps'] = new QM_Output_Html_Caps( $collector );
 	}
 	return $output;

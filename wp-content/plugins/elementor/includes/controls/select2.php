@@ -46,7 +46,6 @@ class Control_Select2 extends Base_Data_Control {
 		return [
 			'options' => [],
 			'multiple' => false,
-			'select2options' => [],
 		];
 	}
 

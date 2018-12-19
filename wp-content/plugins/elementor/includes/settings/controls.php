@@ -34,7 +34,8 @@ class Settings_Controls {
 
 		$defaults = [
 			'type' => '',
-			'attributes' => [],
+			'placeholder' => '',
+			'classes' => [],
 			'std' => '',
 			'desc' => '',
 		];
@@ -62,13 +63,11 @@ class Settings_Controls {
 	 * @param array $field Field data.
 	 */
 	private static function text( array $field ) {
-		if ( empty( $field['attributes']['class'] ) ) {
-			$field['attributes']['class'] = 'regular-text';
+		if ( empty( $field['classes'] ) ) {
+			$field['classes'] = [ 'regular-text' ];
 		}
-
-		$attributes = Utils::render_html_attributes( $field['attributes'] );
 		?>
-		<input type="<?php echo esc_attr( $field['type'] ); ?>" id="<?php echo esc_attr( $field['id'] ); ?>" name="<?php echo esc_attr( $field['id'] ); ?>" value="<?php echo esc_attr( get_option( $field['id'], $field['std'] ) ); ?>" <?php echo $attributes; ?>/>
+		<input type="<?php echo esc_attr( $field['type'] ); ?>" class="<?php echo esc_attr( implode( ' ', $field['classes'] ) ); ?>" id="<?php echo esc_attr( $field['id'] ); ?>" name="<?php echo esc_attr( $field['id'] ); ?>" value="<?php echo esc_attr( get_option( $field['id'], $field['std'] ) ); ?>"<?php echo ! empty( $field['placeholder'] ) ? ' placeholder="' . esc_attr( $field['placeholder'] ) . '"' : ''; ?> />
 		<?php
 		if ( ! empty( $field['sub_desc'] ) ) :
 			echo $field['sub_desc'];
@@ -76,7 +75,7 @@ class Settings_Controls {
 		?>
 		<?php if ( ! empty( $field['desc'] ) ) : ?>
 			<p class="description"><?php echo $field['desc']; ?></p>
-			<?php
+		<?php
 		endif;
 	}
 
@@ -103,7 +102,7 @@ class Settings_Controls {
 		</label>
 		<?php if ( ! empty( $field['desc'] ) ) : ?>
 			<p class="description"><?php echo $field['desc']; ?></p>
-			<?php
+		<?php
 		endif;
 	}
 
@@ -125,7 +124,7 @@ class Settings_Controls {
 		}
 
 		foreach ( $field['options'] as $option_key => $option_value ) :
-			?>
+		?>
 			<label>
 				<input type="checkbox" name="<?php echo $field['id']; ?>[]" value="<?php echo $option_key; ?>"<?php checked( in_array( $option_key, $old_value ), true ); ?> />
 				<?php echo $option_value; ?>
@@ -133,7 +132,7 @@ class Settings_Controls {
 		<?php endforeach; ?>
 		<?php if ( ! empty( $field['desc'] ) ) : ?>
 			<p class="description"><?php echo $field['desc']; ?></p>
-			<?php
+		<?php
 		endif;
 	}
 
@@ -163,7 +162,7 @@ class Settings_Controls {
 
 		<?php if ( ! empty( $field['desc'] ) ) : ?>
 			<p class="description"><?php echo $field['desc']; ?></p>
-			<?php
+		<?php
 		endif;
 	}
 

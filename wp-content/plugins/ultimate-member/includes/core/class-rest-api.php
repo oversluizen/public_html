@@ -70,10 +70,10 @@ if ( ! class_exists( 'um\core\REST_API' ) ) {
 			add_action( 'template_redirect',        array( $this, 'process_query'    ), -1 );
 			add_filter( 'query_vars',               array( $this, 'query_vars'       ) );
 
-			//add_filter( 'um_user_profile_additional_fields', array( $this, 'user_key_field' ), 3, 2 );
+			add_filter( 'um_user_profile_additional_fields', array( $this, 'user_key_field' ), 3, 2 );
 
-			//add_action( 'personal_options_update',  array( $this, 'update_key'       ) );
-			//add_action( 'edit_user_profile_update', array( $this, 'update_key'       ) );
+			add_action( 'personal_options_update',  array( $this, 'update_key'       ) );
+			add_action( 'edit_user_profile_update', array( $this, 'update_key'       ) );
 
 			// Determine if JSON_PRETTY_PRINT is available
 			$this->pretty_print = defined( 'JSON_PRETTY_PRINT' ) ? JSON_PRETTY_PRINT : null;
@@ -524,9 +524,9 @@ if ( ! class_exists( 'um\core\REST_API' ) ) {
 						$val->first_name = um_user('first_name');
 						$val->last_name = um_user('last_name');
 						$val->account_status = um_user('account_status');
-						$val->profile_pic_original = um_get_user_avatar_url('', 'original');
-						$val->profile_pic_normal = um_get_user_avatar_url('', 200);
-						$val->profile_pic_small = um_get_user_avatar_url('', 40);
+						$val->profile_pic_original = $this->getsrc( um_user('profile_photo', 'original') );
+						$val->profile_pic_normal = $this->getsrc( um_user('profile_photo', 200) );
+						$val->profile_pic_small = $this->getsrc( um_user('profile_photo', 40) );
 						$val->cover_photo = $this->getsrc( um_user('cover_photo', 1000) );
 
 						/**
@@ -667,9 +667,9 @@ if ( ! class_exists( 'um\core\REST_API' ) ) {
 							break;
 
 						case 'profile_pic':
-							$response['profile_pic_original'] = um_get_user_avatar_url('', 'original');
-							$response['profile_pic_normal'] = um_get_user_avatar_url('', 200);
-							$response['profile_pic_small'] = um_get_user_avatar_url('', 40);
+							$response['profile_pic_original'] = $this->getsrc( um_user('profile_photo', 'original') );
+							$response['profile_pic_normal'] = $this->getsrc( um_user('profile_photo', 200) );
+							$response['profile_pic_small'] = $this->getsrc( um_user('profile_photo', 40) );
 							break;
 
 						case 'status':
@@ -699,9 +699,9 @@ if ( ! class_exists( 'um\core\REST_API' ) ) {
 						$val->first_name = um_user('first_name');
 						$val->last_name = um_user('last_name');
 						$val->account_status = um_user('account_status');
-						$val->profile_pic_original = um_get_user_avatar_url('', 'original');
-						$val->profile_pic_normal = um_get_user_avatar_url('', 200);
-						$val->profile_pic_small = um_get_user_avatar_url('', 40);
+						$val->profile_pic_original = $this->getsrc( um_user('profile_photo', 'original') );
+						$val->profile_pic_normal = $this->getsrc( um_user('profile_photo', 200) );
+						$val->profile_pic_small = $this->getsrc( um_user('profile_photo', 40) );
 						$val->cover_photo = $this->getsrc( um_user('cover_photo', 1000) );
 
 						/**

@@ -7,10 +7,10 @@
 
 class QM_Collector_PHP_Errors extends QM_Collector {
 
-	public $id               = 'php_errors';
-	public $types            = array();
+	public $id = 'php_errors';
+	public $types = array();
 	private $error_reporting = null;
-	private $display_errors  = null;
+	private $display_errors = null;
 	private static $unexpected_error;
 	private static $wordpress_couldnt;
 
@@ -19,7 +19,7 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 	}
 
 	public function __construct() {
-		if ( defined( 'QM_DISABLE_ERROR_HANDLER' ) && QM_DISABLE_ERROR_HANDLER ) {
+		if ( defined( 'QM_DISABLE_ERROR_HANDLER' ) and QM_DISABLE_ERROR_HANDLER ) {
 			return;
 		}
 
@@ -28,24 +28,13 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 		register_shutdown_function( array( $this, 'shutdown_handler' ) );
 
 		$this->error_reporting = error_reporting();
-		$this->display_errors  = ini_get( 'display_errors' );
+		$this->display_errors = ini_get( 'display_errors' );
 		ini_set( 'display_errors', 0 );
 
 	}
 
 	public function error_handler( $errno, $message, $file = null, $line = null, $context = null ) {
 
-		/**
-		 * Fires before logging the PHP error in Query Monitor.
-		 *
-		 * @since 2.7.0
-		 *
-		 * @param int    $errno   The error number.
-		 * @param string $message The error message.
-		 * @param string $file    The file location.
-		 * @param string $line    The line number.
-		 * @param string $context The context being passed.
-		 */
 		do_action( 'qm/collect/new_php_error', $errno, $message, $file, $line, $context );
 
 		switch ( $errno ) {
@@ -89,8 +78,8 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 		if ( ! isset( self::$unexpected_error ) ) {
 			// These strings are from core. They're passed through `__()` as variables so they get translated at runtime
 			// but do not get seen by GlotPress when it populates its database of translatable strings for QM.
-			$unexpected_error        = 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.';
-			$wordpress_couldnt       = '(WordPress could not establish a secure connection to WordPress.org. Please contact your server administrator.)';
+			$unexpected_error  = 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="https://wordpress.org/support/">support forums</a>.';
+			$wordpress_couldnt = '(WordPress could not establish a secure connection to WordPress.org. Please contact your server administrator.)';
 			self::$unexpected_error  = call_user_func( '__', $unexpected_error );
 			self::$wordpress_couldnt = call_user_func( '__', $wordpress_couldnt );
 		}
@@ -110,29 +99,23 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 		$caller = $trace->get_caller();
 		$key    = md5( $message . $file . $line . $caller['id'] );
 
+		$filename = QM_Util::standard_dir( $file, '' );
+
 		if ( isset( $this->data[ $error_group ][ $type ][ $key ] ) ) {
-			$this->data[ $error_group ][ $type ][ $key ]['calls']++;
+			$this->data[ $error_group ][ $type ][ $key ]->calls++;
 		} else {
-			$this->data[ $error_group ][ $type ][ $key ] = array(
+			$this->data[ $error_group ][ $type ][ $key ] = (object) array(
 				'errno'    => $errno,
 				'type'     => $type,
-				'message'  => wp_strip_all_tags( $message ),
+				'message'  => $message,
 				'file'     => $file,
-				'filename' => QM_Util::standard_dir( $file, '' ),
+				'filename' => $filename,
 				'line'     => $line,
 				'trace'    => $trace,
 				'calls'    => 1,
 			);
 		}
 
-		/**
-		 * Filters the PHP error handler return value. This can be used to control whether or not additional error
-		 * handlers are called after Query Monitor's.
-		 *
-		 * @since 2.7.0
-		 *
-		 * @param bool $return_value Error handler return value. Default true.
-		 */
 		return apply_filters( 'qm/collect/php_errors_return_value', false );
 
 	}
@@ -145,7 +128,7 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 			return;
 		}
 
-		if ( empty( $e ) || ! ( $e['type'] & ( E_ERROR | E_PARSE | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_RECOVERABLE_ERROR ) ) ) {
+		if ( empty( $e ) or ! ( $e['type'] & ( E_ERROR | E_PARSE | E_COMPILE_ERROR | E_COMPILE_WARNING | E_USER_ERROR | E_RECOVERABLE_ERROR ) ) ) {
 			return;
 		}
 
@@ -195,7 +178,7 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 	 */
 	public function process() {
 		$this->types = array(
-			'errors'     => array(
+			'errors' => array(
 				'warning'    => _x( 'Warning', 'PHP error level', 'query-monitor' ),
 				'notice'     => _x( 'Notice', 'PHP error level', 'query-monitor' ),
 				'strict'     => _x( 'Strict', 'PHP error level', 'query-monitor' ),
@@ -207,14 +190,14 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 				'strict'     => _x( 'Strict (Suppressed)', 'Suppressed PHP error level', 'query-monitor' ),
 				'deprecated' => _x( 'Deprecated (Suppressed)', 'Suppressed PHP error level', 'query-monitor' ),
 			),
-			'silenced'   => array(
+			'silenced' => array(
 				'warning'    => _x( 'Warning (Silenced)', 'Silenced PHP error level', 'query-monitor' ),
 				'notice'     => _x( 'Notice (Silenced)', 'Silenced PHP error level', 'query-monitor' ),
 				'strict'     => _x( 'Strict (Silenced)', 'Silenced PHP error level', 'query-monitor' ),
 				'deprecated' => _x( 'Deprecated (Silenced)', 'Silenced PHP error level', 'query-monitor' ),
 			),
 		);
-		$components  = array();
+		$components = array();
 
 		if ( ! empty( $this->data ) && ! empty( $this->data['errors'] ) ) {
 			/**
@@ -251,8 +234,6 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 			 * to silence all errors from a component. See the PHP documentation on error
 			 * reporting for more info: http://php.net/manual/en/function.error-reporting.php
 			 *
-			 * @since 2.7.0
-			 *
 			 * @param int[] $levels The error levels used for each component.
 			 */
 			$levels = apply_filters( 'qm/collect/php_error_levels', array() );
@@ -264,8 +245,6 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 			 *
 			 *     add_filter( 'qm/collect/hide_silenced_php_errors', '__return_true' );
 			 *
-			 * @since 2.7.0
-			 *
 			 * @param bool $hide Whether to hide silenced PHP errors. Default false.
 			 */
 			$this->hide_silenced_php_errors = apply_filters( 'qm/collect/hide_silenced_php_errors', false );
@@ -276,7 +255,7 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 				foreach ( $error_types as $type => $title ) {
 					if ( isset( $this->data[ $error_group ][ $type ] ) ) {
 						foreach ( $this->data[ $error_group ][ $type ] as $error ) {
-							$component                      = $error['trace']->get_component();
+							$component = $error->trace->get_component();
 							$components[ $component->name ] = $component->name;
 						}
 					}
@@ -300,10 +279,10 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 		foreach ( $components as $component_context => $allowed_level ) {
 			foreach ( $all_errors as $error_level => $errors ) {
 				foreach ( $errors as $error_id => $error ) {
-					if ( $this->is_reportable_error( $error['errno'], $allowed_level ) ) {
+					if ( $this->is_reportable_error( $error->errno, $allowed_level ) ) {
 						continue;
 					}
-					if ( ! $this->is_affected_component( $error['trace']->get_component(), $component_type, $component_context ) ) {
+					if ( ! $this->is_affected_component( $error->trace->get_component(), $component_type, $component_context ) ) {
 						continue;
 					}
 
@@ -378,4 +357,4 @@ class QM_Collector_PHP_Errors extends QM_Collector {
 }
 
 # Load early to catch early errors
-QM_Collectors::add( new QM_Collector_PHP_Errors() );
+QM_Collectors::add( new QM_Collector_PHP_Errors );
