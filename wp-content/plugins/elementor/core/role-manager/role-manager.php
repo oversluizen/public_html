@@ -107,9 +107,6 @@ class Role_Manager extends Settings_Page {
 	/**
 	 * @since 2.0.0
 	 * @access private
-	 *
-	 * @param string $role_slug The role slug.
-	 * @param array  $role_data An array with role data.
 	 */
 	private function display_role_controls( $role_slug, $role_data ) {
 		static $excluded_options = false;
@@ -134,18 +131,8 @@ class Role_Manager extends Settings_Page {
 				<div>
 					<?php
 					/**
-					 * Role restrictions controls.
-					 *
-					 * Fires after the role manager checkbox that allows the user to
-					 * exclude the role.
-					 *
-					 * This filter allows developers to add custom controls to the role
-					 * manager.
-					 *
-					 * @since 2.0.0
-					 *
-					 * @param string $role_slug The role slug.
-					 * @param array  $role_data An array with role data.
+					 * @param string        $role_slug.
+					 * @param array         $role_data.
 					 */
 					do_action( 'elementor/role/restrictions/controls', $role_slug, $role_data );
 					?>

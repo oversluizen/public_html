@@ -6,10 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor scheme base.
+ * Scheme base class.
  *
- * An abstract class implementing the scheme interface, responsible for
- * creating new schemes.
+ * Elementor base class for schemes is an abstract class implementing the scheme
+ * interface. The class is responsible for creating base schemes.
  *
  * @since 1.0.0
  * @abstract

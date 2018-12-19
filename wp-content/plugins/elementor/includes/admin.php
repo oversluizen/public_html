@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor admin.
+ * Elementor admin class.
  *
  * Elementor admin handler class is responsible for initializing Elementor in
  * WordPress admin.

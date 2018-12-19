@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor conditions.
+ * Elementor conditions class.
  *
  * Elementor conditions handler class introduce the compare conditions and the
  * check conditions methods.

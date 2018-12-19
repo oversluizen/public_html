@@ -5,14 +5,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-/**
- * Elementor base data tag.
- *
- * An abstract class to register new Elementor data tags.
- *
- * @since 2.0.0
- * @abstract
- */
 abstract class Data_Tag extends Base_Tag {
 
 	/**

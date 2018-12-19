@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor shapes.
+ * Elementor shapes class.
  *
  * Elementor shapes handler class is responsible for setting up the supported
  * shape dividers.

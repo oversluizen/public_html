@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Elementor base UI control.
  *
- * An abstract class for creating new UI controls in the panel.
+ * A base control for creating UI controls.
  *
  * @abstract
  */

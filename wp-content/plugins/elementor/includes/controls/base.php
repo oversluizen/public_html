@@ -8,7 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Elementor base control.
  *
- * An abstract class for creating new controls in the panel.
+ * A base control for creating controls in the panel. Each control accepts all
+ * the params listed below.
  *
  * @since 1.0.0
  * @abstract

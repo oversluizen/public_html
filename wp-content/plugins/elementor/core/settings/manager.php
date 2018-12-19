@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor settings manager.
+ * Elementor settings manager class.
  *
  * Elementor settings manager handler class is responsible for registering and
  * managing Elementor settings managers.
@@ -158,9 +158,7 @@ class Manager {
 		foreach ( self::$settings_managers as $name => $manager ) {
 			$settings_model = $manager->get_model_for_config();
 
-			if ( $settings_model ) {
-				$config[ $name ] = $settings_model->get_frontend_settings();
-			}
+			$config[ $name ] = $settings_model->get_frontend_settings();
 		}
 
 		return $config;

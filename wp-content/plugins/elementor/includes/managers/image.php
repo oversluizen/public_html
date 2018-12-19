@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor images manager.
+ * Elementor images manager class.
  *
- * Elementor images manager handler class is responsible for retrieving image
+ * Elementor images manager handler class is responsible for retrieve images
  * details.
  *
  * @since 1.0.0

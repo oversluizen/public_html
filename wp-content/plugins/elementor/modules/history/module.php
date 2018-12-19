@@ -9,12 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor history module.
+ * Elementor history module class.
  *
  * Elementor history module handler class is responsible for registering and
  * managing Elementor history modules.
- *
- * @since 1.7.0
  */
 class Module extends BaseModule {
 
@@ -42,9 +40,9 @@ class Module extends BaseModule {
 	 * @since 1.7.0
 	 * @access public
 	 *
-	 * @param array $settings Localized settings.
+	 * @param string $settings Localized settings.
 	 *
-	 * @return array Localized settings.
+	 * @return string Localized settings.
 	 */
 	public function localize_settings( $settings ) {
 		$settings = array_replace_recursive( $settings, [

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor global CSS file.
+ * Elementor global CSS file class.
  *
  * Elementor CSS file handler class is responsible for generating the global CSS
  * file.

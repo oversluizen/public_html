@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Elementor upgrades.
+ * Elementor upgrades class.
  *
  * Elementor upgrades handler class is responsible for updating different
  * Elementor versions.
