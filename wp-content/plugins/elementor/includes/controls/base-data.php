@@ -84,8 +84,8 @@ abstract class Base_Data_Control extends Base_Control {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param $dynamic_value    The dynamic tag text.
-	 * @param $dynamic_settings The dynamic tag settings.
+	 * @param string $dynamic_value    The dynamic tag text.
+	 * @param array  $dynamic_settings The dynamic tag settings.
 	 *
 	 * @return string|string[]|mixed A string or an array of strings with the
 	 *                               return value from each tag callback function.
@@ -107,14 +107,20 @@ abstract class Base_Data_Control extends Base_Control {
 	 * while extracting CSS from the `selectors` data argument.
 	 *
 	 * @since 1.5.0
+	 * @since 2.3.3 New `$control_data` parameter added.
 	 * @access public
 	 *
 	 * @param string $css_property  CSS property.
 	 * @param string $control_value Control value.
+	 * @param array  $control_data Control Data.
 	 *
 	 * @return string Control style value.
 	 */
-	public function get_style_value( $css_property, $control_value ) {
+	public function get_style_value( $css_property, $control_value, array $control_data ) {
+		if ( 'DEFAULT' === $css_property ) {
+			return $control_data['default'];
+		}
+
 		return $control_value;
 	}
 

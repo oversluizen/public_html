@@ -58,6 +58,20 @@ class Widget_Image_Carousel extends Widget_Base {
 	}
 
 	/**
+	 * Get widget keywords.
+	 *
+	 * Retrieve the list of keywords the widget belongs to.
+	 *
+	 * @since 2.1.0
+	 * @access public
+	 *
+	 * @return array Widget keywords.
+	 */
+	public function get_keywords() {
+		return [ 'image', 'photo', 'visual', 'carousel', 'slider' ];
+	}
+
+	/**
 	 * Retrieve the list of scripts the image carousel widget depended on.
 	 *
 	 * Used to set scripts dependencies required to run the widget.
@@ -123,14 +137,15 @@ class Widget_Image_Carousel extends Widget_Base {
 			]
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'slides_to_scroll',
 			[
 				'label' => __( 'Slides to Scroll', 'elementor' ),
 				'type' => Controls_Manager::SELECT,
 				'description' => __( 'Set how many slides are scrolled per swipe.', 'elementor' ),
-				'default' => '2',
-				'options' => $slides_to_show,
+				'options' => [
+					'' => __( 'Default', 'elementor' ),
+				] + $slides_to_show,
 				'condition' => [
 					'slides_to_show!' => '1',
 				],

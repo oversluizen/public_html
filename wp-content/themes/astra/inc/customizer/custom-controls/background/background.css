@@ -2,12 +2,21 @@
   position: relative;
 }
 
-.customize-control-ast-background .wp-picker-container input[type="text"].wp-color-picker {
-  max-width: 65px !important;
+.customize-control-ast-background .ast-color-control.wp-color-picker {
+  width: 96px !important;
+  line-height: 17px;
+}
+
+.customize-control-ast-background .wp-picker-clear {
+  margin-left: 2%;
 }
 
 .customize-control-ast-background .screen-reader-text {
   top: initial;
+}
+
+.customize-control-ast-background .background-container h4 {
+  font-weight: normal;
 }
 
 .customize-control-ast-background .background-attachment h4,

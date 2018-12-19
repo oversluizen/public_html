@@ -190,3 +190,13 @@
 .rtl .control-section-astra-pro h3 a:after {
     content: "\f341";
 }
+
+.ast-hide{
+	display: none !important;
+}
+
+
+/* Primary Sub Menu Item Border */
+#customize-control-astra-settings-primary-submenu-item-border .ast-border-wrapper{
+	width: 100%;
+}

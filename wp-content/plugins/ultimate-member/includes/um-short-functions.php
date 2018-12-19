@@ -288,142 +288,288 @@ function um_user_ip() {
  * @return bool
  */
 function um_field_conditions_are_met( $data ) {
+
+
+
 	if (!isset( $data['conditions'] )) return true;
 
-	$state = 1;
+    $state = ( $data['conditional_action'] == 'show' ) ? 1 : 0;
 
-	foreach ($data['conditions'] as $k => $arr) {
-		if ($arr[0] == 'show') {
 
-			$val = $arr[3];
-			$op = $arr[2];
+    $first_group = 0;
+    $state_array = array();
+    $count = count($state_array);
+    foreach ($data['conditions'] as $k => $arr){
 
-			if (strstr( $arr[1], 'role_' ))
-				$arr[1] = 'role';
+        $val = $arr[3];
+        $op = $arr[2];
 
-			$field = um_profile( $arr[1] );
+        if (strstr($arr[1], 'role_'))
+            $arr[1] = 'role';
 
-			switch ($op) {
-				case 'equals to':
+        $field = um_profile($arr[1]);
 
-					$field = maybe_unserialize( $field );
 
-					if (is_array( $field ))
-						$state = in_array( $val, $field ) ? 1 : 0;
-					else
-						$state = ( $field == $val ) ? 1 : 0;
+        if( $arr[5] != $first_group ){
 
-					break;
-				case 'not equals':
 
-					$field = maybe_unserialize( $field );
+            if ($arr[0] == 'show') {
 
-					if (is_array( $field ))
-						$state = !in_array( $val, $field ) ? 1 : 0;
-					else
-						$state = ( $field != $val ) ? 1 : 0;
+                switch ($op) {
+                    case 'equals to':
 
-					break;
-				case 'empty':
+                        $field = maybe_unserialize( $field );
 
-					$state = ( !$field ) ? 1 : 0;
+                        if (is_array( $field ))
+                            $state = in_array( $val, $field ) ? 'show' : 'hide';
+                        else
+                            $state = ( $field == $val ) ? 'show' : 'hide';
 
-					break;
-				case 'not empty':
+                        break;
+                    case 'not equals':
 
-					$state = ( $field ) ? 1 : 0;
+                        $field = maybe_unserialize( $field );
 
-					break;
-				case 'greater than':
-					if ($field > $val) {
-						$state = 1;
-					} else {
-						$state = 0;
-					}
-					break;
-				case 'less than':
-					if ($field < $val) {
-						$state = 1;
-					} else {
-						$state = 0;
-					}
-					break;
-				case 'contains':
-					if (strstr( $field, $val )) {
-						$state = 1;
-					} else {
-						$state = 0;
-					}
-					break;
-			}
-		} else if ($arr[0] == 'hide') {
+                        if (is_array( $field ))
+                            $state = !in_array( $val, $field ) ? 'show' : 'hide';
+                        else
+                            $state = ( $field != $val ) ? 'show' : 'hide';
 
-			$state = 1;
-			$val = $arr[3];
-			$op = $arr[2];
+                        break;
+                    case 'empty':
 
-			if (strstr( $arr[1], 'role_' ))
-				$arr[1] = 'role';
+                        $state = ( !$field ) ? 'show' : 'hide';
 
-			$field = um_profile( $arr[1] );
+                        break;
+                    case 'not empty':
 
-			switch ($op) {
-				case 'equals to':
+                        $state = ( $field ) ? 'show' : 'hide';
 
-					$field = maybe_unserialize( $field );
+                        break;
+                    case 'greater than':
+                        if ($field > $val) {
+                            $state = 'show';
+                        } else {
+                            $state = 'hide';
+                        }
+                        break;
+                    case 'less than':
+                        if ($field < $val) {
+                            $state = 'show';
+                        } else {
+                            $state = 'hide';
+                        }
+                        break;
+                    case 'contains':
+                        if (strstr( $field, $val )) {
+                            $state = 'show';
+                        } else {
+                            $state = 'hide';
+                        }
+                        break;
+                }
+            } else if ($arr[0] == 'hide') {
 
-					if (is_array( $field ))
-						$state = in_array( $val, $field ) ? 0 : 1;
-					else
-						$state = ( $field == $val ) ? 0 : 1;
+                switch ($op) {
+                    case 'equals to':
 
-					break;
-				case 'not equals':
+                        $field = maybe_unserialize( $field );
 
-					$field = maybe_unserialize( $field );
+                        if (is_array( $field ))
+                            $state = in_array( $val, $field ) ? 'hide' : 'show';
+                        else
+                            $state = ( $field == $val ) ? 'hide' : 'show';
 
-					if (is_array( $field ))
-						$state = !in_array( $val, $field ) ? 0 : 1;
-					else
-						$state = ( $field != $val ) ? 0 : 1;
+                        break;
+                    case 'not equals':
 
-					break;
-				case 'empty':
+                        $field = maybe_unserialize( $field );
 
-					$state = ( !$field ) ? 0 : 1;
+                        if (is_array( $field ))
+                            $state = !in_array( $val, $field ) ? 'hide' : 'show';
+                        else
+                            $state = ( $field != $val ) ? 'hide' : 'show';
 
-					break;
-				case 'not empty':
+                        break;
+                    case 'empty':
 
-					$state = ( $field ) ? 0 : 1;
+                        $state = ( !$field ) ? 'hide' : 'show';
 
-					break;
-				case 'greater than':
-					if ($field <= $val) {
-						$state = 0;
-					} else {
-						$state = 1;
-					}
-					break;
-				case 'less than':
-					if ($field >= $val) {
-						$state = 0;
-					} else {
-						$state = 1;
-					}
-					break;
-				case 'contains':
-					if (strstr( $field, $val )) {
-						$state = 0;
-					} else {
-						$state = 1;
-					}
-					break;
-			}
-		}
-	}
+                        break;
+                    case 'not empty':
 
-	return ( $state ) ? true : false;
+                        $state = ( $field ) ? 'hide' : 'show';
+
+                        break;
+                    case 'greater than':
+                        if ($field <= $val) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'show';
+                        }
+                        break;
+                    case 'less than':
+                        if ($field >= $val) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'show';
+                        }
+                        break;
+                    case 'contains':
+                        if (strstr( $field, $val )) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'show';
+                        }
+                        break;
+                }
+            }
+            $first_group++;
+            array_push($state_array, $state);
+        } else {
+
+            if ($arr[0] == 'show') {
+
+                switch ($op) {
+                    case 'equals to':
+
+                        $field = maybe_unserialize( $field );
+
+                        if (is_array( $field ))
+                            $state = in_array( $val, $field ) ? 'show' : 'not_show';
+                        else
+                            $state = ( $field == $val ) ? 'show' : 'not_show';
+
+                        break;
+                    case 'not equals':
+
+                        $field = maybe_unserialize( $field );
+
+                        if (is_array( $field ))
+                            $state = !in_array( $val, $field ) ? 'show' : 'not_show';
+                        else
+                            $state = ( $field != $val ) ? 'show' : 'not_show';
+
+                        break;
+                    case 'empty':
+
+                        $state = ( !$field ) ? 'show' : 'not_show';
+
+                        break;
+                    case 'not empty':
+
+                        $state = ( $field ) ? 'show': 'not_show';
+
+                        break;
+                    case 'greater than':
+                        if ($field > $val) {
+                            $state = 'show';
+                        } else {
+                            $state = 'not_show';
+                        }
+                        break;
+                    case 'less than':
+                        if ($field < $val) {
+                            $state = 'show';
+                        } else {
+                            $state = 'not_show';
+                        }
+                        break;
+                    case 'contains':
+                        if (strstr( $field, $val )) {
+                            $state = 'show';
+                        } else {
+                            $state = 'not_show';
+                        }
+                        break;
+                }
+            } else if ($arr[0] == 'hide') {
+
+                switch ($op) {
+                    case 'equals to':
+
+                        $field = maybe_unserialize( $field );
+
+                        if (is_array( $field ))
+                            $state = in_array( $val, $field ) ? 'hide' : 'not_hide';
+                        else
+                            $state = ( $field == $val ) ? 'hide' : 'not_hide';
+
+                        break;
+                    case 'not equals':
+
+                        $field = maybe_unserialize( $field );
+
+                        if (is_array( $field ))
+                            $state = !in_array( $val, $field ) ? 'hide' : 'not_hide';
+                        else
+                            $state = ( $field != $val ) ? 'hide' : 'not_hide';
+
+                        break;
+                    case 'empty':
+
+                        $state = ( !$field ) ? 'hide' : 'not_hide';
+
+                        break;
+                    case 'not empty':
+
+                        $state = ( $field ) ? 'hide' : 'not_hide';
+
+                        break;
+                    case 'greater than':
+                        if ($field <= $val) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'not_hide';
+                        }
+                        break;
+                    case 'less than':
+                        if ($field >= $val) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'not_hide';
+                        }
+                        break;
+                    case 'contains':
+                        if (strstr( $field, $val )) {
+                            $state = 'hide';
+                        } else {
+                            $state = 'not_hide';
+                        }
+                        break;
+                }
+            }
+            if( isset($state_array[$count]) ){
+                if( $state_array[$count] == 'show' || $state_array[$count] == 'not_hide' ){
+                    if ( $state == 'show' || $state == 'not_hide' ){
+                        $state_array[$count] = 'show';
+                    } else {
+                        $state_array[$count] = 'hide';
+                    }
+                } else {
+                    if ( $state == 'hide' || $state == 'not_show' ){
+                        $state_array[$count] = 'hide';
+                    } else {
+                        $state_array[$count] = 'hide';
+                    }
+                }
+            } else {
+                if ( $state == 'show' || $state == 'not_hide' ){
+                    $state_array[$count] = 'show';
+                } else {
+                    $state_array[$count] = 'hide';
+                }
+            }
+        }
+
+
+    }
+    $result = array_unique($state_array);
+    if( !in_array("show", $result) ){
+        return $state = false;
+    } else {
+        return $state = true;
+    }
 }
 
 
@@ -439,27 +585,25 @@ function um_redirect_home() {
  * @param $url
  */
 function um_js_redirect( $url ) {
-	if (headers_sent() || empty( $url )) {
+	if ( headers_sent() || empty( $url ) ) {
 		//for blank redirects
-		if ('' == $url) {
-			$url = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+		if ( '' == $url ) {
+			$url = set_url_scheme( '//' . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] );
 		}
 
-		$funtext = "echo \"<script data-cfasync='false' type='text/javascript'>window.location = '" . $url . "'</script>\";";
-		register_shutdown_function( create_function( '', $funtext ) );
+		register_shutdown_function( function( $url ) {
+			echo '<script data-cfasync="false" type="text/javascript">window.location = "' . $url . '"</script>';
+		}, $url );
 
-		if (1 < ob_get_level()) {
-			while (ob_get_level() > 1) {
+		if ( 1 < ob_get_level() ) {
+			while ( ob_get_level() > 1 ) {
 				ob_end_clean();
 			}
-		}
-
-		?>
-        <script data-cfasync='false' type="text/javascript">
-            window.location = '<?php echo $url; ?>';
-        </script>
-		<?php
-		exit;
+		} ?>
+		<script data-cfasync='false' type="text/javascript">
+			window.location = '<?php echo $url; ?>';
+		</script>
+		<?php exit;
 	} else {
 		wp_redirect( $url );
 	}
@@ -508,10 +652,11 @@ function um_user_submitted_registration( $style = false ) {
 
 	$data = um_user( 'submitted' );
 
-	if ($style)
+	if ( $style ) {
 		$output .= '<div class="um-admin-infobox">';
+	}
 
-	if (isset( $data ) && is_array( $data )) {
+	if ( isset( $data ) && is_array( $data ) ) {
 
 		/**
 		 * UM hook
@@ -535,38 +680,65 @@ function um_user_submitted_registration( $style = false ) {
 		 */
 		$data = apply_filters( 'um_email_registration_data', $data );
 
-		foreach ($data as $k => $v) {
+		$pw_fields = array();
+		foreach ( $data as $k => $v ) {
 
-			if (!is_array( $v ) && strstr( $v, 'ultimatemember/temp' )) {
+			if ( strstr( $k, 'user_pass' ) || in_array( $k, array( 'g-recaptcha-response', 'request', '_wpnonce', '_wp_http_referer' ) ) ) {
+				continue;
+			}
+
+			if ( UM()->fields()->get_field_type( $k ) == 'password' ) {
+				$pw_fields[] = $k;
+				$pw_fields[] = 'confirm_' . $k;
+				continue;
+			}
+
+			if ( ! empty( $pw_fields ) && in_array( $k, $pw_fields ) ) {
+				continue;
+			}
+
+			if ( UM()->fields()->get_field_type( $k ) == 'image' || UM()->fields()->get_field_type( $k ) == 'file' ) {
 				$file = basename( $v );
-				$v = um_user_uploads_uri() . $file;
-			}
+				$filedata = get_user_meta( um_user( 'ID' ), $k . "_metadata", true );
 
-			if (!strstr( $k, 'user_pass' ) && !in_array( $k, array( 'g-recaptcha-response', 'request', '_wpnonce', '_wp_http_referer' ) )) {
-
-				if (is_array( $v )) {
-					$v = implode( ',', $v );
+				$baseurl = UM()->uploader()->get_upload_base_url();
+				if ( ! file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . $file ) ) {
+					if ( is_multisite() ) {
+						//multisite fix for old customers
+						$baseurl = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $baseurl );
+					}
 				}
 
-				if ($k == 'timestamp') {
-					$k = __( 'date submitted', 'ultimate-member' );
-					$v = date( "d M Y H:i", $v );
-				}
-
-				if ($style) {
-					if (!$v) $v = __( '(empty)', 'ultimate-member' );
-					$output .= "<p><label>$k</label><span>$v</span></p>";
+				if ( ! empty( $filedata['original_name'] ) ) {
+					$v = '<a href="' . esc_attr( $baseurl . um_user( 'ID' ) . '/' . $file ) . '">' . $filedata['original_name'] . '</a>';
 				} else {
-					$output .= "$k: $v" . "<br />";
+					$v = $baseurl . um_user( 'ID' ) . '/' . $file;
 				}
-
 			}
 
+			if ( is_array( $v ) ) {
+				$v = implode( ',', $v );
+			}
+
+			if ( $k == 'timestamp' ) {
+				$k = __( 'date submitted', 'ultimate-member' );
+				$v = date( "d M Y H:i", $v );
+			}
+
+			if ( $style ) {
+				if ( ! $v ) {
+					$v = __( '(empty)', 'ultimate-member' );
+				}
+				$output .= "<p><label>$k</label><span>$v</span></p>";
+			} else {
+				$output .= "$k: $v" . "<br />";
+			}
 		}
 	}
 
-	if ($style)
+	if ( $style ) {
 		$output .= '</div>';
+	}
 
 	return $output;
 }
@@ -691,10 +863,11 @@ function um_filtered_value( $key, $data = false ) {
  * @return bool|int|null
  */
 function um_profile_id() {
+	$requested_user = um_get_requested_user();
 
-	if ( um_get_requested_user() ) {
+	if ( $requested_user ) {
 		return um_get_requested_user();
-	} else if (is_user_logged_in() && get_current_user_id()) {
+	} elseif ( is_user_logged_in() && get_current_user_id() ) {
 		return get_current_user_id();
 	}
 
@@ -760,15 +933,49 @@ function um_is_temp_image( $url ) {
 
 
 /**
- * Get core page url
- *
- * @param $time1
- * @param $time2
- *
- * @return mixed|void
+ * Check user's file ownership
+ * @param string $url
+ * @param int|null $user_id
+ * @param string|bool $image_path
+ * @return bool
  */
-function um_time_diff( $time1, $time2 ) {
-	return UM()->datetime()->time_diff( $time1, $time2 );
+function um_is_file_owner( $url, $user_id = null, $image_path = false ) {
+
+	if ( strpos( $url, UM()->uploader()->get_upload_base_url() . $user_id . '/' ) !== false && is_user_logged_in() ) {
+		$user_basedir = UM()->uploader()->get_upload_user_base_dir( $user_id );
+	} else {
+		$user_basedir = UM()->uploader()->get_upload_user_base_dir( 'temp' );
+	}
+
+	$filename = wp_basename( parse_url( $url, PHP_URL_PATH ) );
+
+	$file = $user_basedir . DIRECTORY_SEPARATOR . $filename;
+	if ( file_exists( $file ) ) {
+		if ( $image_path ) {
+			return $file;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+
+/**
+ * Check if file is temporary
+ * @param  string $filename 
+ * @return bool       
+ */
+function um_is_temp_file( $filename ) {
+	$user_basedir = UM()->uploader()->get_upload_user_base_dir( 'temp' );
+	
+	$file = $user_basedir . '/' . $filename;
+	
+	if ( file_exists( $file ) ) {
+		return true;
+	}	
+	return false;
 }
 
 
@@ -791,19 +998,13 @@ function um_user_last_login_timestamp( $user_id ) {
 /**
  * Get user's last login (time diff)
  *
- * @param $user_id
+ * @param int $user_id
  *
- * @return mixed|string|void
+ * @return string
  */
 function um_user_last_login( $user_id ) {
 	$value = get_user_meta( $user_id, '_um_last_login', true );
-	if ( $value ) {
-		$value = um_time_diff( $value, current_time( 'timestamp' ) );
-	} else {
-		$value = '';
-	}
-
-	return $value;
+	return ! empty( $value ) ? UM()->datetime()->time_diff( $value, current_time( 'timestamp' ) ) : '';
 }
 
 
@@ -1026,35 +1227,6 @@ function um_get_metadefault( $id ) {
 	$core_form_meta_all = UM()->config()->core_form_meta_all;
 
 	return isset( $core_form_meta_all['_um_' . $id] ) ? $core_form_meta_all['_um_' . $id] : '';
-}
-
-
-/**
- * Check if a legitimate password reset request is in action
- *
- * @return bool
- */
-function um_requesting_password_reset() {
-	if (um_is_core_page( 'password-reset' ) && isset( $_POST['_um_password_reset'] ) == 1)
-		return true;
-
-	return false;
-}
-
-
-/**
- * Check if a legitimate password change request is in action
- *
- *
- * @return bool
- */
-function um_requesting_password_change() {
-	if (um_is_core_page( 'account' ) && isset( $_POST['_um_account'] ) == 1)
-		return true;
-    else if (isset( $_POST['_um_password_change'] ) && $_POST['_um_password_change'] == 1)
-		return true;
-
-	return false;
 }
 
 
@@ -1290,15 +1462,20 @@ function um_can_view_profile( $user_id ) {
 		return ! UM()->user()->is_private_profile( $user_id );
 	}
 
+	$temp_id = um_user('ID');
+	um_fetch_user( get_current_user_id() );
+
 	if ( ! um_user( 'can_access_private_profile' ) && UM()->user()->is_private_profile( $user_id ) ) {
 		return false;
 	}
 
-	$temp_id = um_user('ID');
-	um_fetch_user( get_current_user_id() );
-
 	if ( um_user( 'can_view_roles' ) && $user_id != get_current_user_id() ) {
-		if ( count( array_intersect( UM()->roles()->get_all_user_roles( $user_id ), um_user( 'can_view_roles' ) ) ) <= 0 ) {
+
+		$can_view_roles = um_user( 'can_view_roles' );
+ 		
+ 		if( ! is_array( $can_view_roles ) ) $can_view_roles = array();
+
+		if ( count( array_intersect( UM()->roles()->get_all_user_roles( $user_id ), $can_view_roles ) ) <= 0 ) {
 			um_fetch_user( $temp_id );
 			return false;
 		}
@@ -1424,6 +1601,7 @@ function um_multi_admin_email() {
 		$emails_array = array_map( 'trim', $emails_array );
 	}
 
+	$emails_array = array_unique( $emails_array );
 	return $emails_array;
 }
 
@@ -1589,34 +1767,6 @@ function um_youtube_id_from_url( $url ) {
 
 
 /**
- * user uploads uri
- *
- * @return string
- */
-function um_user_uploads_uri() {
-	if (is_ssl()) {
-		UM()->files()->upload_baseurl = str_replace( "http://", "https://", UM()->files()->upload_baseurl );
-	}
-
-	$uri = UM()->files()->upload_baseurl . um_user( 'ID' ) . '/';
-
-	return $uri;
-}
-
-
-/**
- * user uploads directory
- *
- * @return string
- */
-function um_user_uploads_dir() {
-	$uri = UM()->files()->upload_basedir . um_user( 'ID' ) . '/';
-
-	return $uri;
-}
-
-
-/**
  * Find closest number in an array
  *
  * @param $array
@@ -1626,8 +1776,8 @@ function um_user_uploads_dir() {
  */
 function um_closest_num( $array, $number ) {
 	sort( $array );
-	foreach ($array as $a) {
-		if ($a >= $number) return $a;
+	foreach ( $array as $a ) {
+		if ( $a >= $number ) return $a;
 	}
 
 	return end( $array );
@@ -1644,16 +1794,47 @@ function um_closest_num( $array, $number ) {
  */
 function um_get_cover_uri( $image, $attrs ) {
 	$uri = false;
+	$uri_common = false;
 	$ext = '.' . pathinfo( $image, PATHINFO_EXTENSION );
-	if (file_exists( UM()->files()->upload_basedir . um_user( 'ID' ) . '/cover_photo' . $ext )) {
-		$uri = um_user_uploads_uri() . 'cover_photo' . $ext . '?' . current_time( 'timestamp' );
+
+	$ratio = str_replace(':1','',UM()->options()->get( 'profile_cover_ratio' ) );
+	$height = round( $attrs / $ratio );
+
+	if ( is_multisite() ) {
+		//multisite fix for old customers
+		$multisite_fix_dir = UM()->uploader()->get_upload_base_dir();
+		$multisite_fix_url = UM()->uploader()->get_upload_base_url();
+		$multisite_fix_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $multisite_fix_dir );
+		$multisite_fix_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $multisite_fix_url );
+
+		if ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo{$ext}?" . current_time( 'timestamp' );
+		}
+
+		if ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}x{$height}{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo-{$attrs}x{$height}{$ext}?". current_time( 'timestamp' );
+		} elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/cover_photo-{$attrs}{$ext}?" . current_time( 'timestamp' );
+		}
 	}
-	if (file_exists( UM()->files()->upload_basedir . um_user( 'ID' ) . '/cover_photo-' . $attrs . $ext )) {
-		$uri = um_user_uploads_uri() . 'cover_photo-' . $attrs . $ext . '?' . current_time( 'timestamp' );
+
+	if ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo{$ext}?" . current_time( 'timestamp' );
+	}
+
+	if ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}x{$height}{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo-{$attrs}x{$height}{$ext}?". current_time( 'timestamp' );
+	} elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "cover_photo-{$attrs}{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/cover_photo-{$attrs}{$ext}?" . current_time( 'timestamp' );
+	}
+
+	if ( ! empty( $uri_common ) && empty( $uri ) ) {
+		$uri = $uri_common;
 	}
 
 	return $uri;
 }
+
 
 
 /**
@@ -1674,14 +1855,69 @@ function um_get_avatar_url( $get_avatar ) {
  * get avatar uri
  *
  * @param $image
- * @param $attrs
+ * @param string|array $attrs
  *
  * @return bool|string
  */
 function um_get_avatar_uri( $image, $attrs ) {
 	$uri = false;
+	$uri_common = false;
 	$find = false;
 	$ext = '.' . pathinfo( $image, PATHINFO_EXTENSION );
+
+	if ( is_multisite() ) {
+		//multisite fix for old customers
+		$multisite_fix_dir = UM()->uploader()->get_upload_base_dir();
+		$multisite_fix_url = UM()->uploader()->get_upload_base_url();
+		$multisite_fix_dir = str_replace( DIRECTORY_SEPARATOR . 'sites' . DIRECTORY_SEPARATOR . get_current_blog_id() . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $multisite_fix_dir );
+		$multisite_fix_url = str_replace( '/sites/' . get_current_blog_id() . '/', '/', $multisite_fix_url );
+
+		if ( $attrs == 'original' && file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo{$ext}";
+		} elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$attrs}x{$attrs}{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo-{$attrs}x{$attrs}{$ext}";
+		} elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$attrs}{$ext}" ) ) {
+			$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo-{$attrs}{$ext}";
+		} else {
+			$sizes = UM()->options()->get( 'photo_thumb_sizes' );
+			if ( is_array( $sizes ) ) {
+				$find = um_closest_num( $sizes, $attrs );
+			}
+
+			if ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$find}x{$find}{$ext}" ) ) {
+				$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo-{$find}x{$find}{$ext}";
+			} elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$find}{$ext}" ) ) {
+				$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo-{$find}{$ext}";
+			} elseif ( file_exists( $multisite_fix_dir . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo{$ext}" ) ) {
+				$uri_common = $multisite_fix_url . um_user( 'ID' ) . "/profile_photo{$ext}";
+			}
+		}
+	}
+
+	if ( $attrs == 'original' && file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo{$ext}";
+	} elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$attrs}x{$attrs}{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo-{$attrs}x{$attrs}{$ext}";
+	} elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$attrs}{$ext}" ) ) {
+		$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo-{$attrs}{$ext}";
+	} else {
+		$sizes = UM()->options()->get( 'photo_thumb_sizes' );
+		if ( is_array( $sizes ) ) {
+			$find = um_closest_num( $sizes, $attrs );
+		}
+
+		if ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$find}x{$find}{$ext}" ) ) {
+			$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo-{$find}x{$find}{$ext}";
+		} elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo-{$find}{$ext}" ) ) {
+			$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo-{$find}{$ext}";
+		} elseif ( file_exists( UM()->uploader()->get_upload_base_dir() . um_user( 'ID' ) . DIRECTORY_SEPARATOR . "profile_photo{$ext}" ) ) {
+			$uri = UM()->uploader()->get_upload_base_url() . um_user( 'ID' ) . "/profile_photo{$ext}";
+		}
+	}
+
+	if ( ! empty( $uri_common ) && empty( $uri ) ) {
+		$uri = $uri_common;
+	}
 
 	/**
 	 * UM hook
@@ -1705,34 +1941,8 @@ function um_get_avatar_uri( $image, $attrs ) {
 	 * ?>
 	 */
 	$cache_time = apply_filters( 'um_filter_avatar_cache_time', current_time( 'timestamp' ), um_user( 'ID' ) );
-
-	if (!empty( $cache_time )) {
-		$cache_time = "?{$cache_time}";
-	}
-
-	if (file_exists( UM()->files()->upload_basedir . um_user( 'ID' ) . "/profile_photo-{$attrs}{$ext}" )) {
-
-		$uri = um_user_uploads_uri() . "profile_photo-{$attrs}{$ext}{$cache_time}";
-
-	} else {
-
-		$sizes = UM()->options()->get( 'photo_thumb_sizes' );
-		if (is_array( $sizes )) $find = um_closest_num( $sizes, $attrs );
-
-		if (file_exists( UM()->files()->upload_basedir . um_user( 'ID' ) . "/profile_photo-{$find}{$ext}" )) {
-
-			$uri = um_user_uploads_uri() . "profile_photo-{$find}{$ext}{$cache_time}";
-
-		} else if (file_exists( UM()->files()->upload_basedir . um_user( 'ID' ) . "/profile_photo{$ext}" )) {
-
-			$uri = um_user_uploads_uri() . "profile_photo{$ext}{$cache_time}";
-
-		}
-
-		if ($attrs == 'original') {
-			$uri = um_user_uploads_uri() . "profile_photo{$ext}{$cache_time}";
-		}
-
+	if ( ! empty( $cache_time ) ) {
+		$uri .= "?{$cache_time}";
 	}
 
 	return $uri;
@@ -1749,35 +1959,134 @@ function um_get_default_avatar_uri() {
 	$uri = !empty( $uri['url'] ) ? $uri['url'] : '';
 	if ( ! $uri ) {
 		$uri = um_url . 'assets/img/default_avatar.jpg';
-	} else {
-
-		//http <-> https compatibility default avatar option of SSL was changed
-		$url_array = parse_url( $uri );
-
-		if (is_ssl() && $url_array['scheme'] == 'http') {
-			$uri = str_replace( 'http://', 'https://', $uri );
-		} else if (!is_ssl() && $url_array['scheme'] == 'https') {
-			$uri = str_replace( 'https://', 'http://', $uri );
-		}
 	}
 
-	return $uri;
+	return set_url_scheme( $uri );
 }
 
 
 /**
  * get user avatar url
  *
+ * @param $user_id
+ * @param $size
+ *
  * @return bool|string
  */
-function um_get_user_avatar_url() {
-	if (um_profile( 'profile_photo' )) {
-		$avatar_uri = um_get_avatar_uri( um_profile( 'profile_photo' ), 32 );
+function um_get_user_avatar_data( $user_id = '', $size = '96' ) {
+	if( empty( $user_id ) ) {
+		$user_id = um_user( 'ID' );
 	} else {
-		$avatar_uri = um_get_default_avatar_uri();
+		um_fetch_user( $user_id );
 	}
 
-	return $avatar_uri;
+	$data = array(
+		'user_id' => $user_id,
+		'default' => um_get_default_avatar_uri(),
+		'class' => 'gravatar avatar avatar-' . $size . ' um-avatar',
+		'size' => $size
+	);
+
+	if ( $profile_photo = um_profile( 'profile_photo' ) ) {
+		$data['url'] = um_get_avatar_uri( $profile_photo, $size );
+		$data['type'] = 'upload';
+		$data['class'] .= ' um-avatar-uploaded';
+	} elseif ( $synced_profile_photo = um_user( 'synced_profile_photo' ) ) {
+		$data['url'] = $synced_profile_photo;
+		$data['type'] = 'sync';
+		$data['class'] .= ' um-avatar-default';
+	} elseif ( UM()->options()->get( 'use_gravatars' ) ) {
+		$avatar_hash_id = md5( um_user( 'user_email' ) );
+		$data['url'] = set_url_scheme( '//gravatar.com/avatar/' . $avatar_hash_id );
+		$data['url'] = add_query_arg( 's', 400, $data['url'] );
+		$rating = get_option( 'avatar_rating' );
+		if ( ! empty( $rating ) ) {
+			$data['url'] = add_query_arg( 'r', $rating, $data['url'] );
+		}
+
+		$gravatar_type = UM()->options()->get( 'use_um_gravatar_default_builtin_image' );
+		if ( $gravatar_type == 'default' ) {
+			if ( UM()->options()->get( 'use_um_gravatar_default_image' ) ) {
+				$data['url'] = add_query_arg( 'd', $data['default'], $data['url'] );
+			} else {
+				$default = get_option( 'avatar_default', 'mystery' );
+				if ( $default == 'gravatar_default' ) {
+					$default = '';
+				}
+				$data['url'] = add_query_arg( 'd', $default, $data['url'] );
+			}
+		} else {
+			$data['url'] = add_query_arg( 'd', $gravatar_type, $data['url'] );
+		}
+
+		$data['type'] = 'gravatar';
+		$data['class'] .= ' um-avatar-gravatar';
+	} else {
+		$data['url'] = $data['default'];
+		$data['type'] = 'default';
+		$data['class'] .= ' um-avatar-default';
+	}
+
+
+	/**
+	 * UM hook
+	 *
+	 * @type filter
+	 * @title um_user_avatar_url_filter
+	 * @description Change user avatar URL
+	 * @input_vars
+	 * [{"var":"$avatar_uri","type":"string","desc":"Avatar URL"},
+	 * {"var":"$user_id","type":"int","desc":"User ID"}]
+	 * @change_log
+	 * ["Since: 2.0"]
+	 * @usage add_filter( 'um_user_avatar_url_filter', 'function_name', 10, 2 );
+	 * @example
+	 * <?php
+	 * add_filter( 'um_user_avatar_url_filter', 'my_user_avatar_url', 10, 2 );
+	 * function my_user_avatar_url( $avatar_uri ) {
+	 *     // your code here
+	 *     return $avatar_uri;
+	 * }
+	 * ?>
+	 */
+	$data['url'] = apply_filters( 'um_user_avatar_url_filter', $data['url'], $user_id, $data );
+	/**
+	 * UM hook
+	 *
+	 * @type filter
+	 * @title um_avatar_image_alternate_text
+	 * @description Change user display name on um_user function profile photo
+	 * @input_vars
+	 * [{"var":"$display_name","type":"string","desc":"User Display Name"}]
+	 * @change_log
+	 * ["Since: 2.0"]
+	 * @usage add_filter( 'um_avatar_image_alternate_text', 'function_name', 10, 1 );
+	 * @example
+	 * <?php
+	 * add_filter( 'um_avatar_image_alternate_text', 'my_avatar_image_alternate_text', 10, 1 );
+	 * function my_avatar_image_alternate_text( $display_name ) {
+	 *     // your code here
+	 *     return $display_name;
+	 * }
+	 * ?>
+	 */
+	$data['alt'] = apply_filters( "um_avatar_image_alternate_text", um_user( "display_name" ), $data );
+
+	return $data;
+}
+
+
+/**
+ * get user avatar url
+ *
+ * @param $user_id
+ * @param $size
+ *
+ * @return bool|string
+ */
+function um_get_user_avatar_url( $user_id = '', $size = '96' ) {
+    $data = um_get_user_avatar_data( $user_id, $size );
+    return $data['url'];
 }
 
 
@@ -1999,17 +2308,16 @@ function um_user( $data, $attrs = null ) {
 			}
 
 
-			if ($op == 'field' && UM()->options()->get( 'display_name_field' ) != '') {
+			if ( $op == 'field' && UM()->options()->get( 'display_name_field' ) != '' ) {
 				$fields = array_filter( preg_split( '/[,\s]+/', UM()->options()->get( 'display_name_field' ) ) );
 				$name = '';
 
-				foreach ($fields as $field) {
-					if (um_profile( $field )) {
+				foreach ( $fields as $field ) {
+					if ( um_profile( $field ) ) {
 						$name .= um_profile( $field ) . ' ';
-					} else if (um_user( $field )) {
+					} elseif ( um_user( $field ) && $field != 'display_name' ) {
 						$name .= um_user( $field ) . ' ';
 					}
-
 				}
 			}
 
@@ -2051,8 +2359,10 @@ function um_user( $data, $attrs = null ) {
 
 		case 'submitted':
 			$array = um_profile( $data );
-			if (empty( $array )) return '';
-			$array = unserialize( $array );
+			if ( empty( $array ) ) {
+				return '';
+			}
+			$array = maybe_unserialize( $array );
 
 			return $array;
 			break;
@@ -2066,98 +2376,26 @@ function um_user( $data, $attrs = null ) {
 			break;
 
 		case 'profile_photo':
+			$data = um_get_user_avatar_data( um_user( 'ID' ), $attrs );
 
-			$has_profile_photo = false;
-			$photo_type = 'um-avatar-default';
-
-			/**
-			 * UM hook
-			 *
-			 * @type filter
-			 * @title um_avatar_image_alternate_text
-			 * @description Change user display name on um_user function profile photo
-			 * @input_vars
-			 * [{"var":"$display_name","type":"string","desc":"User Display Name"}]
-			 * @change_log
-			 * ["Since: 2.0"]
-			 * @usage add_filter( 'um_avatar_image_alternate_text', 'function_name', 10, 1 );
-			 * @example
-			 * <?php
-			 * add_filter( 'um_avatar_image_alternate_text', 'my_avatar_image_alternate_text', 10, 1 );
-			 * function my_avatar_image_alternate_text( $display_name ) {
-			 *     // your code here
-			 *     return $display_name;
-			 * }
-			 * ?>
-			 */
-			$image_alt = apply_filters( "um_avatar_image_alternate_text", um_user( "display_name" ) );
-
-			if (um_profile( 'profile_photo' )) {
-				$avatar_uri = um_get_avatar_uri( um_profile( 'profile_photo' ), $attrs );
-				$has_profile_photo = true;
-				$photo_type = 'um-avatar-uploaded';
-			} else if (um_user( 'synced_profile_photo' )) {
-				$avatar_uri = um_user( 'synced_profile_photo' );
-			} else {
-				$avatar_uri = um_get_default_avatar_uri();
-			}
-
-			/**
-			 * UM hook
-			 *
-			 * @type filter
-			 * @title um_user_avatar_url_filter
-			 * @description Change user avatar URL
-			 * @input_vars
-			 * [{"var":"$avatar_uri","type":"string","desc":"Avatar URL"},
-			 * {"var":"$user_id","type":"int","desc":"User ID"}]
-			 * @change_log
-			 * ["Since: 2.0"]
-			 * @usage add_filter( 'um_user_avatar_url_filter', 'function_name', 10, 2 );
-			 * @example
-			 * <?php
-			 * add_filter( 'um_user_avatar_url_filter', 'my_user_avatar_url', 10, 2 );
-			 * function my_user_avatar_url( $avatar_uri ) {
-			 *     // your code here
-			 *     return $avatar_uri;
-			 * }
-			 * ?>
-			 */
-			$avatar_uri = apply_filters( 'um_user_avatar_url_filter', $avatar_uri, um_user( 'ID' ) );
-
-
-			if (!$avatar_uri)
-				return '';
-
-			if ( UM()->options()->get( 'use_gravatars' ) && !um_user( 'synced_profile_photo' ) && !$has_profile_photo) {
-				$avatar_hash_id = get_user_meta( um_user( 'ID' ), 'synced_gravatar_hashed_id', true );
-				$avatar_uri = um_get_domain_protocol() . 'gravatar.com/avatar/' . $avatar_hash_id;
-				$avatar_uri = add_query_arg( 's', 400, $avatar_uri );
-				$gravatar_type = UM()->options()->get( 'use_um_gravatar_default_builtin_image' );
-				$photo_type = 'um-avatar-gravatar';
-				if ( $gravatar_type == 'default' ) {
-					if ( UM()->options()->get( 'use_um_gravatar_default_image' ) ) {
-						$avatar_uri = add_query_arg( 'd', um_get_default_avatar_uri(), $avatar_uri );
-					}
-				} else {
-					$avatar_uri = add_query_arg( 'd', $gravatar_type, $avatar_uri );
-				}
-
-			}
-
-			$default_avatar = um_get_default_avatar_uri();
-
-			return '<img onerror="this.src=\''.esc_attr($default_avatar).'\';"  src="' . $avatar_uri . '" class="func-um_user gravatar avatar avatar-' . $attrs . ' um-avatar ' . $photo_type . '" width="' . $attrs . '"  height="' . $attrs . '" alt="' . $image_alt . '" />';
-
+			return sprintf( '<img src="%s" class="%s" width="%s" height="%s" alt="%s" data-default="%s" onerror="%s" />',
+				esc_attr( $data['url'] ),
+				esc_attr( $data['class'] ),
+				esc_attr( $data['size'] ),
+				esc_attr( $data['size'] ),
+				esc_attr( $data['alt'] ),
+				esc_attr( $data['default'] ),
+				'if ( ! this.getAttribute(\'data-load-error\') ){ this.setAttribute(\'data-load-error\', \'1\');this.setAttribute(\'src\', this.getAttribute(\'data-default\'));}'
+			);
 			break;
 
 		case 'cover_photo':
 
 			$is_default = false;
 
-			if (um_profile( 'cover_photo' )) {
+			if ( um_profile( 'cover_photo' ) ) {
 				$cover_uri = um_get_cover_uri( um_profile( 'cover_photo' ), $attrs );
-			} else if (um_profile( 'synced_cover_photo' )) {
+			} elseif ( um_profile( 'synced_cover_photo' ) ) {
 				$cover_uri = um_profile( 'synced_cover_photo' );
 			} else {
 				$cover_uri = um_get_default_cover_uri();
@@ -2188,12 +2426,7 @@ function um_user( $data, $attrs = null ) {
 			 */
 			$cover_uri = apply_filters( 'um_user_cover_photo_uri__filter', $cover_uri, $is_default, $attrs );
 
-			if ( $cover_uri )
-				return '<img src="' . $cover_uri . '" alt="" />';
-
-			if ( ! $cover_uri )
-				return '';
-
+			return $cover_uri ? '<img src="' . esc_attr( $cover_uri ) . '" alt="" />' : '';
 			break;
 
 
@@ -2421,7 +2654,5 @@ function is_ultimatemember() {
  * Maybe set empty time limit
  */
 function um_maybe_unset_time_limit() {
-	if ( ! ini_get( 'safe_mode' ) ) {
-		@set_time_limit(0);
-	}
+	@set_time_limit( 0 );
 }

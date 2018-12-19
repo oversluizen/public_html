@@ -122,7 +122,7 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 
 				$element->add_responsive_control( $id, $field_args, $options );
 			} else {
-				$element->add_control( $id , $field_args, $options );
+				$element->add_control( $id, $field_args, $options );
 			}
 		}
 
@@ -289,12 +289,14 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 
 		$field_args['classes'] = $this->get_base_group_classes() . ' elementor-group-control-' . $control_id;
 
-		if ( ! empty( $args['condition'] ) ) {
-			if ( empty( $field_args['condition'] ) ) {
-				$field_args['condition'] = [];
-			}
+		foreach ( [ 'condition', 'conditions' ] as $condition_type ) {
+			if ( ! empty( $args[ $condition_type ] ) ) {
+				if ( empty( $field_args[ $condition_type ] ) ) {
+					$field_args[ $condition_type ] = [];
+				}
 
-			$field_args['condition'] += $args['condition'];
+				$field_args[ $condition_type ] += $args[ $condition_type ];
+			}
 		}
 
 		return $field_args;
@@ -348,7 +350,6 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 				'starter_name' => 'popover_toggle',
 				'starter_value' => 'custom',
 				'starter_title' => '',
-				'toggle_type' => 'switcher',
 			],
 		];
 
@@ -361,11 +362,11 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 	 * Initializing group control base class.
 	 *
 	 * @since 1.2.2
-	 * @access private
+	 * @access protected
 	 *
 	 * @param array $args Group control settings value.
 	 */
-	private function init_args( $args ) {
+	protected function init_args( $args ) {
 		$this->args = array_merge( $this->get_default_args(), $this->get_child_default_args(), $args );
 	}
 
@@ -459,8 +460,10 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 
 		foreach ( $selectors as &$selector ) {
 			$selector = preg_replace_callback(
-				'/(?:\{\{)\K[^.}]+(?=\.[^}]*}})/', function( $matches ) use ( $controls_prefix ) {
-					return $controls_prefix . $matches[0];
+				'/\{\{\K(.*?)(?=}})/', function( $matches ) use ( $controls_prefix ) {
+					return preg_replace_callback( '/[^ ]+(?=\.)/', function( $sub_matches ) use ( $controls_prefix ) {
+						return $controls_prefix . $sub_matches[0];
+					}, $matches[1] );
 				}, $selector
 			);
 		}
@@ -491,9 +494,12 @@ abstract class Group_Control_Base implements Group_Control_Interface {
 		$control_params = [
 			'type' => Controls_Manager::POPOVER_TOGGLE,
 			'label' => $label,
-			'toggle_type' => $popover_options['toggle_type'],
 			'return_value' => $popover_options['starter_value'],
 		];
+
+		if ( ! empty( $popover_options['settings'] ) ) {
+			$control_params = array_replace_recursive( $control_params, $popover_options['settings'] );
+		}
 
 		if ( ! empty( $settings['condition'] ) ) {
 			$control_params['condition'] = $settings['condition'];

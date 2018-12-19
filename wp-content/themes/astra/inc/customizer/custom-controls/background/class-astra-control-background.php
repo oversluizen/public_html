@@ -7,7 +7,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        http://wpastra.com/
+ * @link        https://wpastra.com/
  * @since       1.0.0
  */
 
@@ -64,7 +64,9 @@ if ( ! class_exists( 'Astra_Control_Background' ) && class_exists( 'WP_Customize
 			wp_enqueue_style( 'astra-background', $css_uri . 'background.css', null, ASTRA_THEME_VERSION );
 			wp_enqueue_script( 'astra-background', $js_uri . 'background.js', array(), ASTRA_THEME_VERSION, true );
 			wp_localize_script(
-				'astra-background', 'astraCustomizerControlBackground', array(
+				'astra-background',
+				'astraCustomizerControlBackground',
+				array(
 					'placeholder'  => __( 'No file selected', 'astra' ),
 					'lessSettings' => __( 'Less Settings', 'astra' ),
 					'moreSettings' => __( 'More Settings', 'astra' ),
@@ -84,10 +86,16 @@ if ( ! class_exists( 'Astra_Control_Background' ) && class_exists( 'WP_Customize
 		 */
 		protected function content_template() {
 			?>
-			<label>
-				<span class="customize-control-title">{{{ data.label }}}</span>
-				<# if ( data.description ) { #><span class="description customize-control-description">{{{ data.description }}}</span><# } #>
-			</label>
+			<# if ( data.label || data.description ) { #>
+				<label>
+					<# if ( data.label ) { #>
+						<span class="customize-control-title">{{{ data.label }}}</span>
+					<# } #>
+					<# if ( data.description ) { #>
+						<span class="description customize-control-description">{{{ data.description }}}</span>
+					<# } #>
+				</label>
+			<# } #>
 			<div class="background-wrapper">
 
 				<!-- background-color -->

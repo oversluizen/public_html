@@ -7,7 +7,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        http://wpastra.com/
+ * @link        https://wpastra.com/
  * @since       Astra 1.0.0
  */
 
@@ -25,7 +25,8 @@
  * </code>
  */
 add_theme_support(
-	'astra_hooks', array(
+	'astra_hooks',
+	array(
 
 		/**
 		 * As a Theme developer, use the 'all' parameter, to declare support for all
@@ -471,4 +472,11 @@ function astra_primary_content_top() {
  */
 function astra_primary_content_bottom() {
 	do_action( 'astra_primary_content_bottom' );
+}
+
+/**
+ * 404 Page content template action.
+ */
+function astra_404_content_template() {
+	do_action( 'astra_404_content_template' );
 }

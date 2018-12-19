@@ -7,7 +7,7 @@
  * @package     Astra
  * @author      Astra
  * @copyright   Copyright (c) 2018, Astra
- * @link        http://wpastra.com/
+ * @link        https://wpastra.com/
  * @since       Astra 1.1.0
  */
 
@@ -49,13 +49,14 @@ if ( ! function_exists( 'astra_woo_shop_parent_category' ) ) :
 			<span class="ast-woo-product-category">
 				<?php
 				global $product;
-				$product_categories = function_exists( 'wc_get_product_category_list' ) ? wc_get_product_category_list( get_the_ID(), ',', '', '' ) : $product->get_categories( ',', '', '' );
+				$product_categories = function_exists( 'wc_get_product_category_list' ) ? wc_get_product_category_list( get_the_ID(), ';', '', '' ) : $product->get_categories( ';', '', '' );
 
-				$product_categories = strip_tags( $product_categories );
+				$product_categories = htmlspecialchars_decode( strip_tags( $product_categories ) );
 				if ( $product_categories ) {
-					list( $parent_cat ) = explode( ',', $product_categories );
+					list( $parent_cat ) = explode( ';', $product_categories );
 					echo esc_html( $parent_cat );
 				}
+
 				?>
 			</span> 
 			<?php
@@ -78,9 +79,9 @@ if ( ! function_exists( 'astra_woo_shop_out_of_stock' ) ) :
 		$out_of_stock        = get_post_meta( get_the_ID(), '_stock_status', true );
 		$out_of_stock_string = apply_filters( 'astra_woo_shop_out_of_stock_string', __( 'Out of stock', 'astra' ) );
 		if ( 'outofstock' === $out_of_stock ) {
-		?>
+			?>
 			<span class="ast-shop-product-out-of-stock"><?php echo esc_html( $out_of_stock_string ); ?></span>
-		<?php
+			<?php
 		}
 	}
 
@@ -98,13 +99,13 @@ if ( ! function_exists( 'astra_woo_shop_product_short_description' ) ) :
 	 * @since 1.1.0
 	 */
 	function astra_woo_shop_product_short_description() {
-	?>
-	<?php if ( has_excerpt() ) { ?>
+		?>
+		<?php if ( has_excerpt() ) { ?>
 		<div class="ast-woo-shop-product-description">
 			<?php the_excerpt(); ?>
 		</div>
 	<?php } ?>
-	<?php
+		<?php
 	}
 endif;
 /**

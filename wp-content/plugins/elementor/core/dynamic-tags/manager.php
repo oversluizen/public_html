@@ -1,6 +1,9 @@
 <?php
 namespace Elementor\Core\DynamicTags;
 
+use Elementor\Core\Common\Modules\Ajax\Module as Ajax;
+use Elementor\Core\Files\CSS\Post;
+use Elementor\Core\Files\CSS\Post_Preview;
 use Elementor\Plugin;
 use Elementor\User;
 
@@ -25,6 +28,10 @@ class Manager {
 	private $parsing_mode = self::MODE_RENDER;
 
 	/**
+	 * Dynamic tags manager constructor.
+	 *
+	 * Initializing Elementor dynamic tags manager.
+	 *
 	 * @since 2.0.0
 	 * @access public
 	 */
@@ -96,6 +103,10 @@ class Manager {
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param string $tag_text
+	 *
+	 * @return array|null
 	 */
 	public function tag_text_to_tag_data( $tag_text ) {
 		preg_match( '/id="(.*?(?="))"/', $tag_text, $tag_id_match );
@@ -114,11 +125,16 @@ class Manager {
 	}
 
 	/**
+	 * Dynamic tag to text.
+	 *
+	 * Retrieve the shortcode that represents the dynamic tag.
+	 *
 	 * @since 2.0.0
 	 * @access public
-	 * @param Base_Tag $tag
 	 *
-	 * @return string
+	 * @param Base_Tag $tag An instance of the dynamic tag.
+	 *
+	 * @return string The shortcode that represents the dynamic tag.
 	 */
 	public function tag_to_text( Base_Tag $tag ) {
 		return sprintf( '[%1$s id="%2$s" name="%3$s" settings="%4$s"]', self::TAG_LABEL, $tag->get_id(), $tag->get_name(), urlencode( wp_json_encode( $tag->get_settings(), JSON_FORCE_OBJECT ) ) );
@@ -170,6 +186,12 @@ class Manager {
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param       $tag_id
+	 * @param       $tag_name
+	 * @param array $settings
+	 *
+	 * @return null|string
 	 */
 	public function get_tag_data_content( $tag_id, $tag_name, array $settings = [] ) {
 		if ( self::MODE_REMOVE === $this->parsing_mode ) {
@@ -188,18 +210,47 @@ class Manager {
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param $tag_name
+	 *
+	 * @return mixed|null
 	 */
 	public function get_tag_info( $tag_name ) {
-		if ( empty( $this->tags_info[ $tag_name ] ) ) {
+		$tags = $this->get_tags();
+
+		if ( empty( $tags[ $tag_name ] ) ) {
 			return null;
 		}
 
-		return $this->tags_info[ $tag_name ];
+		return $tags[ $tag_name ];
+	}
+
+	/**
+	 * @since 2.0.9
+	 * @access public
+	 */
+	public function get_tags() {
+		if ( ! did_action( 'elementor/dynamic_tags/register_tags' ) ) {
+			/**
+			 * Register dynamic tags.
+			 *
+			 * Fires when Elementor registers dynamic tags.
+			 *
+			 * @since 2.0.9
+			 *
+			 * @param Manager $this Dynamic tags manager.
+			 */
+			do_action( 'elementor/dynamic_tags/register_tags', $this );
+		}
+
+		return $this->tags_info;
 	}
 
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param string $class
 	 */
 	public function register_tag( $class ) {
 		/** @var Tag $tag */
@@ -212,8 +263,21 @@ class Manager {
 	}
 
 	/**
+	 * @since 2.0.9
+	 * @access public
+	 *
+	 * @param string $tag_name
+	 */
+	public function unregister_tag( $tag_name ) {
+		unset( $this->tags_info[ $tag_name ] );
+	}
+
+	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param       $group_name
+	 * @param array $group_settings
 	 */
 	public function register_group( $group_name, array $group_settings ) {
 		$default_group_settings = [
@@ -230,7 +294,7 @@ class Manager {
 	 * @access public
 	 */
 	public function print_templates() {
-		foreach ( $this->tags_info as $tag_name => $tag_info ) {
+		foreach ( $this->get_tags() as $tag_name => $tag_info ) {
 			$tag = $tag_info['instance'];
 
 			if ( ! $tag instanceof Tag ) {
@@ -248,26 +312,11 @@ class Manager {
 	public function get_tags_config() {
 		$config = [];
 
-		foreach ( $this->tags_info as $tag_name => $tag_info ) {
+		foreach ( $this->get_tags() as $tag_name => $tag_info ) {
 			/** @var Tag $tag */
 			$tag = $tag_info['instance'];
 
-			ob_start();
-
-			$tag->print_panel_template();
-
-			$panel_template = ob_get_clean();
-
-			$config[ $tag_name ] = [
-				'name' => $tag_name,
-				'title' => $tag->get_title(),
-				'panel_template' => $panel_template,
-				'categories' => $tag->get_categories(),
-				'group' => $tag->get_group(),
-				'controls' => $tag->get_controls(),
-				'content_type' => $tag->get_content_type(),
-				'settings_required' => $tag->is_settings_required(),
-			];
+			$config[ $tag_name ] = $tag->get_editor_config();
 		}
 
 		return $config;
@@ -287,21 +336,20 @@ class Manager {
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @throws \Exception If post ID is missing.
+	 * @throws \Exception If current user don't have permissions to edit the post.
 	 */
-	public function ajax_render_tags() {
-		Plugin::$instance->editor->verify_ajax_nonce();
-
-		$posted = $_POST; // WPCS: CSRF OK.
-
-		if ( empty( $posted['post_id'] ) ) {
+	public function ajax_render_tags( $data ) {
+		if ( empty( $data['post_id'] ) ) {
 			throw new \Exception( 'Missing post id.' );
 		}
 
-		if ( ! User::is_current_user_can_edit( $posted['post_id'] ) ) {
+		if ( ! User::is_current_user_can_edit( $data['post_id'] ) ) {
 			throw new \Exception( 'Access denied.' );
 		}
 
-		Plugin::$instance->db->switch_to_post( $posted['post_id'] );
+		Plugin::$instance->db->switch_to_post( $data['post_id'] );
 
 		/**
 		 * Before dynamic tags rendered.
@@ -314,7 +362,7 @@ class Manager {
 
 		$tags_data = [];
 
-		foreach ( $posted['tags'] as $tag_key ) {
+		foreach ( $data['tags'] as $tag_key ) {
 			$tag_key_parts = explode( '-', $tag_key );
 
 			$tag_name = base64_decode( $tag_key_parts[0] );
@@ -335,12 +383,14 @@ class Manager {
 		 */
 		do_action( 'elementor/dynamic_tags/after_render' );
 
-		wp_send_json_success( $tags_data );
+		return $tags_data;
 	}
 
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param $mode
 	 */
 	public function set_parsing_mode( $mode ) {
 		$this->parsing_mode = $mode;
@@ -355,10 +405,38 @@ class Manager {
 	}
 
 	/**
+	 * @since 2.1.0
+	 * @access public
+	 * @param Post $css_file
+	 */
+	public function after_enqueue_post_css( $css_file ) {
+		$post_id = $css_file->get_post_id();
+
+		if ( $css_file instanceof Post_Preview ) {
+			$post_id_for_data = $css_file->get_preview_id();
+		} else {
+			$post_id_for_data = $post_id;
+		}
+
+		$css_file = new Dynamic_CSS( $post_id, $post_id_for_data );
+
+		$css_file->enqueue();
+	}
+
+	/**
+	 * @since 2.3.0
+	 * @access public
+	 */
+	public function register_ajax_actions( Ajax $ajax ) {
+		$ajax->register_ajax_action( 'render_tags', [ $this, 'ajax_render_tags' ] );
+	}
+
+	/**
 	 * @since 2.0.0
 	 * @access private
 	 */
 	private function add_actions() {
-		add_action( 'wp_ajax_elementor_render_tags', [ $this, 'ajax_render_tags' ] );
+		add_action( 'elementor/ajax/register_actions', [ $this, 'register_ajax_actions' ] );
+		add_action( 'elementor/css-file/post/enqueue', [ $this, 'after_enqueue_post_css' ] );
 	}
 }

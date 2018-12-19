@@ -100,17 +100,30 @@ add_filter( 'um_prepare_user_query_args', 'um_remove_special_users_from_list', 9
 /**
  * Adds search parameters
  *
+ * @hooked 'um_prepare_user_query_args'
+ *
  * @param $query_args
  * @param $args
  *
  * @return mixed|void
  */
-function um_add_search_to_query( $query_args, $args ){
+function um_add_search_to_query( $query_args, $args ) {
 	extract( $args );
+
+	if ( ! empty( $args['search_filters'] ) ) {
+		$_REQUEST['um_search'] = 1;
+	}
 
 	if ( isset( $_REQUEST['um_search'] ) ) {
 
 		$query = UM()->permalinks()->get_query_array();
+
+		if ( ! empty( $args['search_filters'] ) ) {
+			parse_str( $args['search_filters'], $search_filters );
+			if ( $search_filters && is_array( $search_filters ) ) {
+				$query = array_merge( $search_filters, $query );
+			}
+		}
 
 		// if searching
 		if ( isset( $query['search'] ) ) {
@@ -124,7 +137,7 @@ function um_add_search_to_query( $query_args, $args ){
 				if ( in_array( $field, array( 'members_page' ) ) ) continue;
 
 				$serialize_value = serialize( strval( $value ) );
-					
+
 				if ( $value && $field != 'um_search' && $field != 'page_id' ) {
 
 					if ( strstr( $field, 'role_' ) )
@@ -135,24 +148,72 @@ function um_add_search_to_query( $query_args, $args ){
 						if ( 'role' == $field ) {
 							$query_args['role__in'] = trim( $value );
 						} else {
-							$field_query = array(
-								array(
-									'key' => $field,
-									'value' => trim( $value ),
-									'compare' => '=',
-								),
-								array(
-									'key' => $field,
-									'value' => trim( $value ),
-									'compare' => 'LIKE',
-								),
-								array(
-									'key' => $field,
-									'value' => trim( $serialize_value ),
-									'compare' => 'LIKE',
-								),
-								'relation' => 'OR',
-							);
+							$filter_data = UM()->members()->prepare_filter( $field );
+							if ( $filter_data['type'] == 'select' ) {
+								$field_query = array(
+									array(
+										'key' => $field,
+										'value' => trim( $value ),
+										'compare' => '=',
+									),
+									'relation' => 'OR',
+								);
+
+
+								$types = apply_filters( 'um_search_field_types', array(
+									'multiselect',
+									'radio',
+									'checkbox'
+								) );
+
+								if ( in_array( $filter_data['attrs']['type'], $types ) ) {
+
+									$arr_meta_query = array(
+										array(
+											'key' => $field,
+											'value' => serialize( strval( trim( $value ) ) ),
+											'compare' => 'LIKE',
+										),
+										array(
+											'key' => $field,
+											'value' => '"' . trim( $value ) . '"',
+											'compare' => 'LIKE',
+										)
+									);
+
+									if( is_numeric( $value ) ){
+
+										$arr_meta_query[ ] = array(
+											'key' => $field,
+											'value' => serialize( intval( trim( $value ) ) ),
+											'compare' => 'LIKE',
+										);
+
+									}
+
+									$field_query = array_merge( $field_query, $arr_meta_query );
+								}
+
+							} else {
+								$field_query = array(
+									array(
+										'key' => $field,
+										'value' => trim( $value ),
+										'compare' => '=',
+									),
+									array(
+										'key' => $field,
+										'value' => trim( $value ),
+										'compare' => 'LIKE',
+									),
+									array(
+										'key' => $field,
+										'value' => trim( $serialize_value ),
+										'compare' => 'LIKE',
+									),
+									'relation' => 'OR',
+								);
+							}
 
 							/**
 							 * UM hook
@@ -211,7 +272,7 @@ function um_add_search_to_query( $query_args, $args ){
 	 */
 	$query_args = apply_filters( 'um_query_args_filter', $query_args );
 
-	if ( count( $query_args['meta_query'] ) == 1 )
+	if ( isset( $query_args['meta_query'] ) && count( $query_args['meta_query'] ) == 1 )
 		unset( $query_args['meta_query'] );
 
 	return $query_args;
@@ -335,7 +396,7 @@ function um_prepare_user_query_args( $query_args, $args ) {
 				$sortby = str_replace('_asc','',$sortby);
 				$order = 'ASC';
 			}
-				
+
 			$query_args['orderby'] = $sortby;
 
 		}
@@ -402,30 +463,33 @@ add_filter( 'um_modify_sortby_parameter', 'um_sortby_last_login', 100, 2 );
  * @return mixed
  */
 function um_modify_sortby_randomly( $query ) {
-	if( um_is_session_started() === false ){
-		@session_start();
-	}
 
-	// Reset seed on load of initial
-	if( ! isset( $_REQUEST['members_page'] ) || $_REQUEST['members_page'] == 0 ||  $_REQUEST['members_page'] == 1 ) {
-		if( isset( $_SESSION['seed'] ) ) {
-			unset( $_SESSION['seed'] );
+	if( 'random' == $query->query_vars["orderby"] ) {
+
+		if( um_is_session_started() === false ){
+			@session_start();
 		}
-	}
 
-	// Get seed from session variable if it exists
-	$seed = false;
-	if( isset( $_SESSION['seed'] ) ) {
-		$seed = $_SESSION['seed'];
-	}
-        
-	// Set new seed if none exists
-	if ( ! $seed ) {
-		$seed = rand();
-		$_SESSION['seed'] = $seed;
-	}
+		// Reset seed on load of initial
+		if( ! isset( $_REQUEST['members_page'] ) || $_REQUEST['members_page'] == 0 ||  $_REQUEST['members_page'] == 1 ) {
+			if( isset( $_SESSION['seed'] ) ) {
+				unset( $_SESSION['seed'] );
+			}
+		}
 
-	if($query->query_vars["orderby"] == 'random') {
+		// Get seed from session variable if it exists
+		$seed = false;
+		if( isset( $_SESSION['seed'] ) ) {
+			$seed = $_SESSION['seed'];
+		}
+
+		// Set new seed if none exists
+		if ( ! $seed ) {
+			$seed = rand();
+			$_SESSION['seed'] = $seed;
+		}
+
+
 		$query->query_orderby = 'ORDER by RAND('. $seed.')';
 	}
 
@@ -447,7 +511,7 @@ function um_prepare_user_results_array( $result ) {
 	} else {
 		$result['no_users'] = 0;
 	}
-   
+
 	return $result;
 }
 add_filter( 'um_prepare_user_results_array', 'um_prepare_user_results_array', 50, 2 );
@@ -473,16 +537,3 @@ function um_search_select_fields( $atts ) {
 	return $atts;
 }
 add_filter( 'um_search_select_fields', 'um_search_select_fields' );
-
-
-/**
- * Filter gender query argument
- *
- * @param  array $field_query
- * @return array
- */
-function um_query_args_gender__filter( $field_query ) {
-	unset( $field_query[1] );
-	return $field_query;
-}
-add_filter( 'um_query_args_gender__filter', 'um_query_args_gender__filter' );

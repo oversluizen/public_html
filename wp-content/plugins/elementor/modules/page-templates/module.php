@@ -82,6 +82,8 @@ class Module extends BaseModule {
 				$template_path = $this->get_template_path( $document->get_meta( '_wp_page_template' ) );
 				if ( $template_path ) {
 					$template = $template_path;
+
+					Plugin::$instance->inspector->add_log( 'Page Template', Plugin::$instance->inspector->parse_template_path( $template ), $document->get_edit_url() );
 				}
 			}
 		}
@@ -129,7 +131,10 @@ class Module extends BaseModule {
 	 */
 	public function add_page_templates( $page_templates, $wp_theme, $post ) {
 		if ( $post ) {
-			$document = Plugin::$instance->documents->get( $post->ID );
+			// FIX ME: Gutenberg not send $post as WP_Post object, just the post ID.
+			$post_id = ! empty( $post->ID ) ? $post->ID : $post;
+
+			$document = Plugin::$instance->documents->get( $post_id );
 			if ( $document && ! $document::get_property( 'support_wp_page_templates' ) ) {
 				return $page_templates;
 			}
@@ -148,7 +153,7 @@ class Module extends BaseModule {
 	 *
 	 * Set the page template callback.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param callable $callback
@@ -193,7 +198,7 @@ class Module extends BaseModule {
 	 *
 	 * Retrieve the path for any given page template.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param string $page_template The page template name.
@@ -258,6 +263,9 @@ class Module extends BaseModule {
 
 		$document->start_injection( [
 			'of' => 'post_status',
+			'fallback' => [
+				'of' => 'post_title',
+			],
 		] );
 
 		$document->add_control(
@@ -322,7 +330,7 @@ class Module extends BaseModule {
 	 *
 	 * Fired by `update_{$meta_type}_metadata` filter.
 	 *
-	 * @since  2.0.0
+	 * @since 2.0.0
 	 * @access public
 	 *
 	 * @param bool   $check     Whether to allow updating metadata for the given type.
@@ -332,8 +340,11 @@ class Module extends BaseModule {
 	 * @return bool Whether to allow updating metadata of a specific type.
 	 */
 	public function filter_update_meta( $check, $object_id, $meta_key ) {
-		if ( '_wp_page_template' === $meta_key ) {
-			$ajax_data = Plugin::$instance->ajax->get_current_action_data();
+		if ( '_wp_page_template' === $meta_key && Plugin::$instance->common ) {
+			/** @var \Elementor\Core\Common\Modules\Ajax\Module $ajax */
+			$ajax = Plugin::$instance->common->get_component( 'ajax' );
+
+			$ajax_data = $ajax->get_current_action_data();
 
 			$is_autosave_action = $ajax_data && 'save_builder' === $ajax_data['action'] && DB::STATUS_AUTOSAVE === $ajax_data['data']['status'];
 
@@ -358,7 +369,7 @@ class Module extends BaseModule {
 	public function __construct() {
 		add_action( 'init', [ $this, 'add_wp_templates_support' ] );
 
-		add_filter( 'template_include', [ $this, 'template_include' ] );
+		add_filter( 'template_include', [ $this, 'template_include' ], 11 /* After Plugins/WooCommerce */ );
 
 		add_action( 'elementor/documents/register_controls', [ $this, 'action_register_template_control' ] );
 

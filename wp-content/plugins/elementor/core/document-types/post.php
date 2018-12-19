@@ -7,6 +7,7 @@ use Elementor\Group_Control_Background;
 use Elementor\Plugin;
 use Elementor\Settings;
 use Elementor\Core\Settings\Manager as SettingsManager;
+use Elementor\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
@@ -14,12 +15,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Post extends Document {
 
+	/**
+	 * @since 2.0.8
+	 * @access public
+	 * @static
+	 */
 	public static function get_properties() {
 		$properties = parent::get_properties();
 
 		$properties['support_wp_page_templates'] = true;
 
 		return $properties;
+	}
+
+	/**
+	 * @since 2.1.2
+	 * @access protected
+	 * @static
+	 */
+	protected static function get_editor_panel_categories() {
+		return Utils::array_inject(
+			parent::get_editor_panel_categories(),
+			'theme-elements',
+			[
+				'theme-elements-single' => [
+					'title' => __( 'Single', 'elementor' ),
+					'active' => false,
+				],
+			]
+		);
 	}
 
 	/**
@@ -74,8 +98,13 @@ class Post extends Document {
 			$page_title_selector = 'h1.entry-title';
 		}
 
+		$page_title_selector .= ', .elementor-page-title';
+
 		$document->start_injection( [
 			'of' => 'post_status',
+			'fallback' => [
+				'of' => 'post_title',
+			],
 		] );
 
 		$document->add_control(
@@ -83,8 +112,6 @@ class Post extends Document {
 			[
 				'label' => __( 'Hide Title', 'elementor' ),
 				'type' => Controls_Manager::SWITCHER,
-				'label_off' => __( 'No', 'elementor' ),
-				'label_on' => __( 'Yes', 'elementor' ),
 				'description' => sprintf(
 					/* translators: %s: Setting page link */
 					__( 'Not working? You can set a different selector for the title in the <a href="%s" target="_blank">Settings page</a>.', 'elementor' ),
@@ -118,6 +145,14 @@ class Post extends Document {
 			Group_Control_Background::get_type(),
 			[
 				'name'  => 'background',
+				'fields_options' => [
+					'image' => [
+						// Currently isn't supported.
+						'dynamic' => [
+							'active' => false,
+						],
+					],
+				],
 			]
 		);
 
@@ -135,7 +170,7 @@ class Post extends Document {
 
 		$document->end_controls_section();
 
-		Plugin::$instance->controls_manager->add_custom_css_controls( $document, Controls_Manager::TAB_STYLE );
+		Plugin::$instance->controls_manager->add_custom_css_controls( $document );
 	}
 
 	/**
@@ -147,6 +182,9 @@ class Post extends Document {
 	public static function register_post_fields_control( $document ) {
 		$document->start_injection( [
 			'of' => 'post_status',
+			'fallback' => [
+				'of' => 'post_title',
+			],
 		] );
 
 		if ( post_type_supports( $document->post->post_type, 'excerpt' ) ) {
@@ -181,13 +219,19 @@ class Post extends Document {
 	/**
 	 * @since 2.0.0
 	 * @access public
+	 *
+	 * @param array $data
+	 *
+	 * @throws \Exception
 	 */
 	public function __construct( array $data = [] ) {
 		if ( $data ) {
 			$template = get_post_meta( $data['post_id'], '_wp_page_template', true );
+
 			if ( empty( $template ) ) {
 				$template = 'default';
 			}
+
 			$data['settings']['template'] = $template;
 		}
 

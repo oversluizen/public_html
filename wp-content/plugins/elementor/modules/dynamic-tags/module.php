@@ -2,6 +2,7 @@
 namespace Elementor\Modules\DynamicTags;
 
 use Elementor\Core\Base\Module as BaseModule;
+use Elementor\Core\DynamicTags\Manager;
 use Elementor\Core\DynamicTags\Tag;
 use Elementor\Plugin;
 
@@ -40,6 +41,11 @@ class Module extends BaseModule {
 	const IMAGE_CATEGORY = 'image';
 
 	/**
+	 * Dynamic tags media category.
+	 */
+	const MEDIA_CATEGORY = 'media';
+
+	/**
 	 * Dynamic tags post meta category.
 	 */
 	const POST_META_CATEGORY = 'post_meta';
@@ -60,7 +66,7 @@ class Module extends BaseModule {
 	public function __construct() {
 		$this->register_groups();
 
-		$this->register_tags();
+		add_action( 'elementor/dynamic_tags/register_tags', [ $this, 'register_tags' ] );
 	}
 
 	/**
@@ -129,14 +135,16 @@ class Module extends BaseModule {
 	 * Add all the available dynamic tags.
 	 *
 	 * @since 2.0.0
-	 * @access private
+	 * @access public
+	 *
+	 * @param Manager $dynamic_tags
 	 */
-	private function register_tags() {
+	public function register_tags( $dynamic_tags ) {
 		foreach ( $this->get_tag_classes_names() as $tag_class ) {
 			/** @var Tag $class_name */
 			$class_name = $this->get_reflection()->getNamespaceName() . '\Tags\\' . $tag_class;
 
-			Plugin::$instance->dynamic_tags->register_tag( $class_name );
+			$dynamic_tags->register_tag( $class_name );
 		}
 	}
 }

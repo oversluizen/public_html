@@ -314,8 +314,9 @@ function um_submit_form_errors_hook_( $args ) {
 				foreach ( $array['conditions'] as $condition ) {
 					list( $visibility, $parent_key, $op, $parent_value ) = $condition;
 
-					if ( ! isset( $args[ $parent_key ] ) )
+					if ( ! isset( $args[ $parent_key ] ) ) {
 						continue;
+					}
 
 					$cond_value = ( $fields[ $parent_key ]['type'] == 'radio' ) ? $args[ $parent_key ][0] : $args[ $parent_key ];
 
@@ -326,57 +327,63 @@ function um_submit_form_errors_hook_( $args ) {
 							}
 						} elseif ( $op == 'not empty' ) {
 							if ( ! empty( $cond_value ) ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'equals to' ) {
 							if ( $cond_value == $parent_value ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'not equals' ) {
 							if ( $cond_value != $parent_value ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'greater than' ) {
-							if ( $cond_value > $op ) {
-								continue 2;
+							if ( $cond_value > $parent_value ) {
+								continue;
 							}
 						} elseif ( $op == 'less than' ) {
-							if ( $cond_value < $op ) {
-								continue 2;
+							if ( $cond_value < $parent_value ) {
+								continue;
 							}
 						} elseif ( $op == 'contains' ) {
-							if ( strstr( $cond_value, $parent_value ) ) {
-								continue 2;
+							if ( is_string( $cond_value ) && strstr( $cond_value, $parent_value ) ) {
+								continue;
+							}
+							if( is_array( $cond_value ) && in_array( $parent_value, $cond_value ) ) {
+								continue;
 							}
 						}
 					} elseif ( $visibility == 'show' ) {
 						if ( $op == 'empty' ) {
 							if ( ! empty( $cond_value ) ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'not empty' ) {
 							if ( empty( $cond_value ) ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'equals to' ) {
 							if ( $cond_value != $parent_value ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'not equals' ) {
 							if ( $cond_value == $parent_value ) {
-								continue 2;
+								continue;
 							}
 						} elseif ( $op == 'greater than' ) {
-							if ( $cond_value <= $op ) {
-								continue 2;
+							if ( $cond_value <= $parent_value ) {
+								continue;
 							}
 						} elseif ( $op == 'less than' ) {
-							if ( $cond_value >= $op ) {
-								continue 2;
+							if ( $cond_value >= $parent_value ) {
+								continue;
 							}
 						} elseif ( $op == 'contains' ) {
-							if ( ! strstr( $cond_value, $parent_value ) ) {
-								continue 2;
+							if ( is_string( $cond_value ) && ! strstr( $cond_value, $parent_value ) ) {
+								continue;
+							}
+							if( is_array( $cond_value ) && !in_array( $parent_value, $cond_value ) ) {
+								continue;
 							}
 						}
 					}
@@ -424,7 +431,7 @@ function um_submit_form_errors_hook_( $args ) {
 			 */
 			do_action( 'um_add_error_on_form_submit_validation', $array, $key, $args );
 
-			if ( isset( $args[$key] ) ) {
+			if ( isset( $args[ $key ] ) ) {
 
 				if ( isset( $array['required'] ) && $array['required'] == 1 ) {
 					if ( ! isset( $args[$key] ) || $args[$key] == '' || $args[$key] == 'empty_file') {
